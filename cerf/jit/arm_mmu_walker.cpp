@@ -64,6 +64,32 @@ void FillFastTlb(ArmTlbUnit* unit, uint32_t folded_va, uint8_t* host,
     e->writable  = writable ? 1u : 0u;
 }
 
+/* I/O analog of FillFastTlb: a device page has no host pointer, so the entry
+   records its PA tagged kArmTlbIoTagBit. ArmTlbMatchIoWay later resolves it via
+   SetIoPending with no walk; writable mirrors the RAM read-only-upgrade rule. */
+void FillFastTlbIo(ArmTlbUnit* unit, uint32_t folded_va, uint32_t pa,
+                   uint8_t asid, bool global, bool writable) {
+    const uint32_t base   = ArmTlbSetBase(folded_va);
+    const uint32_t io_tag = (folded_va & 0xFFFFF000u) | kArmTlbIoTagBit;
+    ArmTlbEntry* e = nullptr;
+    for (uint32_t w = 0; w < kArmTlbWays; ++w) {
+        ArmTlbEntry& c = unit->entries[base + w];
+        if (c.tag == io_tag && c.asid == asid &&
+            c.global == (global ? 1u : 0u)) {
+            ArmTlbPromote(unit, base, static_cast<int>(w));
+            e = &unit->entries[base];
+            break;
+        }
+    }
+    if (!e) e = &ArmTlbInsertSlot(unit, base);
+    e->tag       = io_tag;
+    e->va_addend = 0;
+    e->pa_page   = pa & 0xFFFFF000u;
+    e->asid      = asid;
+    e->global    = global ? 1u : 0u;
+    e->writable  = writable ? 1u : 0u;
+}
+
 }  // namespace
 
 template <ArmMmuAccess kAccess>
@@ -130,6 +156,19 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
         NoteCodeTracking<kAccess>(state_, pa);
         return reinterpret_cast<uint8_t*>(
             static_cast<uintptr_t>(p) + fast.va_addend);
+    }
+
+    /* I/O fast path: a cached device page routes straight to the
+       PeripheralDispatcher (SetIoPending) without a walk. Execute never caches
+       I/O — code fetched from MMIO is not a real path. */
+    if constexpr (kAccess != ArmMmuAccess::kExecute) {
+        const int io_way =
+            ArmTlbMatchIoWay(tlb_unit, set_base, va_page, current_asid, kIsWrite);
+        if (io_way >= 0) {
+            const ArmTlbEntry& io = tlb_unit->entries[set_base + static_cast<uint32_t>(io_way)];
+            SetIoPending(io.pa_page | (p & 0x0FFFu));
+            return nullptr;
+        }
     }
 
     /* Fast-path miss — walk the in-RAM page table. */
@@ -363,6 +402,8 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
                 NoteCodeTracking<kAccess>(state_, effective_address);
                 return host_ptr;
             }
+            FillFastTlbIo(tlb_unit, p, effective_address, current_asid,
+                          new_slot.global, /*writable=*/true);
             SetIoPending(effective_address);
             return nullptr;
         } else {
@@ -391,6 +432,11 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
                 }
                 NoteCodeTracking<kAccess>(state_, effective_address);
                 return flash_host;
+            }
+            if constexpr (kAccess != ArmMmuAccess::kExecute) {
+                FillFastTlbIo(tlb_unit, p, effective_address, current_asid,
+                              new_slot.global,
+                              /*writable=*/kAccess == ArmMmuAccess::kReadWrite);
             }
             SetIoPending(effective_address);
             return nullptr;

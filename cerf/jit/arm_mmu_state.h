@@ -108,6 +108,12 @@ enum class ArmMmuAccess : uint8_t {
    index + tag compare instead of a per-access call into the page-table walker. */
 constexpr uint32_t kArmTlbInvalidTag = 0xFFFFFFFFu;  /* low bits set ⇒ never equals a page-aligned tag */
 
+/* I/O entry discriminator in tag bit 0. RAM tags are page-aligned (bits 11:0
+   clear), so bit 0 set marks a device page and the RAM tag-equality probe and
+   N-way scan never match it; pa_page is then the device page PA and va_addend
+   is unused. */
+constexpr uint32_t kArmTlbIoTagBit = 1u;
+
 struct ArmTlbEntry {
     uint32_t  tag;         /* FCSE-folded VA page, or kArmTlbInvalidTag when empty */
     uint32_t  va_addend;   /* host_ptr - foldedVA, so host = foldedVA + va_addend (32-bit host) */
@@ -148,6 +154,21 @@ inline int ArmTlbMatchWay(const ArmTlbUnit* unit, uint32_t base, uint32_t va_pag
     for (uint32_t w = 0; w < kArmTlbWays; ++w) {
         const ArmTlbEntry& e = unit->entries[base + w];
         if (e.tag == va_page && (e.global || e.asid == asid) &&
+            (!need_write || e.writable))
+            return static_cast<int>(w);
+    }
+    return -1;
+}
+
+/* Scan a set's ways for a live I/O entry (tag = page | kArmTlbIoTagBit). asid
+   is CONTEXTIDR[7:0]; need_write requires install-time write permission.
+   Returns the way or -1. */
+inline int ArmTlbMatchIoWay(const ArmTlbUnit* unit, uint32_t base, uint32_t va_page,
+                            uint8_t asid, bool need_write) {
+    const uint32_t io_tag = va_page | kArmTlbIoTagBit;
+    for (uint32_t w = 0; w < kArmTlbWays; ++w) {
+        const ArmTlbEntry& e = unit->entries[base + w];
+        if (e.tag == io_tag && (e.global || e.asid == asid) &&
             (!need_write || e.writable))
             return static_cast<int>(w);
     }

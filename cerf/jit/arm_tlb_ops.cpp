@@ -15,9 +15,10 @@ void ArmTlbInvalidateByVa(ArmTlbUnit* unit, uint32_t process_id, uint32_t va) {
     }
     const uint32_t page = va & 0xFFFFF000u;
     const uint32_t base = ArmTlbSetBase(va);
-    /* The page may sit in any way of its set — invalidate every match. */
+    /* The page may sit in any way of its set — invalidate every match. Mask the
+       I/O tag bit so a device-page entry for this page is cleared too. */
     for (uint32_t w = 0; w < kArmTlbWays; ++w) {
-        if (unit->entries[base + w].tag == page) {
+        if ((unit->entries[base + w].tag & ~kArmTlbIoTagBit) == page) {
             unit->entries[base + w].tag = kArmTlbInvalidTag;
         }
     }
