@@ -206,8 +206,11 @@ uint32_t __fastcall PeripheralDispatcher::JitIoReadWord(int8_t* hint, Peripheral
     if (addr < entry->base || addr >= entry->end) {
         entry = d->LookupEntry(addr);
         if (!entry) {
+            const ArmMmuState* ms = d->mmu_->State();
             LOG(Caution, "PeripheralDispatcher::JitIoReadWord: no peripheral "
-                    "registered at 0x%08X (pc=0x%08X)\n", addr, d->last_guest_pc_);
+                    "registered at 0x%08X (pc=0x%08X) [SCTLR.M=%u TTBR=0x%08X PID=0x%08X]\n",
+                    addr, d->last_guest_pc_, ms->control_register.bits.m,
+                    ms->translation_table_base.word, ms->process_id);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }
         *hint = static_cast<int8_t>(entry - d->entries_.data());
