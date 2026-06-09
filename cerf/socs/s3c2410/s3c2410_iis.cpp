@@ -23,13 +23,10 @@ constexpr uint32_t kRegIISFIFO = 0x10u;
 constexpr uint32_t kIisconTxFifoReady = 0x80u;
 constexpr uint32_t kIisconRxFifoReady = 0x40u;
 
-/* INT_DMA2 = SRCPND bit 19 — wavedev's ISR target. */
-constexpr int kIrqDma2 = 19;
+constexpr int kIrqDma2 = 19;   /* INT_DMA2 = SRCPND bit 19 — wavedev's ISR target. */
 
-/* Custom thread message — see BSP IOIIS::SetOutputDMA. Sent on DMA
-   enable to mark the threshold past which MM_WOM_DONE generates an
-   interrupt; messages posted before this don't (DMA was off when
-   they were queued). */
+/* Posted on DMA enable: MM_WOM_DONE generates INT_DMA2 only past this point,
+   since DMA was off when earlier messages queued. See BSP IOIIS::SetOutputDMA. */
 constexpr UINT kMsgOutDmaEnable = 0xC001u;
 
 }  /* namespace */
@@ -39,86 +36,43 @@ bool S3C2410Iis::ShouldRegister() {
     return bd && bd->GetSoc() == SocFamily::S3C2410;
 }
 
-void S3C2410Iis::StopAudioThread() {
-    shutdown_.store(true, std::memory_order_release);
-    if (audio_thread_id_) PostThreadMessageW(audio_thread_id_, WM_QUIT, 0, 0);
-    if (audio_thread_.joinable()) audio_thread_.join();
-}
-
-/* Audio thread asserts INT_DMA2 via IrqController; stop it before any peer is
-   destroyed. waveOut/handle frees stay in the destructor — they run only after
-   the thread is joined here. */
-void S3C2410Iis::OnShutdown() { StopAudioThread(); }
-
-S3C2410Iis::~S3C2410Iis() {
-    StopAudioThread();
-    if (out_device_) waveOutClose(out_device_);
-    if (thread_ready_event_) CloseHandle(thread_ready_event_);
-}
+/* Stop the audio thread before any peer it asserts INT_DMA2 into is destroyed. */
+void S3C2410Iis::OnShutdown() { sink_.Stop(); }
 
 void S3C2410Iis::OnReady() {
     emu_.Get<PeripheralDispatcher>().Register(this);
 
-    /* Init both WAVEHDR slots' buffers up front. The buffer base
-       never changes; each Reset only zeroes the WAVEHDR fields. */
+    /* Pin each WAVEHDR's buffer base once; Reset only zeroes the WAVEHDR fields. */
     out_headers_[0].lpData = reinterpret_cast<LPSTR>(&out_buffer_[0]);
     out_headers_[1].lpData = reinterpret_cast<LPSTR>(&out_buffer_[kBufferBytes]);
     curr_out_header_ = &out_headers_[0];
 
-    thread_ready_event_ = CreateEventW(nullptr, TRUE, FALSE, nullptr);
-    audio_thread_ = std::thread([this] { AudioThreadMain(); });
-    WaitForSingleObject(thread_ready_event_, INFINITE);
+    sink_.Start(
+        [this] {
+            sink_.EnsureFormat(kSampleRate, kChannels, kBitsPerSamp,
+                               /*allow_resampler=*/false, /*busy=*/false);
+        },
+        [this](const MSG& msg) { OnThreadMessage(msg); },
+        "S3C2410Iis");
 }
 
-void S3C2410Iis::AudioThreadMain() {
-    audio_thread_id_ = GetCurrentThreadId();
-
-    /* Force-create the message queue so PostThreadMessage from
-       waveOut callbacks (and from QueueOutput) lands before our
-       GetMessage call. */
-    MSG msg;
-    PeekMessageW(&msg, nullptr, WM_USER, WM_USER, PM_NOREMOVE);
-    SetEvent(thread_ready_event_);
-
-    /* Open the wave output device after the message queue exists.
-       Format hardcoded to 44100/16/2 per BSP InitAudio — the
-       on-chip IIS rate is computed from IISMOD+IISPSR but matches
-       this in practice for WM5 system sounds. */
-    WAVEFORMATEX fmt{};
-    fmt.wFormatTag      = WAVE_FORMAT_PCM;
-    fmt.nChannels       = kChannels;
-    fmt.nSamplesPerSec  = kSampleRate;
-    fmt.wBitsPerSample  = kBitsPerSamp;
-    fmt.nBlockAlign     = (uint16_t)((fmt.wBitsPerSample / 8) * fmt.nChannels);
-    fmt.nAvgBytesPerSec = fmt.nSamplesPerSec * fmt.nBlockAlign;
-    fmt.cbSize          = 0;
-
-    const MMRESULT r = waveOutOpen(&out_device_, WAVE_MAPPER, &fmt,
-                                   audio_thread_id_, 0,
-                                   CALLBACK_THREAD | WAVE_FORMAT_DIRECT);
-    if (r != MMSYSERR_NOERROR) {
-        LOG(Caution, "S3C2410Iis: waveOutOpen failed (mmresult=%u) — "
-                "silent-mode boot (IRQ delivery still works)\n", r);
-        out_device_ = nullptr;
+void S3C2410Iis::OnThreadMessage(const MSG& msg) {
+    if (msg.message == kMsgOutDmaEnable) {
+        output_dma_enabled_.store(true, std::memory_order_release);
+        return;
     }
-
-    while (!shutdown_.load(std::memory_order_acquire) &&
-           GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        if (msg.message == kMsgOutDmaEnable) {
-            output_dma_enabled_.store(true, std::memory_order_release);
-            continue;
+    if (msg.message == MM_WOM_DONE) {
+        auto* hdr = reinterpret_cast<LPWAVEHDR>(msg.lParam);
+        /* wParam != 0 = real waveOut completion (handle); 0 = QueueOutput's
+           manual pacing post, whose header is still owned by the ring. */
+        if (msg.wParam != 0 && sink_.IsOpen() && hdr != nullptr) {
+            sink_.Unprepare(hdr);
         }
-        if (msg.message == MM_WOM_DONE) {
-            auto* hdr = reinterpret_cast<LPWAVEHDR>(msg.lParam);
-            if (msg.wParam != 0 && out_device_ != nullptr && hdr != nullptr) {
-                waveOutUnprepareHeader(out_device_, hdr, sizeof(WAVEHDR));
-            }
-            const bool manual_post = (msg.wParam == 0);
-            const bool switching   = switch_out_queue_.load(std::memory_order_acquire);
-            if (output_dma_enabled_.load(std::memory_order_acquire) &&
-                (manual_post || switching)) {
-                emu_.Get<IrqController>().AssertIrq(kIrqDma2);
-            }
+        const bool manual_post = (msg.wParam == 0);
+        const bool switching   = switch_out_queue_.load(std::memory_order_acquire);
+        if (output_dma_enabled_.load(std::memory_order_acquire) &&
+            (manual_post || switching)) {
+            emu_.Get<IrqController>().AssertIrq(kIrqDma2);
         }
     }
 }
@@ -142,8 +96,6 @@ void S3C2410Iis::SwitchQueue() {
 }
 
 void S3C2410Iis::ResetCurrentQueue() {
-    /* BSP zeroes everything except dwUser. We don't use dwUser; just
-       zero everything and re-pin lpData. */
     WAVEHDR* hdr   = curr_out_header_;
     uint8_t* buf   = (hdr == &out_headers_[0]) ? &out_buffer_[0]
                                                : &out_buffer_[kBufferBytes];
@@ -152,18 +104,8 @@ void S3C2410Iis::ResetCurrentQueue() {
 }
 
 void S3C2410Iis::PlayCurrentQueue() {
-    if (!out_device_) return;
-    MMRESULT r = waveOutPrepareHeader(out_device_, curr_out_header_,
-                                      sizeof(WAVEHDR));
-    if (r != MMSYSERR_NOERROR) {
-        LOG(Caution, "S3C2410Iis: waveOutPrepareHeader failed (%u)\n", r);
-        return;
-    }
-    r = waveOutWrite(out_device_, curr_out_header_, sizeof(WAVEHDR));
-    if (r != MMSYSERR_NOERROR) {
-        LOG(Caution, "S3C2410Iis: waveOutWrite failed (%u)\n", r);
-        waveOutUnprepareHeader(out_device_, curr_out_header_, sizeof(WAVEHDR));
-    }
+    if (!sink_.IsOpen()) return;
+    sink_.Play(curr_out_header_);
 }
 
 void S3C2410Iis::QueueOutput(const void* host_bytes, size_t length) {
@@ -180,14 +122,13 @@ void S3C2410Iis::QueueOutput(const void* host_bytes, size_t length) {
         std::lock_guard<std::mutex> lk(state_mutex_);
         WAVEHDR* hdr = curr_out_header_;
 
-        if (out_device_ != nullptr) {
+        if (sink_.IsOpen()) {
             if (switch_out_queue_.load(std::memory_order_acquire)) {
                 if ((hdr->dwFlags & WHDR_PREPARED) == 0) {
                     ResetCurrentQueue();
                     switch_out_queue_.store(false, std::memory_order_release);
                 } else {
-                    /* Drop the packet — CE got ahead of us, matches
-                       BSP's "we drop the packet" branch. */
+                    /* Drop the packet — CE got ahead of us, matches BSP. */
                     LOG(Periph, "[IIS] dropping audio packet — CE "
                             "outran host audio\n");
                     return;
@@ -207,24 +148,20 @@ void S3C2410Iis::QueueOutput(const void* host_bytes, size_t length) {
                 done_hdr  = hdr;
             }
         } else {
-            /* Silent mode: still post MM_WOM_DONE so wavedev's ISR
-               progresses — BSP same branch. */
+            /* Silent mode: still post MM_WOM_DONE so wavedev's ISR progresses. */
             post_done = true;
             done_hdr  = hdr;
         }
     }
 
-    if (post_done && audio_thread_id_) {
-        PostThreadMessageW(audio_thread_id_, MM_WOM_DONE, 0,
-                           reinterpret_cast<LPARAM>(done_hdr));
+    if (post_done) {
+        sink_.Post(MM_WOM_DONE, 0, reinterpret_cast<LPARAM>(done_hdr));
     }
 }
 
 void S3C2410Iis::SetOutputDMA(bool on) {
     if (on) {
-        if (audio_thread_id_) {
-            PostThreadMessageW(audio_thread_id_, kMsgOutDmaEnable, 0, 0);
-        }
+        sink_.Post(kMsgOutDmaEnable, 0, 0);
     } else {
         output_dma_enabled_.store(false, std::memory_order_release);
     }
@@ -237,8 +174,6 @@ uint32_t S3C2410Iis::ReadWord(uint32_t addr) {
         std::lock_guard<std::mutex> lk(state_mutex_);
         switch (off) {
             case kRegIISCON:
-                /* FIFO-ready bits synthesised per BSP read path so
-                   driver polling loops don't hang. */
                 value = iiscon_ | kIisconTxFifoReady | kIisconRxFifoReady;
                 break;
             case kRegIISMOD:  value = iismod_;  break;
