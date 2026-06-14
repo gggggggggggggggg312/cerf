@@ -340,9 +340,7 @@ private:
 
     void SetInterruptPendingLocked();
 
-#if CERF_DEV_MODE
     static void __cdecl TraceDispatchPcHelper(ArmJit* jit, uint32_t pc, ArmCpuState* state);
-#endif
     void InitializeInterruptCheck();
     void InitializeR15ModifiedHelper();
     void InitializeBranchHelper();

@@ -23,18 +23,14 @@
 #include "place_fns.h"
 #include "x86_emit.h"
 
-#if CERF_DEV_MODE
 #include "../tracing/trace_manager.h"
-#endif
 
-#if CERF_DEV_MODE
 void __cdecl ArmJit::TraceDispatchPcHelper(ArmJit*      jit,
                                            uint32_t     pc,
                                            ArmCpuState* state) {
     const uint32_t cpsr = ArmCpuGetCpsrWithFlags(state);
     jit->emu_.Get<TraceManager>().DispatchPc(pc, state->gprs, cpsr);
 }
-#endif
 
 void ArmJit::JitApplyFixups() {
     using namespace x86;
@@ -88,12 +84,10 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
     block_ctx_.big_skip_count   = 0;
     block_ctx_.pc_cache_valid   = false;
 
-#if CERF_DEV_MODE
     /* Resolve TraceManager once per compile so the per-instruction
        HasPcTrace check below is a single map lookup, not a
        per-instruction service-locator call. */
     TraceManager& tm = emu_.Get<TraceManager>();
-#endif
 
     ArmProcessorConfig& pcfg = emu_.Get<ArmProcessorConfig>();
     constexpr int32_t kCycleCounterOff =
@@ -152,7 +146,6 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
             }
         }
 
-#if CERF_DEV_MODE
         if (tm.HasPcTrace(insn.guest_address)) {
             using namespace x86;
             EmitPushReg(code_location, kEsi);
@@ -163,7 +156,6 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
                         reinterpret_cast<void*>(&ArmJit::TraceDispatchPcHelper));
             EmitAddRegImm32(code_location, kEsp, 12);
         }
-#endif
 
         {
             using namespace x86;
