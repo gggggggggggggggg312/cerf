@@ -332,7 +332,7 @@ void Pd6710Controller::OnCardIrqDeasserted(PcmciaSlot&) {
     if (auto* line = emu_.TryGet<Pd6710CardIrqLine>()) line->Deassert();
 }
 
-/* state_mutex_ is dropped before slot_.SaveState: the slot takes bus_mutex_,
+/* state_mutex_ is dropped before slot_.SaveSlotState: the slot takes bus_mutex_,
    which ranks above state_mutex_ (see WriteIndexedDataLocked). */
 void Pd6710Controller::SaveState(StateWriter& w) {
     {
@@ -351,7 +351,7 @@ void Pd6710Controller::SaveState(StateWriter& w) {
         w.WriteBytes(mem_reg_, sizeof(mem_reg_));
         w.WriteBytes(timing_, sizeof(timing_));
     }
-    slot_.SaveState(w);
+    slot_.SaveSlotState(w);
 }
 
 void Pd6710Controller::RestoreState(StateReader& r) {
@@ -371,7 +371,7 @@ void Pd6710Controller::RestoreState(StateReader& r) {
         r.ReadBytes(mem_reg_, sizeof(mem_reg_));
         r.ReadBytes(timing_, sizeof(timing_));
     }
-    slot_.RestoreState(r);
+    slot_.RestoreSlotState(r);
 }
 
 REGISTER_SERVICE(Pd6710Controller);
