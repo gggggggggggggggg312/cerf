@@ -89,7 +89,19 @@ void ArmJit::JitDecode(JitBlock* containing_block, uint32_t guest_pc) {
             if (mmu_->io_pending_address() != 0) {
                 LOG(Caution,
                     "ArmJit::JitDecode: attempt to execute from I/O space "
-                    "at guest PA 0x%08X\n", actual_guest_pc);
+                    "at guest %s 0x%08X (MMU %s) [io_pending(last)=0x%08X]\n",
+                    mmu_->State()->control_register.bits.m ? "VA" : "PA",
+                    actual_guest_pc,
+                    mmu_->State()->control_register.bits.m ? "on" : "off",
+                    mmu_->io_pending_address());
+                const uint32_t* r = cpu_->State()->gprs;
+                LOG(Caution,
+                    "  R0=%08X R1=%08X R2=%08X R3=%08X R4=%08X R5=%08X "
+                    "R6=%08X R7=%08X\n  R8=%08X R9=%08X R10=%08X R11=%08X "
+                    "R12=%08X SP=%08X LR=%08X PC=%08X CPSR=%08X\n",
+                    r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+                    r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15],
+                    cpu_->State()->cpsr.partial_word);
                 CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
             }
 
