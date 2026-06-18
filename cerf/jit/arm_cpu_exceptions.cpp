@@ -91,9 +91,14 @@ void* ArmCpuRaiseIrqException(ArmJit* jit, ArmCpuState* state, uint32_t inst_ptr
         return nullptr;
     }
 
-    /* Deep sleep: CPU halted until a reset wakes it; nullptr → poll RETN → Run
-       returns so RunLoop parks, and no IRQ is delivered while asleep. */
-    if (state->deep_sleep) return nullptr;
+    /* Deep sleep halts until a reset wakes it (nullptr → RunLoop parks). Record
+       the halt PC: the JIT writes R15 only on a dispatcher return, so across
+       chained blocks it lags at the last dispatched block's entry; the wake
+       re-dispatches R15 and would re-run that stale block on post-sleep regs. */
+    if (state->deep_sleep) {
+        state->gprs[ArmGpr::kR15] = inst_ptr;
+        return nullptr;
+    }
 
     return EnterException(jit, state, ArmMode::kIrq, 0x18u, inst_ptr + 4u,
                           ExceptionVector::kIrq);
