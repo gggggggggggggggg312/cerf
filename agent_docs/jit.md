@@ -59,7 +59,7 @@ model, cache-line size, MIDR/CTR, coprocessor emit shape - lives in
 `ArmProcessorConfig` and `CoprocEmitter` strategies. The JIT body
 never branches on SoC family. A new SoC adds one concrete under
 `cerf/socs/<chip>/` for each strategy base (`ArmProcessorConfig`,
-`CoprocEmitter`, `MmuPolicy`, `PageTableBuilder`, …); the JIT body
+`CoprocEmitter`, `PageTableBuilder`, …); the JIT body
 is untouched.
 
 ## The `place_fn` contract
