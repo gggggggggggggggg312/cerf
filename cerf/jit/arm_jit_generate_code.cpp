@@ -76,10 +76,10 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
 
     uint8_t* original_code_location = code_location;
     JitBlock* ep = nullptr;
-    uint32_t previous_cond = 16;  /* Illegal value — guarantees first
+    uint32_t previous_cond = 16;  /* Illegal value - guarantees first
                                      instruction triggers a cond-change. */
 
-    /* Per-block emit context resets — each compile starts with no
+    /* Per-block emit context resets - each compile starts with no
        pending Jcc skip-fixups and no cached PC-relative load. */
     block_ctx_.big_skip_count   = 0;
     block_ctx_.pc_cache_valid   = false;
@@ -118,7 +118,7 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
         }
 
         if (insn.cond != previous_cond) {
-            /* Cond changed — close any pending skip-fixups for the
+            /* Cond changed - close any pending skip-fixups for the
                previous cond-run, then start a new run if this
                cond is < 14 (unconditional cond=14 needs no guard). */
             PlaceEndConditionCheck(code_location, &block_ctx_);
@@ -133,7 +133,7 @@ size_t ArmJit::JitGenerateCode(uint8_t* code_location, int /* entrypoint_count *
             }
         } else {
             /* Same cond as previous insn AND the previous insn
-               touched the flags — must re-emit the cond guard
+               touched the flags - must re-emit the cond guard
                since the flag state under test has changed. */
             if (previous_cond < 14u && i > 0u &&
                 block_ctx_.insns[i - 1].flags_set) {
@@ -220,7 +220,7 @@ void ArmJit::JitCreateEntrypoints(JitBlock* containing_block,
         uint32_t j = i + 1;
         for (; j < block_ctx_.num_insns; ++j) {
             if (block_ctx_.insns[j].entry_point != prev_marker) {
-                /* Boundary — record the new marker for the next
+                /* Boundary - record the new marker for the next
                    group's processing. */
                 prev_marker = block_ctx_.insns[j].entry_point;
                 break;
@@ -237,12 +237,12 @@ void ArmJit::JitCreateEntrypoints(JitBlock* containing_block,
         new_block.sub_block    = nullptr;
 
         if (j < block_ctx_.num_insns) {
-            /* Mid-stream entrypoint — guest_end is one byte before
+            /* Mid-stream entrypoint - guest_end is one byte before
                the next entrypoint's guest_start. */
             new_block.guest_end =
                 block_ctx_.insns[j].actual_guest_address - 1u;
         } else {
-            /* Last entrypoint — guest_end covers the last
+            /* Last entrypoint - guest_end covers the last
                instruction's address + (instruction_size - 1). */
             new_block.guest_end =
                 block_ctx_.insns[j - 1].actual_guest_address +

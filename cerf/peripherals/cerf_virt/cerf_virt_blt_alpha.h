@@ -6,7 +6,7 @@ namespace CerfVirt {
 
 /* BLT_ALPHABLEND compositing, faithful to WINCE600 GPE swblt.cpp:968-1234.
    AlphaContext is built once per blit; Blend runs per pixel. Premultiplied
-   only — non-premultiplied src (AlphaFormat not 0 and not AC_SRC_ALPHA) is
+   only - non-premultiplied src (AlphaFormat not 0 and not AC_SRC_ALPHA) is
    rejected by the blitter before reaching here (swblt.cpp:267-272). */
 
 const uint32_t kBltAlphaSrcNeg  = 0x0040u; /* BLT_ALPHASRCNEG  (winddi.h BlendFlags) */

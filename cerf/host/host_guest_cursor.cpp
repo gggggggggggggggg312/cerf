@@ -16,7 +16,7 @@ namespace {
 #endif
 
 /* Disable host cursor scaling for cursors created on this (UI) thread, so the
-   guest cursor renders 1:1 — the guest framebuffer is 1:1, so its cursor must
+   guest cursor renders 1:1 - the guest framebuffer is 1:1, so its cursor must
    be too. Resolved dynamically: absent before Win10 1607, where it no-ops and
    the cursor falls back to the host's DPI/accessibility scaling. */
 void DisableCursorScaling() {
@@ -29,7 +29,7 @@ void DisableCursorScaling() {
 /* Repack the guest 1bpp AND/XOR masks into native-size WORD-aligned MSB-first
    planes and build the HCURSOR at the guest's exact dimensions. Bit semantics
    match Win32 (verified WINCE600 SMI3DR cursor.cpp): AND=1 transparent,
-   AND=0/XOR=0 black, AND=0/XOR=1 white — a direct copy. */
+   AND=0/XOR=0 black, AND=0/XOR=1 white - a direct copy. */
 HCURSOR BuildCursor(const GuestCursorShape& s) {
     const int cx = (int)s.cx, cy = (int)s.cy, stride = (int)s.stride;
     if (cx <= 0 || cy <= 0) return nullptr;

@@ -23,7 +23,7 @@ public:
     void FreeUnusedTail(uint8_t* start_of_free);
 
     /* Drop every allocation; reset the cursor to the start of the
-       region. Pages stay committed — overcommit means the unused
+       region. Pages stay committed - overcommit means the unused
        tail consumes no physical RAM. */
     void Flush();
 

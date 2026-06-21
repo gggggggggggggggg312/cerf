@@ -1,4 +1,4 @@
-# JIT — ARM/Thumb → host x86 block translator
+# JIT - ARM/Thumb → host x86 block translator
 
 The JIT translates guest ARM and Thumb instructions to native host
 x86 at first execution of each block and caches the translation.
@@ -18,34 +18,34 @@ x86 at first execution of each block and caches the translation.
 The JIT is not one service; it's a small constellation. Each owns
 one responsibility:
 
-- **`ArmJit`** — the translation cache, the dispatcher, the compile
+- **`ArmJit`** - the translation cache, the dispatcher, the compile
   pipeline. Hot-path runtime helpers called from emitted code live
   here as static methods so emit code can bake a stable
   function-pointer address.
-- **`ArmCpu`** — owns `ArmCpuState` (GPRs, CPSR, banked SPSR/R13/R14
+- **`ArmCpu`** - owns `ArmCpuState` (GPRs, CPSR, banked SPSR/R13/R14
   per privileged mode). Hosts the mode-bank / CPSR-write helpers and
   the exception-entry methods (Undefined, AbortData, AbortPrefetch,
   IRQ, SWI, Reset).
-- **`ArmMmu`** — owns the cp15 register file, the I-TLB and D-TLB,
+- **`ArmMmu`** - owns the cp15 register file, the I-TLB and D-TLB,
   the page-table walker. `Translate{Read,Write,ReadWrite,Execute}`
   are the public surface; on a peripheral PA they return `nullptr`
   and stash the PA in an I/O-pending slot the JIT helper reads to
   route the access to `PeripheralDispatcher`.
-- **`ArmDecoder`** — ARM/Thumb opcode → `DecodedInsn`. Thumb decoders
+- **`ArmDecoder`** - ARM/Thumb opcode → `DecodedInsn`. Thumb decoders
   synthesize an ARM equivalent and re-issue through the ARM decoder
   so register/operand placement has one canonical source.
-- **`ArmProcessorConfig`** — per-SoC strategy. PC store offset,
+- **`ArmProcessorConfig`** - per-SoC strategy. PC store offset,
   base-restored-abort model, memory-before-writeback model,
   cache-line size, MIDR/CTR, syscall presence, DSP / LDRD-STRD
   optionality. Concretes live under `cerf/socs/<chip>/`.
-- **`CoprocEmitter`** — per-SoC MCR/MRC/CDP/LDC/STC emit strategy.
+- **`CoprocEmitter`** - per-SoC MCR/MRC/CDP/LDC/STC emit strategy.
   Concretes live under `cerf/socs/<chip>/`.
-- **`ArmCp15SctlrHandler`** — owns the per-instance trampoline that
+- **`ArmCp15SctlrHandler`** - owns the per-instance trampoline that
   cp15 c1 (SCTLR) writes JMP to. SCTLR changes flip MMU on/off,
-  invalidating every cached block — the handler flushes the cache
+  invalidating every cached block - the handler flushes the cache
   before returning so JIT-emitted code never re-enters a freed
   block.
-- **`JitRunner`** — owns the JIT main-loop thread. `Start` spawns,
+- **`JitRunner`** - owns the JIT main-loop thread. `Start` spawns,
   `RequestStop` signals exit, `Join` waits. One per `CerfEmulator`
   instance.
 
@@ -54,8 +54,8 @@ peripheral I/O helpers; the JIT emits direct calls into them.
 
 ## Per-SoC variation
 
-SoC-specific JIT behavior — PC store offset, base-restored-abort
-model, cache-line size, MIDR/CTR, coprocessor emit shape — lives in
+SoC-specific JIT behavior - PC store offset, base-restored-abort
+model, cache-line size, MIDR/CTR, coprocessor emit shape - lives in
 `ArmProcessorConfig` and `CoprocEmitter` strategies. The JIT body
 never branches on SoC family. A new SoC adds one concrete under
 `cerf/socs/<chip>/` for each strategy base (`ArmProcessorConfig`,
@@ -75,7 +75,7 @@ using ArmPlaceFn = uint8_t* (*)(uint8_t*       cursor,
 ```
 
 Each `place_fn` writes host machine code at `cursor` and returns
-the advanced cursor. Place fns live in `cerf/jit/place/` — one file
+the advanced cursor. Place fns live in `cerf/jit/place/` - one file
 per function. Adding a new ARM instruction is "add a decoder
 mapping + add a `cerf/jit/place/<name>.cpp`"; no build-script or
 project-file edit (`cerf.vcxproj` globs `**\*.cpp`).
@@ -93,7 +93,7 @@ the entire block: one points to `ArmCpuState*`, the other to
 `ArmMmuState*`. Place fns address CPU/MMU fields as `[<pinned-reg>
 + byte-offset]` without ever recomputing the base. The current
 assignment (`ESI` and `EBX` respectively) is invariant across every
-place fn and every JIT helper — changing it would require touching
+place fn and every JIT helper - changing it would require touching
 every emit site. Helpers documented as `__fastcall(va, hint, jit)`
 follow that convention because emit code at the call site already
 has the args in the right registers.
@@ -135,7 +135,7 @@ outer block at a non-start instruction without fragmenting the tree.
 **Block physical identity comes from the fetch, never a re-walk.**
 When a block is keyed or validated by physical address, that PA must
 be captured from the same translation that fetched the block's bytes
-— an independent later page-table walk diverges from the fetch during
+- an independent later page-table walk diverges from the fetch during
 transitional MMU states (a TLB-cached mapping the fresh walk can't
 see, or a partially-set-up TTBR0) and will mis-key or spuriously
 fault the block.
@@ -144,7 +144,7 @@ fault the block.
 
 One large `VirtualAlloc PAGE_EXECUTE_READWRITE` region per `ArmJit`
 instance, bump-allocated. Allocation failure means the region is
-full — caller flushes everything and retries. `Flush` drops every
+full - caller flushes everything and retries. `Flush` drops every
 block but keeps the region committed; the unused tail consumes no
 physical RAM under Windows overcommit.
 
@@ -166,13 +166,13 @@ behavior without a lock on the hot path.
 shadow stack. `BX LR` / `MOV PC, LR` pop and compare; on a
 guest-return-address match the JIT JMPs straight to the cached
 native destination, skipping the R15-modified-helper round trip.
-Cleared on every JIT cache flush — the cached pointers became
+Cleared on every JIT cache flush - the cached pointers became
 stale the moment the arena was reused.
 
 ## FCSE fold
 
 Guest VAs below 32 MB are private to the current process (ARM
-Fast-Context-Switch Extension — the OS plants the active process's
+Fast-Context-Switch Extension - the OS plants the active process's
 fold base in cp13). The block-index key, the TLB key, and the
 shadow-stack key all use the post-fold VA; `DecodedInsn::guest_address`
 keeps the raw VA for diagnostics and for instruction-stream
@@ -190,7 +190,7 @@ the ASID rather than rely on the fold.
 `ArmMmu::Translate*` returns `nullptr` for two reasons: (1) a real
 fault (TLB miss + page-table fault), and (2) the resolved PA lies
 in peripheral I/O space. The JIT helper distinguishes by reading
-the MMU's I/O-pending slot — non-zero means "PA is here, route to
+the MMU's I/O-pending slot - non-zero means "PA is here, route to
 `PeripheralDispatcher`," zero means "raise the abort." The slot is
 per-`ArmMmu` instance.
 
@@ -203,7 +203,7 @@ that the JIT thread CALLs at every guest-block exit. A pending IRQ
 patches the byte to NOP (fall through to delivery); no pending
 patches it to RETN (return to block immediately). `SetEvent` wakes
 the JIT thread if it's parked in an idle-loop `WaitForSingleObject`.
-Idle-wake is fire-and-forget outside the lock — wake-up never hurts;
+Idle-wake is fire-and-forget outside the lock - wake-up never hurts;
 missing one (because the peripheral asserted just as the JIT thread
 was about to park) is self-correcting on the next poll.
 
@@ -224,7 +224,7 @@ was about to park) is self-correcting on the next poll.
 dumps the host EIP context (host x86 registers + a window of
 JIT-emitted bytes around the fault), the guest ARM register file,
 and the host symbol resolved via `dbghelp`, then `CerfFatalExit`s.
-The filter only runs on actual hardware exceptions — zero hot-path
+The filter only runs on actual hardware exceptions - zero hot-path
 cost on the dispatch path.
 
 ## `x86_emit.h`
@@ -235,8 +235,8 @@ encoding source of truth is Intel SDM Vol. 2.
 
 **`rel8` vs `rel32` trap.** Short conditional jumps (`Jcc rel8` /
 `JMP rel8`) carry a signed-byte displacement (±127). When the emit
-between the jump and its target grows past that range — usually
-because the surrounding instruction's code body grew — the
+between the jump and its target grows past that range - usually
+because the surrounding instruction's code body grew - the
 back-patch silently truncates and the CPU jumps to garbage. The
 `FixupLabel` helper catches the overflow at emit time with a fatal
 log naming the jump opcode and the actual displacement; the fix is

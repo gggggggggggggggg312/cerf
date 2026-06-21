@@ -69,12 +69,12 @@ uint8_t* PlaceMRSorMSR(uint8_t*      cursor,
         break;
     }
 
-    case 2: { /* MRS Rd, SPSR — but in user/system mode SPSR doesn't exist;
+    case 2: { /* MRS Rd, SPSR - but in user/system mode SPSR doesn't exist;
                  fall back to leaving GPRs[Rd] unchanged. */
         if (d->rd == ArmGpr::kR15) {
             /* MRS with Rd=PC is UNPREDICTABLE per ddi0406c §B9.3.8
                line 103351 (the Rd=15 rule applies to both CPSR and
-               SPSR forms — the R bit just selects which source). */
+               SPSR forms - the R bit just selects which source). */
             return EmitRaiseUndAndReturn(cursor, d, ctx);
         }
         /* MOV EAX, [ESI + cpsr] */
@@ -85,7 +85,7 @@ uint8_t* PlaceMRSorMSR(uint8_t*      cursor,
             static_cast<int32_t>(offsetof(ArmCpuState, spsr)));
         EmitAndRegImm32(cursor, kEax, 0x1Fu);
         EmitCmpRegImm32(cursor, kEax, ArmMode::kUser);
-        /* CMOVE ECX, [ESI + GPRs[Rd]] — 0F 44 mod=10 reg=ECX r/m=ESI disp32. */
+        /* CMOVE ECX, [ESI + GPRs[Rd]] - 0F 44 mod=10 reg=ECX r/m=ESI disp32. */
         Emit16(cursor, 0x440F);
         EmitModRmReg(cursor, 2, kStateReg, kEcx);
         Emit32(cursor,
@@ -99,7 +99,7 @@ uint8_t* PlaceMRSorMSR(uint8_t*      cursor,
         break;
     }
 
-    case 3: { /* MSR SPSR, Rm — same user/system fallthrough as MRS SPSR. */
+    case 3: { /* MSR SPSR, Rm - same user/system fallthrough as MRS SPSR. */
         EmitMovRegBaseDisp32(cursor, kEax, kStateReg,
             static_cast<int32_t>(offsetof(ArmCpuState, cpsr)));
         load_gpr(kEcx, d->rm);

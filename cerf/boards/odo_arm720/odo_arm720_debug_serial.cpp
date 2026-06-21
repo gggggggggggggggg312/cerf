@@ -18,7 +18,7 @@
 namespace {
 
 /* DispatchTx hooks SERB_TX_EN 0→1 (DEBUG.C OEMWriteDebugByte
-   step 4 of 213-237) — by then DMA pointer writes + byte write
+   step 4 of 213-237) - by then DMA pointer writes + byte write
    already landed in DRAM. Hooking earlier or later misses the
    byte. Chip strips bits 31:26 of DMA address per DEBUG.C:38-39. */
 
@@ -113,7 +113,7 @@ public:
         const uint32_t off = addr - MmioBase();
         /* Kernel never reads TX DMA pointers per DEBUG.C lines
            221-222 (write-only). Halt loudly. */
-        LOG(Caution, "Odo DEBUG_SER TX_DMA: read at +0x%02X — kernel "
+        LOG(Caution, "Odo DEBUG_SER TX_DMA: read at +0x%02X - kernel "
                 "never reads TX DMA pointers per DEBUG.C lines "
                 "221-222; unexpected codepath\n", off);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -128,9 +128,9 @@ public:
 
     uint16_t ReadHalf(uint32_t addr) override {
         const uint32_t off = addr - MmioBase();
-        /* DEBUG.C:258,260 OEMReadDebugByte polls — silent-zero
+        /* DEBUG.C:258,260 OEMReadDebugByte polls - silent-zero
            here makes kernel spin forever waiting for RX. */
-        LOG(Caution, "Odo DEBUG_SER RX_DMA: read at +0x%02X — kernel "
+        LOG(Caution, "Odo DEBUG_SER RX_DMA: read at +0x%02X - kernel "
                 "is polling for RX bytes via OEMReadDebugByte "
                 "(DEBUG.C line 258/260); RX is not implemented.\n",
                 off);
@@ -139,7 +139,7 @@ public:
 };
 
 
-/* DEBUG_SER CSR peripheral — owns CSR A / CSR B state through the
+/* DEBUG_SER CSR peripheral - owns CSR A / CSR B state through the
    shared P2FpgaSerial helper. Detects SERB_TX_EN rising-edge on CSR
    B writes and dispatches one byte via HwScreen + LOG. */
 class OdoArm720DebugSerial : public Peripheral {

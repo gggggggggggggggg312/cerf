@@ -64,7 +64,7 @@ void ArmDecoder::DecodeThumbMoveAddSub(DecodedInsn* d, ThumbOpcode op) {
 
     switch (op.move_shifted_register.op2) {
     case 0: case 1: case 2:
-        /* LSL / LSR / ASR Rd, Rs, #imm — synthesized as MOV Rd, Rs
+        /* LSL / LSR / ASR Rd, Rs, #imm - synthesized as MOV Rd, Rs
            shifted by imm. */
         arm_op.data_processing.rd       = op.move_shifted_register.rd;
         arm_op.data_processing.i        = 0;
@@ -107,7 +107,7 @@ void ArmDecoder::DecodeThumbALUOperation(DecodedInsn* d, ThumbOpcode op) {
     arm_op.word = 0;
 
     if (op.alu_operation.op == 13u) {
-        /* MUL Rd, Rs — synthesize ARM "MULS Rd, Rs, Rd" via
+        /* MUL Rd, Rs - synthesize ARM "MULS Rd, Rs, Rd" via
            ArithmeticExtension. */
         arm_op.arithmetic_extension.cond      = 0xEu;
         arm_op.arithmetic_extension.reserved2 = 0;
@@ -153,7 +153,7 @@ void ArmDecoder::DecodeThumbALUOperation(DecodedInsn* d, ThumbOpcode op) {
 
 void ArmDecoder::DecodeThumbHiOps(DecodedInsn* d, ThumbOpcode op) {
     if (op.hi_ops.op == 3u) {
-        /* BX (branch-and-exchange) — Thumb-specific Place fn. */
+        /* BX (branch-and-exchange) - Thumb-specific Place fn. */
         d->rs_hs        = op.hi_ops.rs_hs;
         d->h2           = op.hi_ops.h2;
         d->r15_modified = true;
@@ -170,7 +170,7 @@ void ArmDecoder::DecodeThumbHiOps(DecodedInsn* d, ThumbOpcode op) {
     arm_op.data_processing.opcode    = kHiOpsToArm[op.hi_ops.op];
     arm_op.data_processing.rn        = op.hi_ops.rd_hd + 8u * op.hi_ops.h1;
     if (arm_op.data_processing.opcode == 10u) {
-        /* CMP — Rd = 0 (flags-only), S = 1. */
+        /* CMP - Rd = 0 (flags-only), S = 1. */
         arm_op.data_processing.rd = 0;
         arm_op.data_processing.s  = 1;
     } else {
@@ -203,7 +203,7 @@ void ArmDecoder::DecodeThumbAddToStackPointer(DecodedInsn* d, ThumbOpcode op) {
 
 void ArmDecoder::DecodeThumbLoadAddress(DecodedInsn* d, ThumbOpcode op) {
     /* SP-relative variant has an exact ARM equivalent (ADD Rd, SP, #imm);
-       PC-relative variant does not — Rd = (PC & ~3) + (imm<<2) — and
+       PC-relative variant does not - Rd = (PC & ~3) + (imm<<2) - and
        routes to a Thumb-specific Place fn that folds the value at emit
        time. */
     if (op.load_address.sp) {

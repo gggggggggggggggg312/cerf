@@ -13,7 +13,7 @@
 namespace {
 
 /* Store Rd into the cp15 field at mmu_disp; on a real change drop the VA-keyed
-   native caches via ContextSwitchFlush. NOT a translation-cache flush — blocks
+   native caches via ContextSwitchFlush. NOT a translation-cache flush - blocks
    are phys-keyed so they survive an address-space change; a TC flush here would
    reinstate the per-context-switch storm. `mask` is ANDed in (0xFFFFFFFF=none). */
 uint8_t* EmitFieldWriteContextSwitch(uint8_t* cursor, ArmJit* jit,
@@ -34,7 +34,7 @@ uint8_t* EmitFieldWriteContextSwitch(uint8_t* cursor, ArmJit* jit,
 
 }  // namespace
 
-/* Shared cp15 MRC / MCR emit body — CRn dispatch common across the
+/* Shared cp15 MRC / MCR emit body - CRn dispatch common across the
    ARMv4T..v7 cores supported today. Per-CPU concretes intercept any
    register whose semantics diverge before delegating here. */
 uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
@@ -54,7 +54,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
                on current CSSELR, dispatch through ArmMmu helper);
                op2=1 → CLIDR (constant baked from ProcessorConfig). */
             if (d->cp == 0) {
-                /* CcsidrLookupHelper __fastcall(ArmMmu*) — ECX = the
+                /* CcsidrLookupHelper __fastcall(ArmMmu*) - ECX = the
                    ArmMmu service pointer, NOT kMmuReg (which holds
                    ArmMmuState* and would make mmu->emu_ read garbage). */
                 EmitMovRegImm32(cursor, kEcx,
@@ -71,7 +71,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
             }
         } else if (jit->ProcessorConfig()->HasCp15V7() && d->cp_opc == 2 &&
                    d->crm == 0 && d->cp == 0) {
-            /* MRC/MCR p15, 2, Rt, c0, c0, 0 — CSSELR R/W. Per-CPU
+            /* MRC/MCR p15, 2, Rt, c0, c0, 0 - CSSELR R/W. Per-CPU
                mutable state stored in ArmMmuState::cssel_register.
                Source: QEMU helper.c:948-955 (PL1_RW, .resetvalue=0,
                banked storage). */
@@ -85,7 +85,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
                 EmitMovBaseDisp32Reg(cursor, kMmuReg, csselr_disp, kEax);
             }
         } else if (d->cp_opc == 0 && d->crm == 0) {
-            /* Legacy MIDR/CTR path — read-only constants from
+            /* Legacy MIDR/CTR path - read-only constants from
                ArmProcessorConfig. */
             if (d->l) {
                 if (d->cp == 0) {
@@ -151,7 +151,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
         break;
 
     case 2: {
-        /* Register 2 — Translation Table Base 0/1 + control. v7 adds TTBR1
+        /* Register 2 - Translation Table Base 0/1 + control. v7 adds TTBR1
            (op2=1) and TTBCR (op2=2) at the same CRn=2. */
         const int32_t ttbr0_disp =
             static_cast<int32_t>(offsetof(ArmMmuState, translation_table_base));
@@ -170,7 +170,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
             break;
         }
         /* TTBR0 write accepts any value; the walker masks to bits[31:14] on
-           use. Do NOT re-tighten here — it UND-faults legitimate kernel
+           use. Do NOT re-tighten here - it UND-faults legitimate kernel
            sentinel writes (observed R1=0xFFFFFFFF). A TTBR0 change is a
            process switch → flush the VA-keyed caches (not the TC). */
         if (d->l) {
@@ -232,7 +232,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
         break;
 
     case 5:
-        /* Register 5 — Fault Status Register. Direct read/write. */
+        /* Register 5 - Fault Status Register. Direct read/write. */
         if (d->l) {
             EmitMovRegBaseDisp32(cursor, kEax, kMmuReg,
                 static_cast<int32_t>(offsetof(ArmMmuState, fault_status)));
@@ -245,7 +245,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
         break;
 
     case 6:
-        /* Register 6 — Fault Address Register. Direct read/write. */
+        /* Register 6 - Fault Address Register. Direct read/write. */
         if (d->l) {
             EmitMovRegBaseDisp32(cursor, kEax, kMmuReg,
                 static_cast<int32_t>(offsetof(ArmMmuState, fault_address)));
@@ -287,7 +287,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
         break;
 
     case 10: {
-        /* PRRR/NMRR storage only valid while SCTLR.TRE=0 — if TRE
+        /* PRRR/NMRR storage only valid while SCTLR.TRE=0 - if TRE
            becomes 1, walker must consult these or attributes diverge. */
         if (jit->ProcessorConfig()->HasCp15V6() && d->cp_opc == 0 &&
             d->crm == 2 && (d->cp == 0 || d->cp == 1)) {
@@ -326,7 +326,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
                 EmitMovRegBaseDisp32(cursor, kEax, kMmuReg, disp);
                 EmitMovBaseDisp32Reg(cursor, kStateReg, rd_disp, kEax);
             } else if (d->cp == 1) {
-                /* CONTEXTIDR[7:0] is the ASID — an address-space switch. */
+                /* CONTEXTIDR[7:0] is the ASID - an address-space switch. */
                 cursor = EmitFieldWriteContextSwitch(cursor, jit, rd_disp, disp,
                                                      0xFFFFFFFFu);
             } else {
@@ -351,7 +351,7 @@ uint8_t* EmitCp15RegisterTransfer(uint8_t*      cursor,
     }
 
     case 14:
-        /* Breakpoint registers — not modeled. */
+        /* Breakpoint registers - not modeled. */
         cursor = EmitRaiseUndAndReturn(cursor, d, ctx);
         break;
 

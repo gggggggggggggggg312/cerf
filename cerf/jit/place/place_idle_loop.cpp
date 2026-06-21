@@ -9,7 +9,7 @@ uint8_t* PlaceIdleLoop(uint8_t*      cursor,
 
     /* DO NOT replace WfiHelper with a raw WaitForSingleObject(INFINITE):
        WfiHelper advances guest_cycle_counter by elapsed wall-clock, an
-       infinite wait does not — frozen cycles freeze the icount OSCR, the
+       infinite wait does not - frozen cycles freeze the icount OSCR, the
        OS-timer match the guest idles on is never reached, and no tick IRQ
        ever fires to wake it (permanent park). */
     EmitMovRegImm32(cursor, kEcx,

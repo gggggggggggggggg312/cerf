@@ -12,7 +12,7 @@
 
 namespace {
 
-/* MMU on → targeted dirty-page block removal (no whole-cache flush — that
+/* MMU on → targeted dirty-page block removal (no whole-cache flush - that
    was the storm). MMU off → whole flush + escape: early-boot fetch/store
    bypass the page walker so there is no dirty-page tracking, and a stale
    MMU-off translation would otherwise execute. */
@@ -72,7 +72,7 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
             case 1:
                 if (d->operand2 == 0xFFFFFFFFu) {
                     /* operand2==0xFFFFFFFF marks a collapsed I-cache range-clean
-                       loop; it would leave its counter R1 = 0 — preserve that
+                       loop; it would leave its counter R1 = 0 - preserve that
                        side effect, then targeted dirty-page invalidation. */
                     EmitMovBaseDisp32Imm32(cursor, kStateReg, r1_disp, 0u);
                     cursor = EmitICacheInvalidate(cursor, jit, r15_disp,
@@ -83,15 +83,15 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
                 }
                 break;
             case 2:
-                /* Set/index invalidate not modeled — halt. */
+                /* Set/index invalidate not modeled - halt. */
                 LOG(Caution,
                     "EmitCp15CacheOp: c7 CRm=5 CP=2 (set/index I-cache invalidate) not supported, pc=0x%08X\n",
                     d->guest_address);
                 CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
                 break;
-            case 4:  /* Flush Prefetch Buffer  — no-op. */
-            case 6:  /* Flush Entire BTB        — no-op. */
-            case 7:  /* Flush BTB entry         — no-op. */
+            case 4:  /* Flush Prefetch Buffer  - no-op. */
+            case 6:  /* Flush Entire BTB        - no-op. */
+            case 7:  /* Flush BTB entry         - no-op. */
                 break;
             default:
                 LOG(Caution,
@@ -148,12 +148,12 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
         case 13:  /* prefetch I-cache     */
         case 14:  /* clean+invalidate     */
         case 15:  /* clean+invalidate U   */
-            /* No-ops on CERF — no D-cache, no prefetcher, no
+            /* No-ops on CERF - no D-cache, no prefetcher, no
                write buffer to drain. */
             break;
 
         default:
-            /* Unimplemented c7 maintenance encoding — halt loudly
+            /* Unimplemented c7 maintenance encoding - halt loudly
                instead of a silent guest UND cascade. */
             LOG(Caution,
                 "EmitCp15CacheOp: unimplemented c7 maintenance op "
@@ -167,7 +167,7 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
         break;
 
     case 1:
-        /* "Flush" / "clean" D-cache entry by VA — documented
+        /* "Flush" / "clean" D-cache entry by VA - documented
            sub-cases are no-ops on CERF; any other encoding UNDs. */
         switch (d->crm) {
         case 6:
@@ -186,8 +186,8 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
         break;
 
     case 4:
-        /* Drain Write Buffer (CRm=10) — no-op (no write buffer on
-           CERF). All other CRm values are unimplemented — halt. */
+        /* Drain Write Buffer (CRm=10) - no-op (no write buffer on
+           CERF). All other CRm values are unimplemented - halt. */
         if (d->crm != 10) {
             LOG(Caution,
                 "EmitCp15CacheOp: unimplemented c7 maintenance op "
@@ -200,8 +200,8 @@ uint8_t* EmitCp15CacheOp(uint8_t*      cursor,
         break;
 
     case 6:
-        /* Invalidate Branch Target Buffer (CRm=5) — no-op (no BTB
-           on CERF). All other CRm values are unimplemented — halt. */
+        /* Invalidate Branch Target Buffer (CRm=5) - no-op (no BTB
+           on CERF). All other CRm values are unimplemented - halt. */
         if (d->crm != 5) {
             LOG(Caution,
                 "EmitCp15CacheOp: unimplemented c7 maintenance op "

@@ -71,7 +71,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
             }
             EmitMovRegImm32(cursor, kEcx, inst_ptr);
             if ((inst_ptr & 7u) == 0u) {
-                /* Statically 8-byte-aligned — drop the runtime check. */
+                /* Statically 8-byte-aligned - drop the runtime check. */
                 needs_alignment_check = false;
             }
         } else {
@@ -92,7 +92,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
     }
 
     if (needs_alignment_check && !alignment_check_on) {
-        /* SCTLR.A off — round EA down to 8-byte alignment so STRD
+        /* SCTLR.A off - round EA down to 8-byte alignment so STRD
            matches the reference's chosen behavior. AND ECX, ~7. */
         EmitAndRegImm32(cursor, kEcx, ~uint32_t{7});
     }
@@ -102,7 +102,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
         cursor = EmitTlbFastPath(cursor, ctx,
                                  d->l ? TlbAccess::kRead : TlbAccess::kWrite);
     } else {
-        /* MMU off — direct PA→host. ECX holds the PA. */
+        /* MMU off - direct PA→host. ECX holds the PA. */
         EmitMovRegImm32(cursor, kEdx,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(jit)));
         EmitCall(cursor,
@@ -202,7 +202,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(peripheral)));
         EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoReadWord));
         EmitMovBaseDisp32Reg(cursor, kStateReg, rd_disp, kEax);
-        /* ADD io_pending_address, 4 — advance to the second word. */
+        /* ADD io_pending_address, 4 - advance to the second word. */
         EmitAddDwordPtrImm8(cursor, mmu->IoPendingAddressPtr(), 4);
         /* Second word into Rd+1. */
 #if CERF_DEV_MODE
@@ -216,7 +216,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
         EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoReadWord));
         EmitMovBaseDisp32Reg(cursor, kStateReg, rd1_disp, kEax);
     } else {
-        /* First word from Rd — JitIoWriteWord(hint, peripheral, value)
+        /* First word from Rd - JitIoWriteWord(hint, peripheral, value)
            cdecl-on-stack value, fastcall ECX=hint EDX=peripheral. */
         EmitPushBaseDisp32(cursor, kStateReg, rd_disp);
 #if CERF_DEV_MODE
@@ -228,7 +228,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
         EmitMovRegImm32(cursor, kEdx,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(peripheral)));
         EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoWriteWord));
-        /* Second word from Rd+1 — reference does NOT advance
+        /* Second word from Rd+1 - reference does NOT advance
            io_pending_address on the store path; matching verbatim. */
         EmitPushBaseDisp32(cursor, kStateReg, rd1_disp);
 #if CERF_DEV_MODE
@@ -244,7 +244,7 @@ uint8_t* PlaceDoubleLoadStoreExtension(uint8_t*      cursor,
 
     uint8_t* load_store_done_io = EmitJmpLabel(cursor);
 
-    /* IO hint cache slot inline — both back-patched to one byte. */
+    /* IO hint cache slot inline - both back-patched to one byte. */
     {
         const uint32_t slot_addr =
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cursor));

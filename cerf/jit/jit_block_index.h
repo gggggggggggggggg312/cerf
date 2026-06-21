@@ -12,7 +12,7 @@ public:
     /* Wire the NIL sentinel and empty the root. */
     void Initialize();
 
-    /* Per-record memory sizes — JitCompile multiplies by
+    /* Per-record memory sizes - JitCompile multiplies by
        entrypoint_count and folds into the slab allocation size. */
     static constexpr size_t OuterEntrySize();
     static constexpr size_t SubEntrySize();
@@ -49,10 +49,10 @@ public:
     void RemoveNode(JitBlock* outer, RemovedCb cb, void* ctx);
 
     /* Outer entry whose folded-VA range contains folded_va (the RB node's
-       embedded block), or nullptr — locates an FCSE-PID-reuse stale block. */
+       embedded block), or nullptr - locates an FCSE-PID-reuse stale block. */
     JitBlock* FindOuter(uint32_t folded_va);
 
-    /* FlushEntrypoints equivalent — forget all references. The
+    /* FlushEntrypoints equivalent - forget all references. The
        backing memory is in the arena and is freed by arena flush;
        this method just resets the tree root to NIL. */
     void Flush();
@@ -64,7 +64,7 @@ private:
 
     /* EPNODE equivalent. JitBlock `ep` is the first field so a
        reinterpret_cast<JitBlock*>(node_memory) gives the embedded
-       block — matching the reference's ((PENTRYPOINT)CodeLocation)
+       block - matching the reference's ((PENTRYPOINT)CodeLocation)
        cast. */
     struct Node {
         JitBlock   ep;

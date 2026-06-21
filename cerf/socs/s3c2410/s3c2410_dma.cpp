@@ -27,7 +27,7 @@ public:
     }
 
     /* Covers DMA1 + DMA2 inclusive: 0x4B000040..0x4B0000BF (0x80
-       bytes). Channel stride is 0x40 — within each channel the BSP
+       bytes). Channel stride is 0x40 - within each channel the BSP
        reserves the full 0x40 even though the highest used register
        (DMASKTRIG) is at +0x20. */
     uint32_t MmioBase() const override { return 0x4B000040u; }
@@ -109,7 +109,7 @@ void S3C2410Dma::WriteWord(uint32_t addr, uint32_t value) {
             ch + 1, reg, value);
 
     /* Audio-output coupling actions decided under the lock and
-       executed after release — IIS and IrqController have their own
+       executed after release - IIS and IrqController have their own
        locks, never nest. */
     bool     queue_output       = false;
     bool     set_output_dma_on  = false;

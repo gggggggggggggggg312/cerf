@@ -2,7 +2,7 @@
 
 SCODE CerfDDGPE::BltPrepare(GPEBltParms* p) {
     /* Route to the host when the dst is a 16/24/32bpp addressable surface, or
-       whenever the src is FB-resident — an FB source must never reach the GPE
+       whenever the src is FB-resident - an FB source must never reach the GPE
        CPU blit, which can't read its PA-only bytes. Everything else goes to
        SwBlt, which aperture-maps any FB surface before the CPU blit. */
     ULONG pa;
@@ -28,7 +28,7 @@ void CerfDDGPE::FillSurface(CerfVirt::CerfBltSurface* s, GPESurf* surf, bool rea
     if (SurfaceFbPa(surf, &pa)) { s->buffer = pa; s->is_fb_pa = 1u; }
     else { s->buffer = (uint32_t)(ULONG_PTR)surf->Buffer(); s->is_fb_pa = 0u; }
     /* A realized brush is raw memory cast to GPESurf* and only Init()'d, so its
-       m_Format is never constructed — uninitialized garbage (GPE/ddi_if.cpp
+       m_Format is never constructed - uninitialized garbage (GPE/ddi_if.cpp
        DrvRealizeBrush, GPE/gpe.cpp GPESurf::Init). Reading m_pPalette off a brush
        dereferences that garbage and faults; brush callers pass read_palette=false. */
     GPEFormat* gf = read_palette ? surf->FormatPtr() : NULL;
@@ -57,7 +57,7 @@ void CerfDDGPE::FillSurfaceFromSurfobj(CerfVirt::CerfBltSurface* s, SURFOBJ* pso
     if (!pso) return;
     if (pso->dhsurf) { FillSurface(s, (GPESurf*)pso->dhsurf); return; }
     /* gpe.h IFormatToEGPEFormat[] maps BMF_16/24/32 (4/5/6) to gpe16/24/32Bpp
-       (4/5/6) — identity for the formats the host renders; lower BMF values
+       (4/5/6) - identity for the formats the host renders; lower BMF values
        differ but the host declines them (ResolveMasks fails). */
     s->format   = (uint32_t)pso->iBitmapFormat;
     s->stride   = (int32_t)pso->lDelta;
@@ -72,7 +72,7 @@ SCODE CerfDDGPE::SwFallback(GPEBltParms* p) { return SwBlt(p); }
 
 /* Host reads guest memory via PeekVaToHost, which cannot fault a page in, so
    an ODO demand-pager-recycled source page (L2=0, no TLB) reads unmapped and
-   the host blit is dropped — icon color/mask lost. Touch one byte per
+   the host blit is dropped - icon color/mask lost. Touch one byte per
    spanned 4KB page in-guest first to fault it resident via the normal pager. */
 void CerfDDGPE::FaultResident(GPESurf* surf, int x0, int y0, int x1, int y1) {
     ULONG pa;

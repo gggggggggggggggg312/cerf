@@ -116,7 +116,7 @@ void* CerfMapFbMemory(void) {
 }
 
 /* On-demand FB aperture for guest CPU code that must touch PA-only FB pixels
-   (DirectDraw Lock, GDI SW-blit edge). Map only the rect needed — a whole 4K
+   (DirectDraw Lock, GDI SW-blit edge). Map only the rect needed - a whole 4K
    surface (33 MB) exceeds the 32 MB slot. Returns the exact byte; free the same
    pointer via CerfUnmapFbWindow. */
 extern "C" void* CerfMapFbWindow(ULONG fb_pa, ULONG bytes) {
@@ -254,7 +254,7 @@ static BOOL APIENTRY CerfTracePaint(SURFOBJ* pso, CLIPOBJ* pco, BRUSHOBJ* pbo,
 }
 
 
-/* DO NOT delegate TRIVIAL to the engine — CE3 gwes's static TRIVIAL XLATEOBJ
+/* DO NOT delegate TRIVIAL to the engine - CE3 gwes's static TRIVIAL XLATEOBJ
    has a bogus internal palette ptr the engine handler derefs → Data Abort.
    Trivial = no palette anyway, so 0 is correct. */
 static ULONG (*g_EngineXlateObj_cGetPalette)(XLATEOBJ*, ULONG, ULONG, ULONG*) = NULL;
@@ -271,7 +271,7 @@ static ULONG WINAPI CerfXlateGetPaletteWrap(XLATEOBJ* pxlo, ULONG iPal,
 
 /* CE3/CE5/WM5 lack the engine palette pool (13-callback ENGCALLBACKS); these
    supply no-pool semantics for the 3 missing callbacks. DO NOT make Release a
-   no-op — gpe.cpp:747 delegates the only free of lib's new ULONG[] palette
+   no-op - gpe.cpp:747 delegates the only free of lib's new ULONG[] palette
    here; a no-op leaks one buffer per brush-realize. */
 static BOOL CerfNoPoolGetPalette(ULONG, ULONG**, int*)             { return FALSE; }
 static VOID CerfNoPoolAddPalette(ULONG, ULONG*, int)              { }

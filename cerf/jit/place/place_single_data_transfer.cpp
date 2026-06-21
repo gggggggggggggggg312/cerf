@@ -50,7 +50,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             EmitMovRegReg(cursor, kEax, kEdi);
             EmitAddRegImm32(cursor, kEax, inst_ptr - ctx->pc_cache_guest_va);
             if (inst_ptr & 3u) {
-                /* Address bits[1:0] non-zero — store the unaligned
+                /* Address bits[1:0] non-zero - store the unaligned
                    guest EA in ECX for the post-load rotation path. */
                 EmitMovRegImm32(cursor, kEcx, inst_ptr);
             }
@@ -64,7 +64,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
              EBP = writeback EA (only when d->w or post-indexed) */
 
         if (fNeedsAlignmentCheck && !alignment_check_on) {
-            /* Alignment check is off — for LDR, stash the unaligned
+            /* Alignment check is off - for LDR, stash the unaligned
                EA so the post-load rotation can recover bits[1:0],
                then AND ECX to dword-align. */
             if (d->l) {
@@ -79,7 +79,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             cursor = EmitTlbFastPath(cursor, ctx,
                                      d->l ? TlbAccess::kRead : TlbAccess::kWrite);
         } else {
-            /* MMU off — direct PA→host. ECX already holds the PA
+            /* MMU off - direct PA→host. ECX already holds the PA
                (no virtual-to-physical translation needed); EDX
                carries jit per MapGuestPhysicalToHostHelper's
                __fastcall(paddr, jit) convention. */
@@ -92,7 +92,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             /* Base-Updated abort model: writeback happens before
                testing for aborts. */
             if (d->w) {
-                /* d->rn != R15 — writeback to R15 is unencoded
+                /* d->rn != R15 - writeback to R15 is unencoded
                    under ARM single-data-transfer writeback. */
                 EmitMovBaseDisp32Reg(cursor, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rn * 4),
@@ -100,7 +100,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             }
         }
 
-        /* TEST EAX, EAX — was the translation successful (returned
+        /* TEST EAX, EAX - was the translation successful (returned
            a non-null host pointer)? */
         EmitTestRegReg(cursor, kEax, kEax);
         abort_exception_or_io = EmitJzLabel(cursor);
@@ -114,7 +114,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
         }
 
         /* Cache the resolved host EA in EDI if this is the first
-           unconditional "LDR Rd, [PC+immediate]" in the block —
+           unconditional "LDR Rd, [PC+immediate]" in the block -
            subsequent same-page PC-relative LDRs reuse it via the
            fast path at the top. */
         if (d->w == 0 && d->cond == 14 && d->b == 0 && d->l &&
@@ -138,11 +138,11 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
     if (d->l) {
         /* === LOAD === */
         if (d->b) {
-            /* LDRB — single-byte zero-extended load. */
+            /* LDRB - single-byte zero-extended load. */
             uint8_t* load_byte_done1 = nullptr;
             uint8_t* load_byte_done2 = nullptr;
 
-            /* MOVZX EAX, BYTE PTR [EAX] — 0F B6 mod=00 r/m=EAX reg=EAX. */
+            /* MOVZX EAX, BYTE PTR [EAX] - 0F B6 mod=00 r/m=EAX reg=EAX. */
             Emit8(cursor, 0x0F);
             Emit8(cursor, 0xB6);
             EmitModRmReg(cursor, 0, kEax, kEax);
@@ -176,13 +176,13 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             EmitMovRegImm32(cursor, kEdx,
                 static_cast<uint32_t>(reinterpret_cast<uintptr_t>(peripheral)));
             EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoReadByte));
-            /* MOVZX EAX, AL — zero-extend byte result to 32-bit. */
+            /* MOVZX EAX, AL - zero-extend byte result to 32-bit. */
             Emit8(cursor, 0x0F);
             Emit8(cursor, 0xB6);
             EmitModRmReg(cursor, 3, kEax, kEax);
             load_byte_done2 = EmitJmpLabel(cursor);
 
-            /* Store IO hint cache slot inline — back-patch the
+            /* Store IO hint cache slot inline - back-patch the
                MOV ECX imm32 to point at this byte. */
             {
                 const uint32_t slot_addr =
@@ -199,7 +199,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
 
             FixupLabel(load_byte_done1, cursor);
             FixupLabel(load_byte_done2, cursor);
-            /* MOV [ESI + offsetof(gprs[Rd])], EAX — store loaded
+            /* MOV [ESI + offsetof(gprs[Rd])], EAX - store loaded
                value into Rd. */
             EmitMovBaseDisp32Reg(cursor, kStateReg,
                 static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rd * 4),
@@ -218,24 +218,24 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
     } else {
         /* === STORE === */
         if (d->b) {
-            /* STRB — single-byte store. */
+            /* STRB - single-byte store. */
             uint8_t* store_byte_done1 = nullptr;
             uint8_t* store_byte_done2 = nullptr;
 
             if (d->rd == ArmGpr::kR15) {
                 const uint32_t inst_ptr = d->guest_address +
                     (thumb ? 4u : pc_store_offset);
-                /* MOV BYTE PTR [EAX], imm8 — 0xC6 mod=00 r/m=EAX /0 imm8. */
+                /* MOV BYTE PTR [EAX], imm8 - 0xC6 mod=00 r/m=EAX /0 imm8. */
                 Emit8(cursor, 0xC6);
                 EmitModRmReg(cursor, 0, kEax, 0);
                 Emit8(cursor, static_cast<uint8_t>(inst_ptr));
             } else {
-                /* MOV CL, BYTE PTR [ESI + gprs[Rd]*4] — load source
+                /* MOV CL, BYTE PTR [ESI + gprs[Rd]*4] - load source
                    byte from the ARM register file via the pinned
                    ArmCpuState base. */
                 EmitMovByteRegBaseDisp32(cursor, kCl, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rd * 4));
-                /* MOV BYTE PTR [EAX], CL — store CL to the host
+                /* MOV BYTE PTR [EAX], CL - store CL to the host
                    pointer the MMU translate returned. */
                 Emit8(cursor, 0x88);
                 EmitModRmReg(cursor, 0, kEax, kCl);
@@ -263,7 +263,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
                 /* Push the byte value sign/zero-extended to dword. */
                 EmitPush32(cursor, static_cast<uint8_t>(inst_ptr));
             } else {
-                /* PUSH DWORD PTR [ESI + offsetof(gprs[Rd])] — the
+                /* PUSH DWORD PTR [ESI + offsetof(gprs[Rd])] - the
                    callee reads only the low byte. */
                 EmitPushBaseDisp32(cursor, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rd * 4));
@@ -293,12 +293,12 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
             FixupLabel(store_byte_done1, cursor);
             FixupLabel(store_byte_done2, cursor);
         } else {
-            /* STR — word store. */
+            /* STR - word store. */
             uint8_t* store_word_done1 = nullptr;
             uint8_t* store_word_done2 = nullptr;
 
             if (d->rd == ArmGpr::kR15) {
-                /* MOV DWORD PTR [EAX], imm32 — 0xC7 mod=00 r/m=EAX /0 imm32. */
+                /* MOV DWORD PTR [EAX], imm32 - 0xC7 mod=00 r/m=EAX /0 imm32. */
                 Emit8(cursor, 0xC7);
                 EmitModRmReg(cursor, 0, kEax, 0);
                 Emit32(cursor, d->guest_address +
@@ -307,7 +307,7 @@ uint8_t* PlaceSingleDataTransfer(uint8_t*      cursor,
                 /* MOV ECX, DWORD PTR [ESI + offsetof(gprs[Rd])]. */
                 EmitMovRegBaseDisp32(cursor, kEcx, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rd * 4));
-                /* MOV DWORD PTR [EAX], ECX — 0x89 mod=00 r/m=EAX reg=ECX. */
+                /* MOV DWORD PTR [EAX], ECX - 0x89 mod=00 r/m=EAX reg=ECX. */
                 Emit8(cursor, 0x89);
                 EmitModRmReg(cursor, 0, kEax, kEcx);
             }

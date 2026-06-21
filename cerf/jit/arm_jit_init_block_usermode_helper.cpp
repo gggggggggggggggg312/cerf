@@ -45,7 +45,7 @@ void ArmJit::InitializeBlockUsermodeHelper() {
     /* MOV EAX, [addr_cpsr]  (5 bytes via the A1 short form for EAX). */
     EmitMovRegDwordPtr(p, kEax, reinterpret_cast<void*>(addr_cpsr));
 
-    /* AND EAX, 0x1F  — encode imm8 form (83 /4 ib) for compactness. */
+    /* AND EAX, 0x1F  - encode imm8 form (83 /4 ib) for compactness. */
     Emit8(p, 0x83);
     EmitModRmReg(p, 3, kEax, 4);
     Emit8(p, 0x1F);
@@ -65,7 +65,7 @@ void ArmJit::InitializeBlockUsermodeHelper() {
     EmitCmpRegImm32(p, kEax, ArmMode::kUser);
     uint8_t* jz_user       = EmitJzLabel(p);
 
-    /* InUserMode (and FIQ fallthrough — FIQ not modelled). */
+    /* InUserMode (and FIQ fallthrough - FIQ not modelled). */
     uint8_t* in_user_label = p;
     FixupLabel(jz_user, p);
     FixupLabel(jz_system, p);

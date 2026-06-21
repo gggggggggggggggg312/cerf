@@ -167,7 +167,7 @@ void MediaQMq200Ge::BlitMonoSource(const uint32_t* r) {
 
     const uint8_t  rop = static_cast<uint8_t>(r[kGe00Command] & kCmdRopMask);
     /* Mono-SOURCE blit colours come from FG_COLOR/BG_COLOR (mqmm2s.blt), not the
-       PAT_FG/PAT_BG pattern regs — those stay set to a prior fill's colour and
+       PAT_FG/PAT_BG pattern regs - those stay set to a prior fill's colour and
        would paint the glyph in the background colour (invisible). */
     const uint32_t fg  = r[kGe07FgColor] & 0xFFFFu;
     const uint32_t bg  = r[kGe08BgColor] & 0xFFFFu;
@@ -223,7 +223,7 @@ void MediaQMq200Ge::BlitMonoSource(const uint32_t* r) {
 
 /* MQ-200 Bresenham solid line, fields per MS driver line.cpp + mqhw2.h (see the
    per-field notes below). The driver emits horizontal lines as a BitBlt rect fill
-   instead, so a type-4 line is always y-major or diagonal — there is deliberately
+   instead, so a type-4 line is always y-major or diagonal - there is deliberately
    no horizontal fast path here. */
 void MediaQMq200Ge::DrawLine(uint32_t cmd) {
     const uint32_t bpp    = BytesPerPixel();

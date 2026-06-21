@@ -49,18 +49,18 @@ constexpr uint32_t kRegADCDAT1 = 0x10u;
 /* Register field layouts pulled from the BSP IOADConverter's bitfield
    unions in dev_emu boards/smdk2410/devices.h (ADCCON, ADCTSC,
    ADCDAT0, ADCDAT1 anonymous structs there). */
-constexpr uint32_t kAdcconEnableStart = 0x0001u;  /* ADCCON.ENABLE_START — bit 0 */
-constexpr uint32_t kAdcconEcflg       = 0x8000u;  /* ADCCON.ECFLG       — bit 15 */
-constexpr uint32_t kAdctscXyPstMask   = 0x0003u;  /* ADCTSC.XY_PST      — bits 0..1 */
-constexpr uint32_t kAdcdatXpdataMask  = 0x03FFu;  /* ADCDAT0.XPDATA / ADCDAT1.YPDATA — bits 0..9 (10-bit sample) */
-constexpr uint32_t kAdcdatXyPstShift  = 12u;      /* ADCDAT0.XY_PST     — bits 12..13 */
+constexpr uint32_t kAdcconEnableStart = 0x0001u;  /* ADCCON.ENABLE_START - bit 0 */
+constexpr uint32_t kAdcconEcflg       = 0x8000u;  /* ADCCON.ECFLG       - bit 15 */
+constexpr uint32_t kAdctscXyPstMask   = 0x0003u;  /* ADCTSC.XY_PST      - bits 0..1 */
+constexpr uint32_t kAdcdatXpdataMask  = 0x03FFu;  /* ADCDAT0.XPDATA / ADCDAT1.YPDATA - bits 0..9 (10-bit sample) */
+constexpr uint32_t kAdcdatXyPstShift  = 12u;      /* ADCDAT0.XY_PST     - bits 12..13 */
 constexpr uint32_t kAdcdatXyPstMask   = 0x3000u;
-constexpr uint32_t kAdcdatUpdown      = 0x8000u;  /* ADCDAT0.UPDOWN / ADCDAT1.UPDOWN — bit 15 (1 = pen up) */
+constexpr uint32_t kAdcdatUpdown      = 0x8000u;  /* ADCDAT0.UPDOWN / ADCDAT1.UPDOWN - bit 15 (1 = pen up) */
 
 constexpr int kIrqAdc   = 31;
 constexpr int kIrqSubTc =  9;
 
-/* TouchInput adapter — anonymous-namespaced, forwards host pointer
+/* TouchInput adapter - anonymous-namespaced, forwards host pointer
    events to the S3C2410AdcTouch concrete; nothing outside this .cpp
    needs to name the adapter type. */
 class S3C2410TouchInput : public TouchInput {
@@ -150,7 +150,7 @@ void S3C2410AdcTouch::WriteWord(uint32_t addr, uint32_t value) {
             break;
         case kRegADCDAT0:
         case kRegADCDAT1:
-            /* Read-only on the real chip — IOADConverter::WriteWord
+            /* Read-only on the real chip - IOADConverter::WriteWord
                explicitly drops these. */
             break;
         default:
@@ -161,7 +161,7 @@ void S3C2410AdcTouch::WriteWord(uint32_t addr, uint32_t value) {
 void S3C2410AdcTouch::SetPenStateLocked(bool pen_up) {
     /* Mirrors IOADConverter::SetPenState: snapshot the current ADCTSC
        XY_PST into ADCDAT0's XY_PST field, set/clear UPDOWN in both
-       data registers. ADCDAT1's XY_PST isn't touched — the BSP
+       data registers. ADCDAT1's XY_PST isn't touched - the BSP
        implementation only copies into ADCDAT0. */
     const uint32_t xy_pst_shifted =
         (adctsc_ & kAdctscXyPstMask) << kAdcdatXyPstShift;

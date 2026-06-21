@@ -56,41 +56,41 @@ inline void EmitSib(uint8_t*& p, uint8_t ss, uint8_t index, uint8_t base) {
 
 inline void EmitSize16(uint8_t*& p) { Emit8(p, 0x66); }
 
-/* MOV r32, [disp32] — uses the A1 short form for EAX, 8B /r otherwise. */
+/* MOV r32, [disp32] - uses the A1 short form for EAX, 8B /r otherwise. */
 inline void EmitMovRegDwordPtr(uint8_t*& p, uint8_t reg, const void* ptr) {
     if (reg == kEax) { Emit8(p, 0xA1); EmitPtr(p, ptr); }
     else             { Emit8(p, 0x8B); EmitModRmReg(p, 0, 5, reg); EmitPtr(p, ptr); }
 }
 
-/* MOV r8, [disp32] — A0 short form for AL, 8A /r otherwise. */
+/* MOV r8, [disp32] - A0 short form for AL, 8A /r otherwise. */
 inline void EmitMovRegBytePtr(uint8_t*& p, uint8_t reg, const void* ptr) {
     if (reg == kAl) { Emit8(p, 0xA0); EmitPtr(p, ptr); }
     else            { Emit8(p, 0x8A); EmitModRmReg(p, 0, 5, reg); EmitPtr(p, ptr); }
 }
 
-/* MOV [disp32], r32 — A3 short form for EAX, 89 /r otherwise. */
+/* MOV [disp32], r32 - A3 short form for EAX, 89 /r otherwise. */
 inline void EmitMovDwordPtrReg(uint8_t*& p, const void* ptr, uint8_t reg) {
     if (reg == kEax) { Emit8(p, 0xA3); EmitPtr(p, ptr); }
     else             { Emit8(p, 0x89); EmitModRmReg(p, 0, 5, reg); EmitPtr(p, ptr); }
 }
 
-/* MOV r32, imm32 — B8+rd, id. */
+/* MOV r32, imm32 - B8+rd, id. */
 inline void EmitMovRegImm32(uint8_t*& p, uint8_t reg, uint32_t imm) {
     Emit8(p, static_cast<uint8_t>(0xB8 + reg));
     Emit32(p, imm);
 }
 
-/* MOV r32, r32 — 8B /r, mod=11. */
+/* MOV r32, r32 - 8B /r, mod=11. */
 inline void EmitMovRegReg(uint8_t*& p, uint8_t dst, uint8_t src) {
     Emit8(p, 0x8B); EmitModRmReg(p, 3, src, dst);
 }
 
-/* CALL rel32 — E8 cd. */
+/* CALL rel32 - E8 cd. */
 inline void EmitCall(uint8_t*& p, const void* target) {
     Emit8(p, 0xE8); EmitRel32(p, target);
 }
 
-/* JMP rel32 — E9 cd. */
+/* JMP rel32 - E9 cd. */
 inline void EmitJmp32(uint8_t*& p, const void* target) {
     Emit8(p, 0xE9); EmitRel32(p, target);
 }
@@ -125,7 +125,7 @@ inline void FixupLabel(uint8_t* label, uint8_t* target) {
     if (disp < -128 || disp > 127) {
         const uint8_t opcode = *(label - 2);
         LOG(Caution, "FixupLabel rel8 overflow: label=%p target=%p disp=%lld "
-                     "jump_opcode=0x%02X (74=JZ 75=JNZ EB=JMP) — caller emit "
+                     "jump_opcode=0x%02X (74=JZ 75=JNZ EB=JMP) - caller emit "
                      "is too large to fit in a short jump\n",
             static_cast<void*>(label), static_cast<void*>(target),
             static_cast<long long>(disp), opcode);
@@ -159,7 +159,7 @@ inline void FixupLabel32(uint8_t* label, uint8_t* target) {
     std::memcpy(label - 4, &rel, 4);
 }
 
-/* Backward conditional-jump emit — opposite shape from EmitJzLabel
+/* Backward conditional-jump emit - opposite shape from EmitJzLabel
    family above. Each takes an absolute target captured earlier in
    the same emit stream and writes the matching Jcc rel32 directly,
    computing the displacement from (cursor + 6) to the target. */
@@ -183,7 +183,7 @@ inline void EmitPushDwordPtr(uint8_t*& p, const void* ptr) {
     Emit8(p, 0xFF); EmitModRmReg(p, 0, 5, 6); EmitPtr(p, ptr);
 }
 
-/* MOV DWORD PTR [disp32], imm32 — Intel SDM: C7 /0 id (mod=00, r/m=101). */
+/* MOV DWORD PTR [disp32], imm32 - Intel SDM: C7 /0 id (mod=00, r/m=101). */
 inline void EmitMovDwordPtrImm32(uint8_t*& p, const void* ptr, uint32_t imm) {
     Emit8(p, 0xC7); EmitModRmReg(p, 0, 5, 0); EmitPtr(p, ptr); Emit32(p, imm);
 }
@@ -208,7 +208,7 @@ inline void EmitOrReg32Reg32 (uint8_t*& p, uint8_t d, uint8_t s) { Emit8(p, 0x09
 inline void EmitIncReg(uint8_t*& p, uint8_t reg) { Emit8(p, static_cast<uint8_t>(reg + 0x40)); }
 inline void EmitDecReg(uint8_t*& p, uint8_t reg) { Emit8(p, static_cast<uint8_t>(reg + 0x48)); }
 
-/* ADD r32, imm32 — picks the shortest encoding: nothing for 0, INC
+/* ADD r32, imm32 - picks the shortest encoding: nothing for 0, INC
    for 1, 83 /0 ib for [-128,127], 05 id for EAX, 81 /0 id otherwise. */
 inline void EmitAddRegImm32(uint8_t*& p, uint8_t reg, uint32_t unsigned_imm) {
     const int32_t imm = static_cast<int32_t>(unsigned_imm);
@@ -222,7 +222,7 @@ inline void EmitAddRegImm32(uint8_t*& p, uint8_t reg, uint32_t unsigned_imm) {
     Emit8(p, 0x81); EmitModRmReg(p, 3, reg, 0); Emit32(p, static_cast<uint32_t>(imm));
 }
 
-/* SUB r32, imm32 — mirror of EmitAddRegImm32. */
+/* SUB r32, imm32 - mirror of EmitAddRegImm32. */
 inline void EmitSubRegImm32(uint8_t*& p, uint8_t reg, uint32_t unsigned_imm) {
     const int32_t imm = static_cast<int32_t>(unsigned_imm);
     if (imm == 0) return;
@@ -296,12 +296,12 @@ inline void EmitShrReg32Imm(uint8_t*& p, uint8_t reg, uint8_t imm) {
 
 inline void EmitCwde(uint8_t*& p) { Emit8(p, 0x98); }
 
-/* IMUL r32 — one-operand signed multiply producing EDX:EAX. */
+/* IMUL r32 - one-operand signed multiply producing EDX:EAX. */
 inline void EmitImulReg32(uint8_t*& p, uint8_t reg) {
     Emit8(p, 0xF7); EmitModRmReg(p, 3, reg, 5);
 }
 
-/* BT [disp32], imm8 — sets x86 CF to bit imm8 of the dword at ptr. */
+/* BT [disp32], imm8 - sets x86 CF to bit imm8 of the dword at ptr. */
 inline void EmitBtDwordPtrImm(uint8_t*& p, const void* ptr, uint8_t imm) {
     Emit16(p, 0xBA0F); EmitModRmReg(p, 0, 5, 4); EmitPtr(p, ptr); Emit8(p, imm);
 }
@@ -309,13 +309,13 @@ inline void EmitBtDwordPtrImm(uint8_t*& p, const void* ptr, uint8_t imm) {
 constexpr uint8_t kStateReg = kEsi;
 constexpr uint8_t kMmuReg   = kEbx;
 
-/* MOV r32, [base + disp32] — 8B /r mod=10. */
+/* MOV r32, [base + disp32] - 8B /r mod=10. */
 inline void EmitMovRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x8B); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* LEA r32, [base + disp32] — 8D /r mod=10. Computes the effective
+/* LEA r32, [base + disp32] - 8D /r mod=10. Computes the effective
    address (no memory access) into dst. Used to materialize a
    per-instance ArmMmuState field pointer (e.g. data_tlb) into a
    scratch register for passing as a cdecl function-call argument. */
@@ -329,121 +329,121 @@ inline void EmitXchgRegBaseDisp32(uint8_t*& p, uint8_t reg, uint8_t base, int32_
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* MOV [base + disp32], r32 — 89 /r mod=10. */
+/* MOV [base + disp32], r32 - 89 /r mod=10. */
 inline void EmitMovBaseDisp32Reg(uint8_t*& p, uint8_t base, int32_t disp, uint8_t src) {
     Emit8(p, 0x89); EmitModRmReg(p, 2, base, src);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* MOV [base + disp32], imm32 — C7 /0 mod=10. */
+/* MOV [base + disp32], imm32 - C7 /0 mod=10. */
 inline void EmitMovBaseDisp32Imm32(uint8_t*& p, uint8_t base, int32_t disp, uint32_t imm) {
     Emit8(p, 0xC7); EmitModRmReg(p, 2, base, 0);
     Emit32(p, static_cast<uint32_t>(disp));
     Emit32(p, imm);
 }
 
-/* MOV r8, [base + disp32] — 8A /r mod=10. */
+/* MOV r8, [base + disp32] - 8A /r mod=10. */
 inline void EmitMovByteRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x8A); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* MOV [base + disp32], r8 — 88 /r mod=10. */
+/* MOV [base + disp32], r8 - 88 /r mod=10. */
 inline void EmitMovBaseDisp32Byte(uint8_t*& p, uint8_t base, int32_t disp, uint8_t src) {
     Emit8(p, 0x88); EmitModRmReg(p, 2, base, src);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* MOVSX r32, byte [base + disp32] — 0F BE /r mod=10. Sign-extends the
+/* MOVSX r32, byte [base + disp32] - 0F BE /r mod=10. Sign-extends the
    addressed byte into the full 32-bit dst. */
 inline void EmitMovsxByteRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x0F); Emit8(p, 0xBE); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* CMP r8, byte [base + disp32] — 3A /r mod=10. */
+/* CMP r8, byte [base + disp32] - 3A /r mod=10. */
 inline void EmitCmpReg8BaseDisp32(uint8_t*& p, uint8_t reg8, uint8_t base, int32_t disp) {
     Emit8(p, 0x3A); EmitModRmReg(p, 2, base, reg8);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* BT [base], index — 0F A3 /r mod=00. CF = bit `index` of the bit-string based
+/* BT [base], index - 0F A3 /r mod=00. CF = bit `index` of the bit-string based
    at [base] (memory bit-base addressing, so index may exceed 32). base must not
    be EBP/ESP. */
 inline void EmitBtMemReg(uint8_t*& p, uint8_t base, uint8_t index) {
     Emit16(p, 0xA30F); EmitModRmReg(p, 0, base, index);
 }
 
-/* BTS [base], index — 0F AB /r mod=00. Sets bit `index` of the bit-string based
+/* BTS [base], index - 0F AB /r mod=00. Sets bit `index` of the bit-string based
    at [base]. base must not be EBP/ESP. */
 inline void EmitBtsMemReg(uint8_t*& p, uint8_t base, uint8_t index) {
     Emit16(p, 0xAB0F); EmitModRmReg(p, 0, base, index);
 }
 
-/* ADD r32, [base + disp32] — 03 /r mod=10. */
+/* ADD r32, [base + disp32] - 03 /r mod=10. */
 inline void EmitAddRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x03); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* ADD [base + disp32], r32 — 01 /r mod=10. */
+/* ADD [base + disp32], r32 - 01 /r mod=10. */
 inline void EmitAddBaseDisp32Reg(uint8_t*& p, uint8_t base, int32_t disp, uint8_t src) {
     Emit8(p, 0x01); EmitModRmReg(p, 2, base, src);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* ADC [base + disp32], r32 — 11 /r mod=10. */
+/* ADC [base + disp32], r32 - 11 /r mod=10. */
 inline void EmitAdcBaseDisp32Reg(uint8_t*& p, uint8_t base, int32_t disp, uint8_t src) {
     Emit8(p, 0x11); EmitModRmReg(p, 2, base, src);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* ADD DWORD PTR [base + disp32], imm8 (sign-extended) — 83 /0 mod=10 ib. */
+/* ADD DWORD PTR [base + disp32], imm8 (sign-extended) - 83 /0 mod=10 ib. */
 inline void EmitAddBaseDisp32Imm8(uint8_t*& p, uint8_t base, int32_t disp, uint8_t imm) {
     Emit8(p, 0x83); EmitModRmReg(p, 2, base, 0);
     Emit32(p, static_cast<uint32_t>(disp));
     Emit8(p, imm);
 }
 
-/* ADC DWORD PTR [base + disp32], imm8 (sign-extended) — 83 /2 mod=10 ib. */
+/* ADC DWORD PTR [base + disp32], imm8 (sign-extended) - 83 /2 mod=10 ib. */
 inline void EmitAdcBaseDisp32Imm8(uint8_t*& p, uint8_t base, int32_t disp, uint8_t imm) {
     Emit8(p, 0x83); EmitModRmReg(p, 2, base, 2);
     Emit32(p, static_cast<uint32_t>(disp));
     Emit8(p, imm);
 }
 
-/* SUB r32, [base + disp32] — 2B /r mod=10. */
+/* SUB r32, [base + disp32] - 2B /r mod=10. */
 inline void EmitSubRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x2B); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* CMP r32, [base + disp32] — 3B /r mod=10. */
+/* CMP r32, [base + disp32] - 3B /r mod=10. */
 inline void EmitCmpRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x3B); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* OR [base + disp8], imm8 — 80 /1 mod=01. */
+/* OR [base + disp8], imm8 - 80 /1 mod=01. */
 inline void EmitOrByteBaseDisp8Imm8(uint8_t*& p, uint8_t base, int8_t disp, uint8_t imm) {
     Emit8(p, 0x80); EmitModRmReg(p, 1, base, 1);
     Emit8(p, static_cast<uint8_t>(disp));
     Emit8(p, imm);
 }
 
-/* PUSH [base + disp32] — FF /6 mod=10. */
+/* PUSH [base + disp32] - FF /6 mod=10. */
 inline void EmitPushBaseDisp32(uint8_t*& p, uint8_t base, int32_t disp) {
     Emit8(p, 0xFF); EmitModRmReg(p, 2, base, 6);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* POP [base + disp32] — 8F /0 mod=10. */
+/* POP [base + disp32] - 8F /0 mod=10. */
 inline void EmitPopBaseDisp32(uint8_t*& p, uint8_t base, int32_t disp) {
     Emit8(p, 0x8F); EmitModRmReg(p, 2, base, 0);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* BT [base + disp32], imm8 — 0F BA /4 mod=10. Sets x86 CF to bit
+/* BT [base + disp32], imm8 - 0F BA /4 mod=10. Sets x86 CF to bit
    imm8 of the dword at base+disp. */
 inline void EmitBtBaseDisp32Imm(uint8_t*& p, uint8_t base, int32_t disp, uint8_t imm) {
     Emit16(p, 0xBA0F); EmitModRmReg(p, 2, base, 4);
@@ -451,20 +451,20 @@ inline void EmitBtBaseDisp32Imm(uint8_t*& p, uint8_t base, int32_t disp, uint8_t
     Emit8(p, imm);
 }
 
-/* TEST byte ptr [base + disp32], imm8 — F6 /0 mod=10 ib. */
+/* TEST byte ptr [base + disp32], imm8 - F6 /0 mod=10 ib. */
 inline void EmitTestByteBaseDisp32Imm8(uint8_t*& p, uint8_t base, int32_t disp, uint8_t imm) {
     Emit8(p, 0xF6); EmitModRmReg(p, 2, base, 0);
     Emit32(p, static_cast<uint32_t>(disp));
     Emit8(p, imm);
 }
 
-/* OR r32, [base + disp32] — 0B /r mod=10. */
+/* OR r32, [base + disp32] - 0B /r mod=10. */
 inline void EmitOrRegBaseDisp32(uint8_t*& p, uint8_t dst, uint8_t base, int32_t disp) {
     Emit8(p, 0x0B); EmitModRmReg(p, 2, base, dst);
     Emit32(p, static_cast<uint32_t>(disp));
 }
 
-/* JMP [base + disp32] — FF /4 mod=10. */
+/* JMP [base + disp32] - FF /4 mod=10. */
 inline void EmitJmpBaseDisp32(uint8_t*& p, uint8_t base, int32_t disp) {
     Emit8(p, 0xFF); EmitModRmReg(p, 2, base, 4);
     Emit32(p, static_cast<uint32_t>(disp));
@@ -477,17 +477,17 @@ inline void EmitMovAbsIndexedReg(uint8_t*& p, uint32_t base_addr, uint8_t index_
     Emit32(p, base_addr);
 }
 
-/* INC byte ptr [disp32] — FE /0. */
+/* INC byte ptr [disp32] - FE /0. */
 inline void EmitIncBytePtrAbs(uint8_t*& p, const void* ptr) {
     Emit8(p, 0xFE); EmitModRmReg(p, 0, 5, 0); EmitPtr(p, ptr);
 }
 
-/* MOVZX r32, byte ptr [disp32] — 0F B6 /r mod=00 r/m=5. */
+/* MOVZX r32, byte ptr [disp32] - 0F B6 /r mod=00 r/m=5. */
 inline void EmitMovzxRegBytePtrAbs(uint8_t*& p, uint8_t dst, const void* ptr) {
     Emit16(p, 0xB60F); EmitModRmReg(p, 0, 5, dst); EmitPtr(p, ptr);
 }
 
-/* ADD DWORD PTR [disp32], imm8 — 83 /0 mod=00 r/m=5 disp32 ib.
+/* ADD DWORD PTR [disp32], imm8 - 83 /0 mod=00 r/m=5 disp32 ib.
    Sign-extends imm8 to 32 bits before adding. Used for incrementing
    the absolute IO-pending-address slot between paired IO transfers
    (LDRD / STRD double-word IO emit). */

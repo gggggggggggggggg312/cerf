@@ -117,7 +117,7 @@ void ArmJit::SignalIdleWake() {
 }
 
 __declspec(naked) void ArmJit::NotJittedHelper() {
-    /* MUST stay a single RET — shadow-stack slots for "not yet
+    /* MUST stay a single RET - shadow-stack slots for "not yet
        jitted" return targets point here; JMP-to-anything-else
        breaks the BX LR / MOV PC, LR return path. */
     __asm { ret }
@@ -169,7 +169,7 @@ void ArmJit::OnReady() {
     neon_scalar_move_           = &emu_.Get<ArmNeonScalarMove>();
 
     /* Resolving ArmJit inside ArmCpu::OnReady would form a
-       service-locator cycle — back-pointer wired here instead. */
+       service-locator cycle - back-pointer wired here instead. */
     cpu_->LateInit(this);
 
     arena_.Initialize();
@@ -219,7 +219,7 @@ void ArmJit::OnReady() {
         static_cast<uint8_t*>(sctlr_handler.Trampoline());
 
     auto& boot = emu_.Get<BootMode>();
-    /* MMU off at cold reset — PC is consumed as PA; the BootMode strategy
+    /* MMU off at cold reset - PC is consumed as PA; the BootMode strategy
        supplies the entry/stack the board's boot model dictates. */
     const uint32_t sp_pa    = boot.ColdStackPa();
     const uint32_t entry_pa = boot.ColdEntryPa();
@@ -233,7 +233,7 @@ void ArmJit::OnReady() {
 }
 
 void ArmJit::UpdateInterruptOnPoll() {
-    /* Caller must hold InterruptLock — concurrent peripheral
+    /* Caller must hold InterruptLock - concurrent peripheral
        threads racing here without it corrupt the trampoline byte. */
     if (interrupt_lock_.try_lock()) {
         interrupt_lock_.unlock();
@@ -327,7 +327,7 @@ void ArmJit::SetResetPending(bool is_resume) {
     emu_.Get<GuestPowerNotifier>().NotifyReboot();
 }
 
-/* All three take an FCSE-folded VA — the index is VA-keyed. */
+/* All three take an FCSE-folded VA - the index is VA-keyed. */
 JitBlock* ArmJit::LookupBlockExact(uint32_t folded_va) {
     IsaBlockSpace& space =
         cpu_->State()->cpsr.bits.thumb_mode ? blocks_thumb_ : blocks_arm_;
@@ -374,7 +374,7 @@ JitBlock* ArmJit::LookupBlockByVaPhys(uint32_t folded_va, uint32_t phys) {
 /* Filter for the __except below: log the fault context (host EIP +
    guest state) before the handler runs CerfFatalExit. Lives here so
    GetExceptionInformation() is called at the top of a filter
-   expression — MSVC rejects it inside nested expressions. */
+   expression - MSVC rejects it inside nested expressions. */
 static int DispatchFaultFilter(EXCEPTION_POINTERS* xp,
                                uint32_t guest_pc, void* native,
                                ArmCpuState* state) {
@@ -459,7 +459,7 @@ __declspec(naked) void __cdecl ArmJit::Dispatch(void*        /* native_pc */,
                                                 ArmMmuState* /* mmu_state */) {
     /* MUST preserve EBP/EBX (and EDI/ESI for symmetry): caller is
        normal C++ with frame pointer, [ESP+20/24/28] are the original
-       args after the 4 PUSHes — adding work before the PUSHes shifts
+       args after the 4 PUSHes - adding work before the PUSHes shifts
        the offsets and the block reads wrong stack slots. */
     __asm {
         push ebp

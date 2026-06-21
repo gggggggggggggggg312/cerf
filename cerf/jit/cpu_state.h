@@ -7,7 +7,7 @@
    bit-field packing (low-to-high) matches the ARM CPSR bit layout. */
 
 /* CPSR view without NZCV. The current NZCV flag bits do NOT live in
-   CPSR while the JIT is running — they live in the side x86_flags /
+   CPSR while the JIT is running - they live in the side x86_flags /
    x86_overflow fields below (lazy flag pack). */
 union ArmPsr {
     struct {
@@ -23,7 +23,7 @@ union ArmPsr {
 };
 static_assert(sizeof(ArmPsr) == 4, "ArmPsr must be 32 bits");
 
-/* CPSR view with NZCV explicit — used when packing flags for storage
+/* CPSR view with NZCV explicit - used when packing flags for storage
    or returning CPSR to the kernel. */
 union ArmPsrFull {
     struct {
@@ -61,7 +61,7 @@ union ArmX86Flags {
 };
 
 /* x86 OF lives at EFLAGS bit 11, not contiguous with NZ/C in the low
-   byte — stored separately. Intel SDM Vol. 1 §3.4.3. */
+   byte - stored separately. Intel SDM Vol. 1 §3.4.3. */
 union ArmX86Overflow {
     uint8_t  byte;
     uint32_t word;
@@ -77,7 +77,7 @@ namespace ArmPsrBit {
 }
 
 /* GPR indices + per-mode bank slot indices for R13/R14. The bank-
-   slot constants intentionally collide with R0/R1 — they index the
+   slot constants intentionally collide with R0/R1 - they index the
    2-element gprs_<mode> arrays where slot 0 = R13 for that mode and
    slot 1 = R14. */
 namespace ArmGpr {
@@ -119,7 +119,7 @@ namespace ArmMode {
     constexpr uint32_t kSystem     = 31;
 }
 
-/* CPU state. FIQ R8-R12 banking is not modelled — guest software in
+/* CPU state. FIQ R8-R12 banking is not modelled - guest software in
    scope does not enable FIQ. */
 struct ArmCpuState {
     uint32_t       gprs[16];           /* R0..R15 */
@@ -143,7 +143,7 @@ struct ArmCpuState {
 
     /* Emulator-side fields. Polled by the JIT run loop at safe
        boundaries; written from peripheral threads. Aligned uint32_t
-       — single-word stores are atomic on x86. */
+       - single-word stores are atomic on x86. */
     uint32_t       irq_interrupt_pending;
     uint32_t       reset_pending;
 
@@ -151,7 +151,7 @@ struct ArmCpuState {
     uint32_t       ldrex_monitor_armed;
 
     /* VFPv3 / NEON register file. Cortex-A8 has VFPv3-D16 with the
-       NEON extension which adds D16..D31 — total 32 doubles = 64
+       NEON extension which adds D16..D31 - total 32 doubles = 64
        singles = 16 quads, aliased over the same storage. */
     uint64_t       vfp_d[32];
 
@@ -167,17 +167,17 @@ struct ArmCpuState {
     uint32_t       guest_cycle_counter;
 
     /* XScale CP0 DSP 40-bit accumulator (acc0); low 40 bits used. Read/
-       written by MRA/MAR (MRRC/MCRR p0). Appended last — ArmCpuState
+       written by MRA/MAR (MRRC/MCRR p0). Appended last - ArmCpuState
        offsets above are baked into emitted code. */
     uint64_t       acc0;
 
     /* Deep-sleep halt flag (e.g. SA-1110 PMCR.SF); the interrupt poll returns to
        the dispatcher and the run loop parks until a reset wakes the CPU. Appended
-       last — offsets above are baked into emitted code. */
+       last - offsets above are baked into emitted code. */
     uint32_t       deep_sleep;
 };
 static_assert(sizeof(ArmCpuState) == 440,
-              "ArmCpuState layout — JIT emit addresses fields by "
+              "ArmCpuState layout - JIT emit addresses fields by "
               "absolute byte offset; update emit-site offsets if size "
               "changes.");
 

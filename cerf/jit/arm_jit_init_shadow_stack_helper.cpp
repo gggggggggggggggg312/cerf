@@ -37,7 +37,7 @@ void ArmJit::InitializeShadowStackHelper() {
     void* shadow_stack_count  = static_cast<void*>(&shadow_stack_count_);
     void* not_jitted_addr     = reinterpret_cast<void*>(&ArmJit::NotJittedHelper);
 
-    /* CMP [EDI], 0 — short form 83 /7 ib mod=00 r/m=7 imm8=0. */
+    /* CMP [EDI], 0 - short form 83 /7 ib mod=00 r/m=7 imm8=0. */
     Emit8(p, 0x83); EmitModRmReg(p, 0, kEdi, 7); Emit8(p, 0);
     uint8_t* jz_perform_lookup = EmitJzLabel(p);
 

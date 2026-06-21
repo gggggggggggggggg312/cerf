@@ -45,7 +45,7 @@ union ArmCp15AuxControlRegister {
 };
 static_assert(sizeof(ArmCp15AuxControlRegister) == 4, "aux control register must be 32 bits");
 
-/* TTBR / Translation Table Base Register — 16 KB-aligned base of the
+/* TTBR / Translation Table Base Register - 16 KB-aligned base of the
    L1 page table; low 14 bits are reserved. */
 union ArmCp15TranslationTableBase {
     struct {
@@ -117,7 +117,7 @@ constexpr uint32_t kArmTlbIoTagBit = 1u;
 struct ArmTlbEntry {
     uint32_t  tag;         /* FCSE-folded VA page, or kArmTlbInvalidTag when empty */
     uint32_t  va_addend;   /* host_ptr - foldedVA, so host = foldedVA + va_addend (32-bit host) */
-    uint32_t  pa_page;     /* PA & ~0xFFF — store fast path rebuilds PA for the SMC code-dirty check */
+    uint32_t  pa_page;     /* PA & ~0xFFF - store fast path rebuilds PA for the SMC code-dirty check */
     uint8_t   asid;        /* ARM DDI 0406C.c B3.9.1: non-global matches only this CONTEXTIDR[7:0] */
     uint8_t   global;      /* 1 ⇒ matches any ASID */
     uint8_t   writable;    /* 1 ⇒ store fast path eligible (write-permitted + uniform RAM host) */
@@ -126,7 +126,7 @@ struct ArmTlbEntry {
 static_assert(sizeof(ArmTlbEntry) == 16, "ArmTlbEntry must be 16 bytes for index scaling");
 
 /* N-way set-associative. SA-1110 Dev Man (MMU chapter): "two 32-entry fully
-   associative translation buffers" — direct-mapped can't emulate that, so under
+   associative translation buffers" - direct-mapped can't emulate that, so under
    FCSE two processes sharing a low VA collide on the dropped process_id bits,
    evict each other, and hang the demand-pager. Inline probe checks only way 0. */
 constexpr uint32_t kArmTlbWays       = 8;
@@ -222,7 +222,7 @@ struct ArmMmuState {
     ArmTlbUnit                   instruction_tlb;
 
     /* SMC code-word marks: 1 bit per 4-byte PA word over [code_word_base,
-       code_word_top), set on fetch. DO NOT coarsen below word granularity —
+       code_word_top), set on fetch. DO NOT coarsen below word granularity -
        the kernel packs literal-pool data right after a BX LR, so a coarser
        unit lets a data write false-positive its code page dirty. */
     uint8_t*                     code_xlat_bitmap;
@@ -233,14 +233,14 @@ struct ArmMmuState {
     /* SMC dirty set, 1 bit per 4 KB PA page over the same extent. A write
        to a marked code word sets its page's bit; the next I-cache invalidate
        invalidates only blocks on dirty pages (targeted, not a whole-cache
-       flush — that was the storm). */
+       flush - that was the storm). */
     uint8_t*                     code_page_dirty;
     uint32_t                     code_page_dirty_bytes;
 };
 
 /* FCSE address fold. When the MMU is enabled and the guest VA is in
    the bottom 32 MB, the high 7 bits are taken from the process ID
-   (CONTEXTIDR / FCSEIDR) — so multiple processes each see a private
+   (CONTEXTIDR / FCSEIDR) - so multiple processes each see a private
    0..32 MB slot while the underlying page tables are global. */
 inline uint32_t ApplyFcseFold(const ArmMmuState& state, uint32_t va) {
     if (state.control_register.bits.m && (va & 0xFE000000u) == 0u) {

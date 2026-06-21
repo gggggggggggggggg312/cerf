@@ -36,7 +36,7 @@ public:
     uint8_t* TranslateReadWrite(ArmCpuState* cpu_state, uint32_t va);
     uint8_t* TranslateExecute (ArmCpuState* cpu_state, uint32_t va);
 
-    /* No walk, no TLB fill, no abort raise — diagnostic-only. */
+    /* No walk, no TLB fill, no abort raise - diagnostic-only. */
     std::optional<uint8_t*> PeekDataTlb(uint32_t va) const;
 
 
@@ -49,7 +49,7 @@ public:
     uint32_t io_pending_address_adjust() const { return io_pending_address_adjust_; }
 
     /* Physical address resolved by the most recent TranslateExecute fetch
-       (before host_adjust). JitCompile reads it to key the block by phys —
+       (before host_adjust). JitCompile reads it to key the block by phys -
        this is the fetch's own resolved PA, never a separate re-walk (a
        re-walk diverges from the fetch's TLB mid-TTBR0-setup). */
     uint32_t LastExecPa() const { return last_exec_pa_; }
@@ -59,7 +59,7 @@ public:
     uint32_t LastDataPa() const { return last_data_pa_; }
 
     /* True iff `pa` is backed by genuine ROM/flash (host PAGE_READONLY /
-       PAGE_EXECUTE_READ) — storage the guest cannot rewrite, distinct from
+       PAGE_EXECUTE_READ) - storage the guest cannot rewrite, distinct from
        DRAM the MMU's AP bits merely mark read-only for one regime. */
     bool IsReadOnlyBacked(uint32_t pa);
 

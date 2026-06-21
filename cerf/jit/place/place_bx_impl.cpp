@@ -25,7 +25,7 @@ uint8_t* PlaceBxImpl(uint8_t*      cursor,
     if (is_call || d->rd == ArmGpr::kR15 || d->rd == 12) {
         cursor = PlaceR15ModifiedHelper(cursor, d, ctx);
     } else {
-        /* BX LR or similar return — try the shadow-stack pop. */
+        /* BX LR or similar return - try the shadow-stack pop. */
         EmitJmp32(cursor, ctx->pop_shadow_stack_helper_target);
     }
 

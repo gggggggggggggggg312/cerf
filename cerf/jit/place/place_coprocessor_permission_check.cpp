@@ -19,13 +19,13 @@ uint8_t* PlaceCoprocessorPermissionCheck(uint8_t*      cursor,
 
     ArmJit* jit = ctx->jit;
 
-    /* MOV AL, BYTE PTR [ESI + offsetof(cpsr)] — low byte of CPSR
+    /* MOV AL, BYTE PTR [ESI + offsetof(cpsr)] - low byte of CPSR
        holds the mode field in bits[4:0]. Per-instance via pinned
        ESI (instead of an absolute disp32 form). */
     EmitMovByteRegBaseDisp32(cursor, kAl, kStateReg,
         static_cast<int32_t>(offsetof(ArmCpuState, cpsr)));
 
-    /* AND AL, 0x1F — mask off the mode field. */
+    /* AND AL, 0x1F - mask off the mode field. */
     Emit8(cursor, 0x24); Emit8(cursor, 0x1F);
 
     /* CMP AL, UserModeValue. */
@@ -46,7 +46,7 @@ uint8_t* PlaceCoprocessorPermissionCheck(uint8_t*      cursor,
 
     uint8_t* permission_granted_2 = EmitJnzLabel(cursor);
 
-    /* Permission denied — raise UND. PUSH guest_pc, PUSH cpu, CALL
+    /* Permission denied - raise UND. PUSH guest_pc, PUSH cpu, CALL
        RaiseUndefinedExceptionHelper, ADD ESP, 8, RETN. */
     EmitPush32(cursor, d->guest_address);
     EmitPush32(cursor,

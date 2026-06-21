@@ -37,7 +37,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
 
     switch (op.generic.instruction_class) {
     case 0:
-        /* 000 — DataProcessing OR Multiply OR SingleDataSwap OR
+        /* 000 - DataProcessing OR Multiply OR SingleDataSwap OR
            BX OR BKPT OR LDRH/STRH/LDRSB/LDRSH OR LDRD/STRD OR
            QADD-family OR DSP-Mul-family OR ControlExtension. */
         if (DecodeArmLdrexStrex(insn, op)) return true;
@@ -59,7 +59,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
 
             case 1:
                 switch (op.control_extension.op1) {
-                case 1:  /* BX — v4T+; undefined on a no-Thumb core
+                case 1:  /* BX - v4T+; undefined on a no-Thumb core
                             (SA-1110 = ARM V4, Dev Manual §1.4). */
                     if (!processor_config_->HasThumb()) {
                         goto RaiseException;
@@ -69,7 +69,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
                     insn->r15_modified = true;
                     return true;
                 case 3:
-                    /* Rd==15 writes PC slot without r15_modified —
+                    /* Rd==15 writes PC slot without r15_modified -
                        bypasses JIT branch-dispatch, corrupts flow. */
                     if (!processor_config_->HasClz()) {
                         goto RaiseException;
@@ -119,7 +119,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
 
             case 8: case 0xA: case 0xC: case 0xE:
                 /* SMLA<x><y> / SMLAW<y> / SMULW<y> / SMLAL<x><y> /
-                   SMUL<x><y> — DSP multiply family. */
+                   SMUL<x><y> - DSP multiply family. */
                 if (!processor_config_->HasDsp()) {
                     goto RaiseException;
                 }
@@ -206,7 +206,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
             insn->l         = op.load_store_extension.l;
             insn->reserved3 = op.half_word_signed_transfer_register.reserved3;
             if (insn->op1 == 0) {
-                /* SWP / SWPB — R15 disallowed as Rd/Rm/Rn. */
+                /* SWP / SWPB - R15 disallowed as Rd/Rm/Rn. */
                 if (insn->rd == 15 || insn->rm == 15 || insn->rn == 15) {
                     goto RaiseException;
                 }
@@ -265,11 +265,11 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
         goto DataProcessing;
 
     case 2:
-        /* 010 — SingleDataTransfer. */
+        /* 010 - SingleDataTransfer. */
         goto SingleDataTransfer;
 
     case 3:
-        /* 011 — SingleDataTransfer OR Undefined (which v6T2+ reuses
+        /* 011 - SingleDataTransfer OR Undefined (which v6T2+ reuses
            for the bit-field insertion / extraction family). */
         if (op.undefined_extension.reserved1 == 1u) {
             if (DecodeArmBitfield(insn, op))   return true;
@@ -279,7 +279,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
         goto SingleDataTransfer;
 
     case 4: {
-        /* 100 — BlockDataTransfer (LDM / STM). */
+        /* 100 - BlockDataTransfer (LDM / STM). */
         insn->rn = op.block_data_transfer.rn;
         if (insn->rn == ArmGpr::kR15) {
             goto RaiseException;
@@ -301,7 +301,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
     }
 
     case 5:
-        /* 101 — Branch / Branch with Link. The encoded offset is
+        /* 101 - Branch / Branch with Link. The encoded offset is
            sign-extended 24-bit, scaled << 2; the reference pre-folds
            the absolute destination into d->Offset by adding PC+8. */
         insn->place_fn     = &PlaceBranch;
@@ -313,11 +313,11 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
         return true;
 
     case 6:
-        /* 110 — CoprocDataTransfer (LDC / STC) OR two-register
+        /* 110 - CoprocDataTransfer (LDC / STC) OR two-register
            coprocessor extension (MCRR / MRRC). */
         if (op.coprocessor_extension.reserved2 == 24u &&
             op.coprocessor_extension.reserved1 == 0u) {
-            /* MCRR / MRRC — v5TE+ register-pair coprocessor moves.
+            /* MCRR / MRRC - v5TE+ register-pair coprocessor moves.
                Dispatch to the named Place fn whose default body is
                UND; per-SoC strategies that DO support v5TE coprocs
                can replace it without touching this decoder route. */
@@ -352,7 +352,7 @@ bool ArmDecoder::DecodeArm(DecodedInsn* insn, uint32_t opcode_word) {
         return true;
 
     case 7:
-        /* 111 — CoprocDataOperation (CDP) OR CoprocRegisterTransfer
+        /* 111 - CoprocDataOperation (CDP) OR CoprocRegisterTransfer
            (MCR/MRC) OR SoftwareInterrupt (SWI). */
         if (op.software_interrupt.reserved1 == 15u) {
             if (processor_config_->GenerateSyscalls() &&
@@ -416,7 +416,7 @@ DataProcessing:
     case 0:  case 1:  case 2:  case 3:
     case 4:  case 5:  case 6:  case 7:
     case 12: case 14:
-        /* AND/EOR/SUB/RSB/ADD/ADC/SBC/RSC/ORR/BIC — write Rd. */
+        /* AND/EOR/SUB/RSB/ADD/ADC/SBC/RSC/ORR/BIC - write Rd. */
         insn->rn = op.data_processing.rn;
         insn->rd = op.data_processing.rd;
         if (insn->rd == ArmGpr::kR15) {
@@ -428,13 +428,13 @@ DataProcessing:
         break;
 
     case 8:  case 9:  case 10: case 11:
-        /* TST/TEQ/CMP/CMN — flags-only, no Rd write. */
+        /* TST/TEQ/CMP/CMN - flags-only, no Rd write. */
         insn->rn = op.data_processing.rn;
         insn->rd = 0;
         break;
 
     case 13: case 15:
-        /* MOV / MVN — write Rd, ignore Rn. */
+        /* MOV / MVN - write Rd, ignore Rn. */
         insn->rd = op.data_processing.rd;
         if (insn->rd == ArmGpr::kR15) {
             insn->r15_modified = true;
@@ -472,7 +472,7 @@ SingleDataTransfer:
         insn->r15_modified = true;
     }
     if (insn->rn == ArmGpr::kR15 && insn->i == 0) {
-        /* PC-relative LDR/STR with immediate offset — pre-fold the
+        /* PC-relative LDR/STR with immediate offset - pre-fold the
            absolute address into reserved3. PC pipeline offset is +8
            in ARM mode, +4 in Thumb mode (this decoder is reused by
            DecodeThumb* helpers that synthesize an ARM equivalent). */
@@ -492,7 +492,7 @@ SingleDataTransfer:
 RaiseException:
     /* insn->cond stays as decoded: a conditional undefined encoding
        whose condition fails executes as a NOP, not a trap (DDI0100I
-       A1.2) — the generator's cond guard must keep skipping the
+       A1.2) - the generator's cond guard must keep skipping the
        PlaceRaiseUndefinedException body, as ARM720T silicon does. */
     insn->immediate = opcode_word;  /* raw bytes for the decode-gap log */
     insn->place_fn  = &PlaceRaiseUndefinedException;

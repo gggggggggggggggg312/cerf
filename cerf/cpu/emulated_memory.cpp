@@ -20,7 +20,7 @@ void EmulatedMemory::AddRegion(uint32_t base, uint32_t size,
                                DWORD page_protect) {
     std::lock_guard<std::mutex> lk(add_mutex_);
 
-    /* count_.load(acquire) inside the writer lock — we hold the writer
+    /* count_.load(acquire) inside the writer lock - we hold the writer
        lock, so no other writer can be racing; the acquire pairs with
        earlier store_release publications. */
     const size_t n = count_.load(std::memory_order_acquire);
@@ -65,7 +65,7 @@ EmulatedMemory::Region* EmulatedMemory::FindRegion(uint32_t vaddr) {
 }
 
 uint8_t* EmulatedMemory::EnsureBacked(Region* r) {
-    /* Fast path — already backed. memory_order_acquire so reads of the
+    /* Fast path - already backed. memory_order_acquire so reads of the
        host page that follow this load see the VirtualAlloc memory. */
     if (uint8_t* ptr = r->host_ptr.load(std::memory_order_acquire)) {
         return ptr;
@@ -289,7 +289,7 @@ void EmulatedMemory::RestoreFlashRegions(StateReader& r) {
             (reg->page_protect != PAGE_READONLY &&
              reg->page_protect != PAGE_EXECUTE_READ)) {
             LOG(Caution, "EmulatedMemory::RestoreFlashRegions: region mismatch "
-                "base=0x%08X size=0x%X — image incompatible with memory map\n",
+                "base=0x%08X size=0x%X - image incompatible with memory map\n",
                 base, size);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }
@@ -324,7 +324,7 @@ void EmulatedMemory::RestoreState(StateReader& r) {
             reg->page_protect == PAGE_READONLY ||
             reg->page_protect == PAGE_EXECUTE_READ) {
             LOG(Caution, "EmulatedMemory::RestoreState: region mismatch "
-                "base=0x%08X size=0x%X — image incompatible with memory map\n",
+                "base=0x%08X size=0x%X - image incompatible with memory map\n",
                 base, size);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }

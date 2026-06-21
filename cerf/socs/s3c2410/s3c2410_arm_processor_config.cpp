@@ -24,7 +24,7 @@ public:
     bool     HasDsp()                     const override { return true; }
     bool     HasLoadStoreDouble()         const override { return true; }
 
-    /* S3C2410 User Manual §7.7.1 — FCLK default 200 MHz (max 266). */
+    /* S3C2410 User Manual §7.7.1 - FCLK default 200 MHz (max 266). */
     uint32_t CpuClockHz()                 const override { return 200000000u; }
 };
 

@@ -50,7 +50,7 @@ void ArmJit::InvalidateDirtyCodePages() {
             blocks_arm_.RemoveRange(page_pa, page_pa + 0x0FFFu);
             blocks_thumb_.RemoveRange(page_pa, page_pa + 0x0FFFu);
             /* Clear this page's code-word marks so it stays clean until code
-               re-executes — else a mixed code+data page re-dirties on every
+               re-executes - else a mixed code+data page re-dirties on every
                data write and thrashes. 4 KB page = 1024 words = 128 bitmap
                bytes at (page-offset >> 5). */
             const uint32_t word_byte = (page_pa - base) >> 5;

@@ -127,12 +127,12 @@ uint8_t* PlaceDspMul(uint8_t*      cursor,
     }
     EmitMovRegBaseDisp32(cursor, kEax, kStateReg, rs_disp);
     cursor = EmitDspSelect(cursor, static_cast<int>(d->y));
-    /* IMUL EBP — signed multiply EAX * EBP, result in EDX:EAX. */
+    /* IMUL EBP - signed multiply EAX * EBP, result in EDX:EAX. */
     Emit8(cursor, 0xF7); EmitModRmReg(cursor, 3, kEbp, 5);
 
     if (W) {
         /* SMLAW/SMULW: take the upper 32 bits of the 48-bit product
-           (Rs · Rm) >> 16 — shift EDX up 16, EAX down 16, OR to
+           (Rs · Rm) >> 16 - shift EDX up 16, EAX down 16, OR to
            combine. Equivalent to the host's SAR EDX:EAX, 16 if it
            had one. */
         EmitShlReg32Imm(cursor, kEdx, 16);
@@ -141,12 +141,12 @@ uint8_t* PlaceDspMul(uint8_t*      cursor,
     }
 
     if (d->op1 == 2u) {
-        /* SMLAL<x><y> — 64-bit accumulate into RdHi:RdLo. */
+        /* SMLAL<x><y> - 64-bit accumulate into RdHi:RdLo. */
         EmitAddBaseDisp32Reg(cursor, kStateReg, rn_disp, kEax);
         EmitAdcBaseDisp32Reg(cursor, kStateReg, rd_disp, kEdx);
     } else {
         if (accum) {
-            /* SMLAW/SMLA — 32-bit accumulate with Q-on-overflow. */
+            /* SMLAW/SMLA - 32-bit accumulate with Q-on-overflow. */
             EmitAddRegBaseDisp32(cursor, kEax, kStateReg, rn_disp);
             uint8_t* no_saturation = EmitJnoLabel(cursor);
             EmitOrByteBaseDisp8Imm8(cursor, kStateReg, QFlagByteDisp(), kCpsrQBitMask);

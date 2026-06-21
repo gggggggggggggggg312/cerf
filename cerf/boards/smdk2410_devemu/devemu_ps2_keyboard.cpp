@@ -56,7 +56,7 @@ constexpr uint32_t kRegSppre  = 0x0Cu;
 constexpr uint32_t kRegSptdat = 0x10u;
 constexpr uint32_t kRegSprdat = 0x14u;
 
-/* SPSTA bit 0 — Transfer Ready Flag. Re-asserted on every SPTDAT
+/* SPSTA bit 0 - Transfer Ready Flag. Re-asserted on every SPTDAT
    write per the BSP's IOSPI1::WriteWord. */
 constexpr uint32_t kSpstaRedy = 0x1u;
 
@@ -68,7 +68,7 @@ constexpr uint32_t kSpconSmodMask  = 0x60u;
 constexpr uint32_t kSpconSmodShift = 5;
 constexpr uint32_t kSpconSmodIntMode = 1;
 
-/* IRQ_EINT1 = 1 from the BSP's s3c2410x_intr.h — the external
+/* IRQ_EINT1 = 1 from the BSP's s3c2410x_intr.h - the external
    interrupt line the BSP wires its virtual PS/2 keyboard controller
    to. Raised on every key enqueue (and re-raised inside SPRDAT-pop
    when more scancodes remain). */
@@ -89,7 +89,7 @@ constexpr uint32_t kKindNumLock   = 2u;
 constexpr uint8_t  kGuestVkHyphen = 0xBDu;
 
 /* Adapter connecting HostWindow's KeyboardInput dispatch to the
-   DevEmuPs2Keyboard peripheral. Anonymous-namespaced — its only role
+   DevEmuPs2Keyboard peripheral. Anonymous-namespaced - its only role
    is to occupy the KeyboardInput slot and forward calls; nothing
    outside this .cpp names the type. */
 class DevEmuKeyboardInput : public KeyboardInput {
@@ -154,7 +154,7 @@ uint32_t DevEmuPs2Keyboard::ReadWord(uint32_t addr) {
                 HaltUnsupportedAccess("ReadWord", addr, 0);  /* noreturn */
         }
     }
-    /* Re-raise outside state_mutex_ — IrqController has its own lock
+    /* Re-raise outside state_mutex_ - IrqController has its own lock
        and we don't want to hold ours across the call. */
     if (keys_remain_after_pop) {
         emu_.Get<IrqController>().AssertIrq(kIrqEint1);
@@ -197,13 +197,13 @@ void DevEmuPs2Keyboard::EnqueueScancode(uint8_t sc) {
         std::lock_guard<std::mutex> lk(state_mutex_);
         const uint32_t smod = (spcon_ & kSpconSmodMask) >> kSpconSmodShift;
         if (smod != kSpconSmodIntMode) {
-            /* Keyboard disabled by guest driver — drop the key on the
+            /* Keyboard disabled by guest driver - drop the key on the
                floor, matching the BSP's IOSPI1::EnqueueKey behavior. */
             return;
         }
         queue_[queue_head_] = sc;
         queue_head_ = (queue_head_ + 1) % kQueueLen;
-        /* No overflow check — head wrapping into tail silently
+        /* No overflow check - head wrapping into tail silently
            overwrites the oldest pending scancode, also matching the
            BSP's behavior. */
         raise = true;
@@ -223,7 +223,7 @@ void DevEmuPs2Keyboard::OnHostKey(uint8_t vk, bool key_up) {
     const uint32_t kind      = (code >> 16) & 0x3u;
     const uint8_t  key_state = key_up ? kScKeyUp : kScKeyDown;
 
-    /* Direct mapping — vast majority of keys land here. */
+    /* Direct mapping - vast majority of keys land here. */
     if (kind == kKindDirect) {
         EnqueueScancode(static_cast<uint8_t>(sc | key_state));
         return;

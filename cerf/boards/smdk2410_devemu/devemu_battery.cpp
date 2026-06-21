@@ -48,7 +48,7 @@ uint8_t DevEmuBattery::ReadByte(uint32_t addr) {
     const char* name = "?";
     switch (off) {
         case kRegIsOnBattery:
-            value = battery_.IsOnBattery() ? 1u : 0u;   /* battif.c:33 — 0 = AC */
+            value = battery_.IsOnBattery() ? 1u : 0u;   /* battif.c:33 - 0 = AC */
             name  = "IsOnBattery";
             break;
         case kRegChargePercent:

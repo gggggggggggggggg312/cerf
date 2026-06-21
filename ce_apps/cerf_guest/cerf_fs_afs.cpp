@@ -14,7 +14,7 @@
 #define OID_FIRST_AFS  0     /* pre-reserved primary slot; stable CE3..CE7 */
 
 /* pkfuncs.h macro-maps SetHandleOwner to a symbol absent from coredll.lib; call
-   the plain exported function instead. These are coredll C exports — extern "C"
+   the plain exported function instead. These are coredll C exports - extern "C"
    so the references bind to the unmangled names. */
 #undef SetHandleOwner
 extern "C" {
@@ -49,7 +49,7 @@ static BOOL CerfRegisterAFS(int iAFS, HANDLE hApi, DWORD ctx) {
 
 /* Table holds the CE6/7 max (24); the REGISTERED count is version-correct
    (CerfCreateApiSets). Registering fewer methods than the kernel dispatches faults
-   its count guard — the CE5 FindFirstChangeNotification[17] vanish. */
+   its count guard - the CE5 FindFirstChangeNotification[17] vanish. */
 #define CERF_AFS_METHODS   24
 #define CERF_FILE_METHODS  14
 #define CERF_FIND_METHODS  3
@@ -113,7 +113,7 @@ static BOOL CerfFsAfsOidGetInfo(CerfVol* vol, DWORD oid, void* pInfo) {
 }
 
 /* FsIoControl(21) / FileSecurity(22,23): a host-folder volume has no custom FSCTLs
-   or security descriptors, so an FSD declines them. One handler — each ignores its
+   or security descriptors, so an FSD declines them. One handler - each ignores its
    differently-shaped args (it reads none) and returns FALSE + not-supported. */
 static BOOL CerfFsAfsNotSupported(CerfVol* vol) {
     (void)vol;
@@ -194,7 +194,7 @@ static const DWORD g_findSig32[CERF_FIND_METHODS] = {
 
 /* CE6/CE7 signatures (64-bit). These drive cross-process AFS marshalling into
    our gwes server (SetupUmodeArgs): per-arg type maps the caller's strings/
-   buffers (I_WSTR/IO_PTR/O_PDW), arg count sizes the server stack frame — a wrong
+   buffers (I_WSTR/IO_PTR/O_PDW), arg count sizes the server stack frame - a wrong
    count returns to a wild address. Per WINCE600 volumeapi.cpp AFSAPISigs. */
 static const ULONGLONG g_afsSig64[CERF_AFS_METHODS] = {
     FNSIG1(DW),                                                  /* 0  CloseVolume          */
@@ -222,7 +222,7 @@ static const ULONGLONG g_afsSig64[CERF_AFS_METHODS] = {
     FNSIG5(DW, I_WSTR, DW, I_PTR, DW),                           /* 22 SetFileSecurityW     */
     FNSIG6(DW, I_WSTR, DW, O_PTR, DW, O_PDW),                    /* 23 GetFileSecurityW     */
 };
-/* File-handle signatures, matched to WINCE600 fileapi.cpp FileAPISigs — same
+/* File-handle signatures, matched to WINCE600 fileapi.cpp FileAPISigs - same
    cross-process marshalling contract as the volume sigs above. */
 static const ULONGLONG g_fileSig64[CERF_FILE_METHODS] = {
     FNSIG1(DW),                                           /* 0  CloseFile         */
@@ -249,7 +249,7 @@ static const ULONGLONG g_findSig64[CERF_FIND_METHODS] = {
 /* ---- One-time API-set creation ------------------------------------------ */
 
 /* CreateAPISet's coredll ordinal diverges by CE version (559 CE3/CE5, 2539
-   CE6/CE7 — dumpbin /exports): a static by-ordinal import is unresolvable on
+   CE6/CE7 - dumpbin /exports): a static by-ordinal import is unresolvable on
    the other family and fails the whole module load, so resolve it by name. */
 typedef HANDLE (*PFN_CreateAPISet)(char*, USHORT, const PFNVOID*, const ULONGLONG*);
 typedef BOOL   (*PFN_RegisterDirectMethods)(HANDLE, const PFNVOID*);

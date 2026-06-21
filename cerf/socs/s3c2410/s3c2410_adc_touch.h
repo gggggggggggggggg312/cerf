@@ -33,12 +33,12 @@ public:
     void OnCaptureLost();
 
 private:
-    /* Helpers — all assume state_mutex_ held by caller. */
+    /* Helpers - all assume state_mutex_ held by caller. */
     void SetPenStateLocked (bool pen_up);
     void UpdateSampleLocked(int host_x, int host_y);
 
     /* Raises sub-source INT_TC; rolls up to main INT_ADC inside
-       IrqController. Must be called outside state_mutex_ — IrqController
+       IrqController. Must be called outside state_mutex_ - IrqController
        has its own lock and we avoid nesting host locks across services. */
     void RaiseTCInterrupt();
 

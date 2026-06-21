@@ -39,7 +39,7 @@ JitBlock* JitBlockIndex::FindContaining(uint32_t folded_va) {
         if (ep->guest_start == folded_va) return ep;
         ep = ep->sub_block;
     } while (ep);
-    /* No sub-entrypoint matches exactly — return the outer block. */
+    /* No sub-entrypoint matches exactly - return the outer block. */
     return &node->ep;
 }
 
@@ -68,7 +68,7 @@ void JitBlockIndex::RemoveNode(JitBlock* outer, RemovedCb cb, void* ctx) {
         }
     }
     /* outer is the JitBlock at the head of its Node (first field), so the
-       Node* recovers by reinterpret_cast — outer blocks only (subs chain
+       Node* recovers by reinterpret_cast - outer blocks only (subs chain
        off the outer and leave with it). */
     root_ = RbDelete(root_, reinterpret_cast<Node*>(outer));
 }

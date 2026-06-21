@@ -13,7 +13,7 @@ uint8_t* PlaceUpdateX86Flags(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx,
     }
 
     if (d->rd == ArmGpr::kR15) {
-        /* Rd == R15 with S-bit set — copy SPSR to CPSR via
+        /* Rd == R15 with S-bit set - copy SPSR to CPSR via
            UpdateCpsrWithFlagsHelper. PUSH SPSR.word, PUSH cpu,
            CALL helper, ADD ESP, 8, RETN (mode may have changed,
            need to exit JIT block). */
@@ -29,14 +29,14 @@ uint8_t* PlaceUpdateX86Flags(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx,
 
     if (d->flags_set) {
         if (d->flags_set == kFlagV) {
-            /* SETO AH — 0F 90 ModRM(3, AH, 0). Then store AH to x86_overflow. */
+            /* SETO AH - 0F 90 ModRM(3, AH, 0). Then store AH to x86_overflow. */
             Emit16(cursor, 0x900F); EmitModRmReg(cursor, 3, kAh, 0);
             EmitMovBaseDisp32Byte(cursor, kStateReg,
                 static_cast<int32_t>(offsetof(ArmCpuState, x86_overflow)), kAh);
         } else {
             /* If V is in the set, store SETO byte ptr [&x86_overflow]. */
             if (d->flags_set & kFlagV) {
-                /* SETO byte ptr [ESI + offsetof(x86_overflow)] —
+                /* SETO byte ptr [ESI + offsetof(x86_overflow)] -
                    0F 90 /0 mod=10 r/m=ESI(6) disp32. */
                 Emit16(cursor, 0x900F);
                 EmitModRmReg(cursor, 2, kStateReg, 0);

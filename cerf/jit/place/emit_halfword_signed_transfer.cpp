@@ -71,7 +71,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
             }
             EmitMovRegImm32(cursor, kEcx, inst_ptr);
             if ((inst_ptr & 1u) == 0u) {
-                /* Statically halfword-aligned — alignment fault
+                /* Statically halfword-aligned - alignment fault
                    cannot fire, drop the runtime check. */
                 needs_alignment_check = false;
             }
@@ -93,7 +93,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
     }
 
     if (needs_alignment_check && !alignment_check_on) {
-        /* SCTLR.A off — the reference rounds the EA down to halfword
+        /* SCTLR.A off - the reference rounds the EA down to halfword
            alignment (AND ECX, ~1) so STRH matches STR's byte sequence.
            Matching the reference's chosen behavior. */
         EmitAndRegImm32(cursor, kEcx, ~uint32_t{1});
@@ -104,7 +104,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
         cursor = EmitTlbFastPath(cursor, ctx,
                                  d->l ? TlbAccess::kRead : TlbAccess::kWrite);
     } else {
-        /* MMU off — direct PA→host. ECX holds the PA. */
+        /* MMU off - direct PA→host. ECX holds the PA. */
         EmitMovRegImm32(cursor, kEdx,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(jit)));
         EmitCall(cursor,
@@ -165,20 +165,20 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
     if (d->l) {
         /* === Load === */
         if (d->h) {
-            /* LDRH / LDRSH — halfword load. */
+            /* LDRH / LDRSH - halfword load. */
             if (d->s) {
-                /* MOVSX EAX, WORD PTR [EAX] — 0F BF /r mod=00 r/m=EAX. */
+                /* MOVSX EAX, WORD PTR [EAX] - 0F BF /r mod=00 r/m=EAX. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xBF);
                 EmitModRmReg(cursor, 0, kEax, kEax);
             } else {
-                /* MOVZX EAX, WORD PTR [EAX] — 0F B7 /r. */
+                /* MOVZX EAX, WORD PTR [EAX] - 0F B7 /r. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xB7);
                 EmitModRmReg(cursor, 0, kEax, kEax);
             }
         } else {
-            /* LDRSB — signed byte load. Decoder enforces d->s == 1
+            /* LDRSB - signed byte load. Decoder enforces d->s == 1
                for this encoding combination. */
-            /* MOVSX EAX, BYTE PTR [EAX] — 0F BE /r. */
+            /* MOVSX EAX, BYTE PTR [EAX] - 0F BE /r. */
             Emit8(cursor, 0x0F); Emit8(cursor, 0xBE);
             EmitModRmReg(cursor, 0, kEax, kEax);
         }
@@ -187,7 +187,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
     } else {
         /* === Store === */
         if (d->h) {
-            /* STRH — halfword store. */
+            /* STRH - halfword store. */
             if (d->rd == ArmGpr::kR15) {
                 const uint16_t value = static_cast<uint16_t>(
                     d->guest_address + pc_store_offset);
@@ -197,13 +197,13 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
                 EmitModRmReg(cursor, 0, kEax, 0);
                 Emit16(cursor, value);
             } else {
-                /* MOV CX, WORD PTR [ESI + gprs[Rd]] — 0x66 prefix forces
+                /* MOV CX, WORD PTR [ESI + gprs[Rd]] - 0x66 prefix forces
                    a 16-bit load so the upper half of ECX stays zero
                    (matches the reference's byte-level encoding; the
                    store below writes only the low 16 bits anyway). */
                 EmitSize16(cursor);
                 EmitMovRegBaseDisp32(cursor, kEcx, kStateReg, rd_disp);
-                /* 66 89 /r mod=00 r/m=EAX reg=ECX — MOV WORD [EAX], CX. */
+                /* 66 89 /r mod=00 r/m=EAX reg=ECX - MOV WORD [EAX], CX. */
                 EmitSize16(cursor);
                 Emit8(cursor, 0x89);
                 EmitModRmReg(cursor, 0, kEax, kEcx);
@@ -214,14 +214,14 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
             if (d->rd == ArmGpr::kR15) {
                 const uint8_t value = static_cast<uint8_t>(
                     d->guest_address + pc_store_offset);
-                /* MOV BYTE [EAX], imm8 — C6 /0 mod=00 r/m=EAX. */
+                /* MOV BYTE [EAX], imm8 - C6 /0 mod=00 r/m=EAX. */
                 Emit8(cursor, 0xC6);
                 EmitModRmReg(cursor, 0, kEax, 0);
                 Emit8(cursor, value);
             } else {
                 /* MOV CL, BYTE PTR [ESI + gprs[Rd]]. */
                 EmitMovByteRegBaseDisp32(cursor, kCl, kStateReg, rd_disp);
-                /* MOV BYTE [EAX], CL — 88 /r mod=00 r/m=EAX. */
+                /* MOV BYTE [EAX], CL - 88 /r mod=00 r/m=EAX. */
                 Emit8(cursor, 0x88);
                 EmitModRmReg(cursor, 0, kEax, kCl);
             }
@@ -263,7 +263,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
     if (d->l) {
         /* IO load. */
         if (d->h) {
-            /* JitIoReadHalf(hint, peripheral) — fastcall, returns AX. */
+            /* JitIoReadHalf(hint, peripheral) - fastcall, returns AX. */
 #if CERF_DEV_MODE
             EmitMovDwordPtrImm32(cursor, peripheral->LastGuestPcPtr(), d->guest_address);
 #endif
@@ -274,11 +274,11 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
                 static_cast<uint32_t>(reinterpret_cast<uintptr_t>(peripheral)));
             EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoReadHalf));
             if (d->s) {
-                /* MOVSX ECX, AX — 0F BF /r mod=11 r/m=EAX reg=ECX. */
+                /* MOVSX ECX, AX - 0F BF /r mod=11 r/m=EAX reg=ECX. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xBF);
                 EmitModRmReg(cursor, 3, kEax, kEcx);
             } else {
-                /* MOVZX ECX, AX — 0F B7 /r mod=11. */
+                /* MOVZX ECX, AX - 0F B7 /r mod=11. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xB7);
                 EmitModRmReg(cursor, 3, kEax, kEcx);
             }
@@ -294,7 +294,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
             EmitMovRegImm32(cursor, kEdx,
                 static_cast<uint32_t>(reinterpret_cast<uintptr_t>(peripheral)));
             EmitCall(cursor, reinterpret_cast<void*>(&PeripheralDispatcher::JitIoReadByte));
-            /* MOVSX ECX, AL — 0F BE /r mod=11 r/m=EAX reg=ECX. */
+            /* MOVSX ECX, AL - 0F BE /r mod=11 r/m=EAX reg=ECX. */
             Emit8(cursor, 0x0F); Emit8(cursor, 0xBE);
             EmitModRmReg(cursor, 3, kEax, kEcx);
             EmitMovBaseDisp32Reg(cursor, kStateReg, rd_disp, kEcx);
@@ -308,7 +308,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
                     d->guest_address + pc_store_offset);
                 EmitMovRegImm32(cursor, kEcx, value);
             } else {
-                /* MOVZX ECX, WORD PTR [ESI + gprs[Rd]] — 0F B7 /r
+                /* MOVZX ECX, WORD PTR [ESI + gprs[Rd]] - 0F B7 /r
                    mod=10 (base+disp32) r/m=ESI reg=ECX. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xB7);
                 EmitModRmReg(cursor, 2, kStateReg, kEcx);
@@ -331,7 +331,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
                     d->guest_address + pc_store_offset);
                 EmitMovRegImm32(cursor, kEcx, value);
             } else {
-                /* MOVZX ECX, BYTE PTR [ESI + gprs[Rd]] — 0F B6 /r mod=10. */
+                /* MOVZX ECX, BYTE PTR [ESI + gprs[Rd]] - 0F B6 /r mod=10. */
                 Emit8(cursor, 0x0F); Emit8(cursor, 0xB6);
                 EmitModRmReg(cursor, 2, kStateReg, kEcx);
                 Emit32(cursor, static_cast<uint32_t>(rd_disp));
@@ -361,7 +361,7 @@ uint8_t* EmitHalfwordSignedTransfer(uint8_t*      cursor,
         load_store_done_io = EmitJmpLabel(cursor);
     }
 
-    /* AbortException — MOV ECX, guest_pc; JMP raise_abort_data_helper. */
+    /* AbortException - MOV ECX, guest_pc; JMP raise_abort_data_helper. */
     FixupLabel(abort_label, cursor);
     EmitMovRegImm32(cursor, kEcx, d->guest_address);
     EmitJmp32(cursor, ctx->raise_abort_data_helper_target);

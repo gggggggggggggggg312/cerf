@@ -164,7 +164,7 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
 
     /* I/O fast path: a cached device page routes straight to the
        PeripheralDispatcher (SetIoPending) without a walk. Execute never caches
-       I/O — code fetched from MMIO is not a real path. */
+       I/O - code fetched from MMIO is not a real path. */
     if constexpr (kAccess != ArmMmuAccess::kExecute) {
         const int io_way =
             ArmTlbMatchIoWay(tlb_unit, set_base, va_page, current_asid, kIsWrite);
@@ -175,7 +175,7 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
         }
     }
 
-    /* Fast-path miss — walk the in-RAM page table. */
+    /* Fast-path miss - walk the in-RAM page table. */
     {
         const uint32_t ttbcr_n   = state_.ttbcr & 7u;
         const uint32_t ttbr0_mask = ~((1u << (14u - ttbcr_n)) - 1u);
@@ -218,8 +218,8 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
                 RaiseAbort(p, ArmFaultStatus::kTranslationPage, kIsWrite);
                 return nullptr;
             case 3:
-                /* WinCE NK ksarm.h:72 — ARMV6_MMU_PTL2_SMALL_XN = 1<<0,
-                   so PTL2_SMALL_PAGE|XN = 2|1 = 3. ksarm.h:85 —
+                /* WinCE NK ksarm.h:72 - ARMV6_MMU_PTL2_SMALL_XN = 1<<0,
+                   so PTL2_SMALL_PAGE|XN = 2|1 = 3. ksarm.h:85 -
                    PREARMV6_MMU_PTL2_SMALL_XN = 0 (no XN, type=3 is fault). */
                 if (!modern_v6_fmt) {
                     if (!v6_ext_small) {
@@ -282,7 +282,7 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
             case 1: {
                 if (modern_v6_fmt) {
                     LOG(Caution, "MMU walk: v6+ L2 large page not implemented "
-                            "(va=0x%08X L2_pte=0x%08X) — AP[2] bit position "
+                            "(va=0x%08X L2_pte=0x%08X) - AP[2] bit position "
                             "unverified in available references.\n",
                         p, l2_pte.word);
                     CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -316,7 +316,7 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
             bool ap_ok;
             uint32_t v7_ap = 0;
             if (modern_v6_fmt) {
-                /* WinCE NK ksarm.h:76 ARMV6_MMU_PTL1_KR0=0x8400 — bits[11:10]=AP[1:0],
+                /* WinCE NK ksarm.h:76 ARMV6_MMU_PTL1_KR0=0x8400 - bits[11:10]=AP[1:0],
                    bit[15]=APX. Subpage AP layout is v5-only. */
                 v7_ap = ((l1_pte.word >> 10) & 3u) |
                         (((l1_pte.word >> 15) & 1u) << 2);
@@ -450,7 +450,7 @@ uint8_t* ArmMmu::MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p) {
             if (ram_host) {
                 if (uniform) {
                     /* kReadWrite (SWP) checked write permission in the walk so it
-                       caches writable; kRead/kExecute cache read-only — a later
+                       caches writable; kRead/kExecute cache read-only - a later
                        store re-walks once to verify write perm and set writable. */
                     const bool writable = (kAccess == ArmMmuAccess::kReadWrite);
                     FillFastTlb(tlb_unit, p, ram_host, effective_address,

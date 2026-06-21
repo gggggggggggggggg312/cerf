@@ -25,7 +25,7 @@ uint8_t* EmitLdrWord(uint8_t*                  cursor,
     uint8_t* raise_alignment_exception2 = nullptr;
     uint8_t* io_hint_imm_location       = nullptr;
 
-    /* MOV EAX, DWORD PTR [EAX] — 0x8B mod=00 r/m=EAX reg=EAX. */
+    /* MOV EAX, DWORD PTR [EAX] - 0x8B mod=00 r/m=EAX reg=EAX. */
     Emit8(cursor, 0x8B);
     EmitModRmReg(cursor, 0, kEax, kEax);
 
@@ -76,7 +76,7 @@ uint8_t* EmitLdrWord(uint8_t*                  cursor,
             FixupLabel(in.raise_alignment_exception, cursor);
             FixupLabel(raise_alignment_exception2, cursor);
             /* RaiseAlignmentExceptionHelper takes __cdecl(jit,
-               guest_pc) — load FAR/FSR with the alignment fault
+               guest_pc) - load FAR/FSR with the alignment fault
                status. The actual EA is no longer in a register (was
                ANDed earlier); guest_pc is what the helper records. */
             EmitPush32(cursor, d->guest_address);
@@ -99,7 +99,7 @@ uint8_t* EmitLdrWord(uint8_t*                  cursor,
             jit->LdrUnalignedGuestAddressPtr());
         EmitAndRegImm32(cursor, kEcx, 3);
         EmitShlReg32Imm(cursor, kEcx, 3);
-        /* ROR EAX, CL — 0xD3 /1 ModRM(3, EAX, 1). */
+        /* ROR EAX, CL - 0xD3 /1 ModRM(3, EAX, 1). */
         Emit8(cursor, 0xD3);
         EmitModRmReg(cursor, 3, kEax, 1);
     }

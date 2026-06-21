@@ -7,13 +7,13 @@
 
 /* Bit i (i < 16) = Ri in LDM/STM list; high half encodes S/SPANS/
    LOAD/W. W gets Rn OR'd at bits[27:24] so the helper knows which
-   base to write back — dropping the OR loses the writeback target. */
+   base to write back - dropping the OR loses the writeback target. */
 constexpr uint32_t kLdmStmS     = 1u << 16;
 constexpr uint32_t kLdmStmSpans = 2u << 16;
 constexpr uint32_t kLdmStmLoad  = 4u << 16;
 constexpr uint32_t kLdmStmW     = 8u << 16;
 
-/* Standard ArmPlaceFn signature — assigned to DecodedInsn::place_fn
+/* Standard ArmPlaceFn signature - assigned to DecodedInsn::place_fn
    by the decoder, invoked once per guest instruction during emit. */
 uint8_t* PlaceIdleLoop                     (uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 uint8_t* PlaceNop                          (uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
@@ -111,7 +111,7 @@ uint8_t* EmitRaiseUndAndReturn(uint8_t* cursor, DecodedInsn* d, BlockContext* ct
 uint8_t* EmitCoprocUnimplementedFatal(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 
 /* In: EAX = raw target. Out: EAX masked, CPSR.T updated. MaskEax sets
-   T iff bit 0 set — ARM-state callers only (Thumb data-proc PC writes
+   T iff bit 0 set - ARM-state callers only (Thumb data-proc PC writes
    halfword-align, no ISA switch, ddi0406c §A2.3.1). FullEax also
    clears T on bit0==0: load-to-PC interworking, runs in either state. */
 uint8_t* EmitArmInterworkingMaskEax(uint8_t* cursor);
@@ -236,10 +236,10 @@ uint8_t* EmitNeonCoreToScalar(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx
 
 uint8_t* EmitNeonScalarToCore(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 
-/* SWP / SWPB — atomic swap (PlaceLoadStoreExtension d->op1 == 0 path). */
+/* SWP / SWPB - atomic swap (PlaceLoadStoreExtension d->op1 == 0 path). */
 uint8_t* EmitSwap(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 
-/* LDRH / STRH / LDRSB / LDRSH — miscellaneous halfword + signed-byte
+/* LDRH / STRH / LDRSB / LDRSH - miscellaneous halfword + signed-byte
    transfer encodings (PlaceLoadStoreExtension d->op1 != 0 path). */
 uint8_t* EmitHalfwordSignedTransfer(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 
@@ -248,7 +248,7 @@ uint8_t* EmitCp15CacheOp(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 uint8_t* EmitCp15TlbOp(uint8_t* cursor, DecodedInsn* d, BlockContext* ctx);
 
 /* EBP is the writeback slot (callee-saved across MMU helper CALLs).
-   EDI is live here — it carries the per-block PC-cache for
+   EDI is live here - it carries the per-block PC-cache for
    consecutive LDR [PC+imm] reads; a transient in EDI silently
    clobbers that cache. */
 uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,

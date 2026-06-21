@@ -37,18 +37,18 @@ void ArmJit::InitializePopShadowStackHelper() {
     uint32_t shadow_stack_base_addr =
         static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&shadow_stack_[0]));
 
-    /* MOV AL, [<count addr>] — A0 disp32. */
+    /* MOV AL, [<count addr>] - A0 disp32. */
     EmitMovRegBytePtr(p, kAl, shadow_stack_count);
-    /* TEST AL, AL — 0x84 ModRM. */
+    /* TEST AL, AL - 0x84 ModRM. */
     Emit8(p, 0x84); EmitModRmReg(p, 3, kAl, kAl);
     uint8_t* jz_stack_empty_a = EmitJzLabel(p);
 
-    /* SUB AL, 1 — 0x2C ib. */
+    /* SUB AL, 1 - 0x2C ib. */
     Emit8(p, 0x2C); Emit8(p, 1);
-    /* MOV [<count addr>], AL — A2 disp32. */
+    /* MOV [<count addr>], AL - A2 disp32. */
     Emit8(p, 0xA2); EmitPtr(p, shadow_stack_count);
 
-    /* MOVZX EAX, AL — 0F B6 ModRM(3, AL, EAX). */
+    /* MOVZX EAX, AL - 0F B6 ModRM(3, AL, EAX). */
     Emit16(p, 0xB60F); EmitModRmReg(p, 3, kAl, kEax);
     EmitShlReg32Imm(p, kEax, 3);
 

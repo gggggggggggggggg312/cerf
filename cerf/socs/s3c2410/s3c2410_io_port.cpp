@@ -76,7 +76,7 @@ int S3C2410IoPort::ExtintTypeLocked(int n) const {
 
 uint32_t S3C2410IoPort::ReevaluateLocked() {
     /* Still-asserted level lines re-latch EINTPEND when the guest
-       clears it — without the re-latch, a line asserting inside the
+       clears it - without the re-latch, a line asserting inside the
        guest's masked IST window is lost and the driver stalls until
        unrelated traffic re-edges the line. */
     storage_[kSlotEintPend] |= eint_level_ & ~storage_[kSlotEintMask];
@@ -107,7 +107,7 @@ void S3C2410IoPort::WriteWord(uint32_t addr, uint32_t value) {
         std::lock_guard<std::mutex> lk(state_mutex_);
         switch (slot) {
             case kSlotEintPend:
-                /* W1C — the kernel ISR drops the pend bit, then any
+                /* W1C - the kernel ISR drops the pend bit, then any
                    still-high level line immediately re-latches it. */
                 storage_[slot] &= ~value;
                 raise = ReevaluateLocked();
@@ -115,7 +115,7 @@ void S3C2410IoPort::WriteWord(uint32_t addr, uint32_t value) {
             case kSlotEintMask:
                 storage_[slot] = value;
                 /* Unmasking with a pend (or held level line) must fire
-                   the rollup now — the combinational EINTPEND/EINTMASK
+                   the rollup now - the combinational EINTPEND/EINTMASK
                    AND drives SRCPND on silicon (DeviceEmulator raises
                    on EINTMASK writes the same way). */
                 raise = ReevaluateLocked();
@@ -173,7 +173,7 @@ void S3C2410IoPort::ClearEint(int n) {
                 "(EINT0..23)\n", n);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
-    if (n <= 3) return;     /* direct SRCPND source — no pend stage */
+    if (n <= 3) return;     /* direct SRCPND source - no pend stage */
 
     bool report = false;
     {

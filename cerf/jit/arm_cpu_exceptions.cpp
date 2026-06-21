@@ -77,11 +77,11 @@ void* ArmCpuRaiseAbortPrefetchException(ArmJit* jit, ArmCpuState* state, uint32_
 }
 
 void* ArmCpuRaiseIrqException(ArmJit* jit, ArmCpuState* state, uint32_t inst_ptr) {
-    /* Soft-reset is multiplexed onto IRQ delivery — dropping this
+    /* Soft-reset is multiplexed onto IRQ delivery - dropping this
        branch silently breaks watchdog / OAL CPU-reset. */
     if (state->reset_pending) {
         /* Reset-line effects must finish before the reset vector
-           executes — the cold-boot wipe + replay restore the RAM bytes
+           executes - the cold-boot wipe + replay restore the RAM bytes
            the entry code runs from. */
         LOG(SocReset, "[DEEPSLEEP] reset delivery: clearing deep_sleep (was %u)\n",
             state->deep_sleep);

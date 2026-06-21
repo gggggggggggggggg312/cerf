@@ -121,7 +121,7 @@ void ArmMmu::RaiseAlignmentFault(uint32_t va) {
 void ArmMmu::SetIoPending(uint32_t pa) {
     if (pa == 0u) {
         /* Encode PA-0 as (4, -4) so the io_pa sentinel is naturally
-           aligned to every access size (byte/halfword/word) — the
+           aligned to every access size (byte/halfword/word) - the
            JIT-side alignment check tests low bits of EAX(=io_pa);
            a sentinel of 1 would falsely fail. Real PA = 4 + (-4) = 0. */
         io_pending_address_        = 4u;

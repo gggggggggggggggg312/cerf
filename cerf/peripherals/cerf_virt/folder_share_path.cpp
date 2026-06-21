@@ -11,14 +11,14 @@ REGISTER_SERVICE(FolderSharePath);
 uint16_t FolderSharePath::ToWin32Path(const uint16_t* ce_name,
                                       uint16_t ce_len_bytes,
                                       std::wstring& out) const {
-    /* Clamp the guest-supplied length to the fName array — an oversized value
+    /* Clamp the guest-supplied length to the fName array - an oversized value
        would over-read the ServerPB copy host-side. */
     if (ce_len_bytes > CerfVirt::kMaxLfn * sizeof(uint16_t))
         ce_len_bytes = (uint16_t)(CerfVirt::kMaxLfn * sizeof(uint16_t));
 
     /* Canonicalise the root to the same form GetFullPathNameW produces below
        (backslashes, resolved) so the under-root prefix check compares like for
-       like — a forward-slash root (e.g. from --share-folder=Z:/x) would else
+       like - a forward-slash root (e.g. from --share-folder=Z:/x) would else
        never match the normalised result and reject every path. */
     std::wstring root = emu_.Get<FolderShareConfig>().HostRoot();
     wchar_t canon_root[MAX_PATH];
@@ -38,7 +38,7 @@ uint16_t FolderSharePath::ToWin32Path(const uint16_t* ce_name,
     if (n == 0 || n >= MAX_PATH) return CerfVirt::kErrorInvalidName;
 
     /* Canonicalised path must still start with the root and, past it, hit a
-       separator (or the root itself) — otherwise a '..' escaped the share. */
+       separator (or the root itself) - otherwise a '..' escaped the share. */
     const size_t rlen = root.size();
     if (_wcsnicmp(full, root.c_str(), rlen) != 0) return CerfVirt::kErrorInvalidName;
     if (full[rlen] != L'\\' && full[rlen] != L'/' && full[rlen] != L'\0')

@@ -55,7 +55,7 @@ public:
         /* Poseidon FPGA populates DISP_XSIZE / DISP_YSIZE at silicon
            reset with (size-1) for the attached panel; EBOOT reads them
            with the +1 convention (OEMBOOT.C:93-94). Odo carries a
-           480x240 panel — see DISPDRVR.C:51-52 cxScreen/cyScreen. */
+           480x240 panel - see DISPDRVR.C:51-52 cxScreen/cyScreen. */
         xsize_ = 479;
         ysize_ = 239;
         emu_.Get<PeripheralDispatcher>().Register(this);

@@ -6,7 +6,7 @@
 class StateWriter;
 class StateReader;
 
-/* P2.H:267-301 — three mutually-disjoint CSR-A bit masks below;
+/* P2.H:267-301 - three mutually-disjoint CSR-A bit masks below;
    overlap clobbers in-flight kernel writes (W1C interrupt latches
    vs R/O input signals vs R/W control bits). */
 
@@ -25,7 +25,7 @@ class P2FpgaSerial {
 public:
     uint16_t Read(uint32_t slot_off);
 
-    /* Returns true on SERB_TX_EN 0→1 in CSR B — DEBUG_SER uses
+    /* Returns true on SERB_TX_EN 0→1 in CSR B - DEBUG_SER uses
        this rising edge to dispatch TX. */
     bool Write(uint32_t slot_off, uint16_t value);
 

@@ -21,7 +21,7 @@ uint8_t* PlaceShifterCarryOut(uint8_t*      cursor,
             }
         }
     } else {
-        /* ROL CL, 8 — C0 /0 imm8 (shifts ARM CF in CL bit 0 into x86 CF). */
+        /* ROL CL, 8 - C0 /0 imm8 (shifts ARM CF in CL bit 0 into x86 CF). */
         Emit8(cursor, 0xC0); EmitModRmReg(cursor, 3, kCl, 0); Emit8(cursor, 8);
     }
     return cursor;

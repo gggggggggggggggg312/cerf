@@ -57,7 +57,7 @@ public:
     void CopyOut(uint32_t vaddr, void* host_dst, size_t size);
 
     /* Power-cycle RAM loss: zero every backed volatile region. Flash
-       (PAGE_READONLY / PAGE_EXECUTE_READ) keeps its contents — guest NOR
+       (PAGE_READONLY / PAGE_EXECUTE_READ) keeps its contents - guest NOR
        writes survive a real power cycle. JIT thread at reset delivery
        only; anywhere else the memset races guest stores. */
     void WipeVolatileRegions();
@@ -74,7 +74,7 @@ public:
     void SaveFlashRegions(StateWriter& w);
     void RestoreFlashRegions(StateReader& r);
 
-    /* Total bytes across volatile regions — the save-progress denominator. */
+    /* Total bytes across volatile regions - the save-progress denominator. */
     uint64_t VolatileByteCount() const;
 
 private:

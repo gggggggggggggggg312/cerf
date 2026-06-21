@@ -55,7 +55,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
         if (d->p) {
             /* Increment-Before: Start = Rn+4, End = Rn+blocksize. */
             if (d->w) {
-                /* LEA EAX, [EBP + blocksize] — 8D /r mod=01 r/m=EBP(5) reg=EAX disp8. */
+                /* LEA EAX, [EBP + blocksize] - 8D /r mod=01 r/m=EBP(5) reg=EAX disp8. */
                 Emit8(cursor, 0x8D);
                 EmitModRmReg(cursor, 1, kEbp, kEax);
                 Emit8(cursor, block_size);
@@ -83,7 +83,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
             EmitAddRegImm32(cursor, kEbp,
                 static_cast<uint32_t>(-static_cast<int32_t>(block_size) + 4));
             if (d->w) {
-                /* LEA EAX, [EBP - 4] — 8D /r mod=01 r/m=EBP(5) reg=EAX disp8=-4. */
+                /* LEA EAX, [EBP - 4] - 8D /r mod=01 r/m=EBP(5) reg=EAX disp8=-4. */
                 Emit8(cursor, 0x8D);
                 EmitModRmReg(cursor, 1, kEbp, kEax);
                 Emit8(cursor, static_cast<uint8_t>(-4));
@@ -123,7 +123,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
         cursor = EmitTlbFastPath(cursor, ctx,
                                  d->l ? TlbAccess::kRead : TlbAccess::kWrite);
     } else {
-        /* MMU off — direct PA→host. ECX holds the PA. */
+        /* MMU off - direct PA→host. ECX holds the PA. */
         EmitMovRegImm32(cursor, kEdx,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(jit)));
         EmitCall(cursor, reinterpret_cast<void*>(&ArmJit::MapGuestPhysicalToHostHelper));
@@ -133,7 +133,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
     EmitTestRegReg(cursor, kEax, kEax);
     uint8_t* no_abort_1 = EmitJnzLabel(cursor);
 
-    /* MMU returned null. Check &io_pending_address_ — if non-zero,
+    /* MMU returned null. Check &io_pending_address_ - if non-zero,
        this is a peripheral access (route through IO path); if
        zero, this is a real abort (restore Rn + raise data abort). */
     EmitMovRegDwordPtr(cursor, kEcx, mmu->IoPendingAddressPtr());
@@ -171,7 +171,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
         EmitJmp32(cursor, ctx->raise_abort_data_helper_target);
     }
 
-    /* NoAbort labels — translation either succeeded (EAX !=0) or
+    /* NoAbort labels - translation either succeeded (EAX !=0) or
        gave us an IO address in StartIOAddress. */
     FixupLabel(no_abort_1, cursor);
     FixupLabel(no_abort_2, cursor);
@@ -182,7 +182,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
         EmitMovRegReg(cursor, kEbp, kEax);  /* EBP = StartHostAddress */
         EmitMovRegReg(cursor, kEax, kEdx);  /* EAX = EA copy */
         EmitAndRegImm32(cursor, kEax, 1023);
-        /* NEG EAX — F7 /3 ModRM(3, EAX, 3). */
+        /* NEG EAX - F7 /3 ModRM(3, EAX, 3). */
         Emit8(cursor, 0xF7); EmitModRmReg(cursor, 3, kEax, 3);
         EmitAddRegImm32(cursor, kEax, 1024);
         EmitCmpRegImm32(cursor, kEax, block_size);
@@ -191,7 +191,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
         EmitMovRegReg(cursor, kEbp, kEax);  /* EBP = StartHostAddress */
     }
 
-    /* TEST EBP, EBP — Is StartHostAddress == 0 (IO path)?
+    /* TEST EBP, EBP - Is StartHostAddress == 0 (IO path)?
        JZ rel32 to PerformIOBasedTransfer; the target sits past the
        full STM loop body + (if MMU on + block_size > 4) the cross-
        page emit, which routinely exceeds rel8 range. */
@@ -237,7 +237,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
                 if (!d->s &&
                     jit->ProcessorConfig()->HasLoadToPcInterworking()) {
                     /* v5T+ LDM/POP-to-PC interworks; LDM (exception
-                       return, S=1) is excluded — its state comes from
+                       return, S=1) is excluded - its state comes from
                        the SPSR restore above (DDI0406C §A2.3.1). */
                     cursor = EmitArmInterworkingFullEax(cursor);
                 } else {
@@ -247,17 +247,17 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
                        CMOVNZ ECX, EDX; AND EAX, ECX. */
                     EmitMovRegImm32(cursor, kEdx, ~uint32_t{1});
                     EmitMovRegImm32(cursor, kEcx, ~uint32_t{3});
-                    /* TEST DWORD PTR [ESI + offsetof(cpsr)], 0x20  —
+                    /* TEST DWORD PTR [ESI + offsetof(cpsr)], 0x20  -
                        F7 /0 mod=10 r/m=ESI(6) reg=0 disp32 imm32. */
                     Emit8(cursor, 0xF7);
                     EmitModRmReg(cursor, 2, kStateReg, 0);
                     Emit32(cursor,
                         static_cast<uint32_t>(offsetof(ArmCpuState, cpsr)));
                     Emit32(cursor, 0x20u);
-                    /* CMOVNZ ECX, EDX — 0F 45 mod=11 r/m=EDX reg=ECX. */
+                    /* CMOVNZ ECX, EDX - 0F 45 mod=11 r/m=EDX reg=ECX. */
                     Emit8(cursor, 0x0F); Emit8(cursor, 0x45);
                     EmitModRmReg(cursor, 3, kEdx, kEcx);
-                    /* AND EAX, ECX — 23 mod=11 r/m=ECX reg=EAX. */
+                    /* AND EAX, ECX - 23 mod=11 r/m=ECX reg=EAX. */
                     Emit8(cursor, 0x23);
                     EmitModRmReg(cursor, 3, kEcx, kEax);
                 }
@@ -265,7 +265,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + 15u * 4u),
                     kEax);
                 if (d->rn == ArmGpr::kR13 && d->p == 0 && d->w && d->u) {
-                    /* LDM R13!, {... R15} up — likely a return. */
+                    /* LDM R13!, {... R15} up - likely a return. */
                     EmitJmp32(cursor, ctx->pop_shadow_stack_helper_target);
                 } else {
                     cursor = PlaceR15ModifiedHelper(cursor, d, ctx);
@@ -284,7 +284,7 @@ uint8_t* PlaceBlockDataTransfer(uint8_t*      cursor,
             if (d->s && reg_num >= 8 && reg_num < 15) {
                 EmitMovRegImm32(cursor, kEcx, static_cast<uint32_t>(reg_num));
                 EmitCall(cursor, ctx->block_usermode_helper_target);
-                /* MOV EAX, [ECX] — 8B /r mod=00 r/m=ECX reg=EAX. */
+                /* MOV EAX, [ECX] - 8B /r mod=00 r/m=ECX reg=EAX. */
                 Emit8(cursor, 0x8B);
                 EmitModRmReg(cursor, 0, kEcx, kEax);
             } else if (reg_num == 15) {

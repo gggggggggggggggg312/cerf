@@ -9,7 +9,7 @@ typedef unsigned char  uint8_t;
 #include <cstdint>
 #endif
 
-/* Shared host<->guest GPE blit descriptor. Do NOT add a pConvert field — it is
+/* Shared host<->guest GPE blit descriptor. Do NOT add a pConvert field - it is
    a driver member-fn pointer that derefs to garbage host-side; the host converts
    from src_fmt/dst_fmt itself. */
 
@@ -20,7 +20,7 @@ namespace CerfVirt {
 /* Host validates this on read; mismatch = corrupt VA, halt rather than blit. */
 const uint32_t kCerfBltMagic = 0x43424C54u; /* 'CBLT' */
 
-/* CerfBltSurface.format — EGPEFormat (gpe.h). */
+/* CerfBltSurface.format - EGPEFormat (gpe.h). */
 const uint32_t kCerfFmt1Bpp  = 0u;
 const uint32_t kCerfFmt2Bpp  = 1u;
 const uint32_t kCerfFmt4Bpp  = 2u;
@@ -29,7 +29,7 @@ const uint32_t kCerfFmt16Bpp = 4u;
 const uint32_t kCerfFmt24Bpp = 5u;
 const uint32_t kCerfFmt32Bpp = 6u;
 
-/* CerfBltSurface.rotate — DMDO_* (winddi.h), only when is_rotate. */
+/* CerfBltSurface.rotate - DMDO_* (winddi.h), only when is_rotate. */
 const uint32_t kCerfRotate0   = 0u;
 const uint32_t kCerfRotate90  = 1u;
 const uint32_t kCerfRotate180 = 2u;
@@ -51,7 +51,7 @@ typedef struct CerfBltSurface {
     uint32_t rotate;    /* kCerfRotate* when is_rotate */
     uint32_t screen_w;  /* physical screen width  (rotated addressing) */
     uint32_t screen_h;  /* physical screen height (rotated addressing) */
-    /* Actual channel masks from GPEFormat::m_pPalette — the reference uses the
+    /* Actual channel masks from GPEFormat::m_pPalette - the reference uses the
        surface's real masks, never an assumed-per-format set. mask[0..2]=R,G,B
        (and mask[3]=A if pal_entries==4). pal_entries: 3=RGB, 4=ARGB, else indexed
        (mask[] = 0). */

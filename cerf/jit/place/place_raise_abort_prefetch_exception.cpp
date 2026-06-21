@@ -11,7 +11,7 @@ uint8_t* PlaceRaiseAbortPrefetchException(uint8_t*      cursor,
     using namespace x86;
 
     /* Replay the MMU FAR/FSR snapshot the decoder captured at
-       decode time (insn.immediate / insn.reserved3) — written into
+       decode time (insn.immediate / insn.reserved3) - written into
        the live ArmMmuState via [EBX + offset]. */
     EmitMovBaseDisp32Imm32(cursor, kMmuReg,
                            static_cast<int32_t>(offsetof(ArmMmuState, fault_address)),

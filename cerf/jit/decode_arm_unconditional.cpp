@@ -8,13 +8,13 @@
 #include "place_fns.h"
 
 bool ArmDecoder::DecodeArmUnconditional(DecodedInsn* insn, ArmOpcode op) {
-    /* RFE — Return From Exception. ddi0406c B9.3.13 encoding A1:
+    /* RFE - Return From Exception. ddi0406c B9.3.13 encoding A1:
        1111 100P U0W1 nnnn 0000 1010 0000 0000.
        Extract P (bit 24), U (bit 23), W (bit 21), Rn (bits 19:16). */
     if ((op.word & 0xFE50FFFFu) == 0xF8100A00u) {
         const uint32_t rn = (op.word >> 16) & 0xFu;
         if (rn == ArmGpr::kR15) {
-            return false;  /* UNPREDICTABLE per spec — fall through to UND. */
+            return false;  /* UNPREDICTABLE per spec - fall through to UND. */
         }
         insn->place_fn            = &PlaceRfe;
         insn->cond                = 14;
@@ -27,7 +27,7 @@ bool ArmDecoder::DecodeArmUnconditional(DecodedInsn* insn, ArmOpcode op) {
         return true;
     }
 
-    /* SRS — Store Return State. ddi0406c B9.3.16 encoding A1:
+    /* SRS - Store Return State. ddi0406c B9.3.16 encoding A1:
        1111 100P U1W0 1101 0000 0101 000 mode[4:0].
        Extract P (bit 24), U (bit 23), W (bit 21), target_mode (bits 4:0). */
     if ((op.word & 0xFE5FFFE0u) == 0xF84D0500u) {
@@ -50,7 +50,7 @@ bool ArmDecoder::DecodeArmUnconditional(DecodedInsn* insn, ArmOpcode op) {
         }
     }
 
-    /* ARMv7 DMB / DSB / ISB barriers — NOP emit on x86's strong
+    /* ARMv7 DMB / DSB / ISB barriers - NOP emit on x86's strong
        memory model. */
     if (processor_config_->HasBarrierInsn() &&
         op.unconditional_extension.opcode1 == 0x57u &&

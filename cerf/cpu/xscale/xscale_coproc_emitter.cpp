@@ -29,7 +29,7 @@ public:
                                   DecodedInsn*  d,
                                   BlockContext* ctx) override {
         if (d->cp_num == 15) {
-            /* CPAR (Coprocessor Access Register) — XScale §7.2.15: cp15
+            /* CPAR (Coprocessor Access Register) - XScale §7.2.15: cp15
                c15, CRm=c1, opc2=0. Shared cp15 dispatch UNDs c15 (boot
                hangs on the UND), so handle here. Backed by ArmMmuState::
                coprocessor_access, unused on XScale unless HasCp15V6(). */
@@ -51,7 +51,7 @@ public:
             /* CP15 c14 = XScale debug/breakpoint regs (Table 7-19); no
                breakpoints modeled → read 0, ignore writes. Delegating to the
                shared cp15 body UNDs CRn=14, and the OAL suspend state-save reads
-               these — the UND becomes a fatal exception-storm halt. */
+               these - the UND becomes a fatal exception-storm halt. */
             if (d->crn == 14) {
                 const bool is_dbg = d->cp_opc == 0 && d->cp == 0 &&
                     (d->crm == 0 || d->crm == 3 || d->crm == 4 ||
@@ -65,7 +65,7 @@ public:
                 }
                 return cursor;
             }
-            /* Allocate Data Cache Line (c7, c2, opc2=5) — XScale-specific
+            /* Allocate Data Cache Line (c7, c2, opc2=5) - XScale-specific
                (Core Dev Manual Table 7-12). No D-cache is modeled and the
                line's backing memory is real, so emit nothing. */
             if (d->crn == 7 && d->crm == 2 && d->cp == 5 && d->cp_opc == 0) {
@@ -97,10 +97,10 @@ public:
             const int32_t rd_disp = static_cast<int32_t>(
                 offsetof(ArmCpuState, gprs) + d->rd * 4u);
 
-            /* PWRMODE (CRn=c7) — XScale Core Dev Manual Table 7-23, M=bits[3:0].
+            /* PWRMODE (CRn=c7) - XScale Core Dev Manual Table 7-23, M=bits[3:0].
                Read returns 0 (ACTIVE). On write: M=1 IDLE (OEMIdle sub_800F736C)
                halts till the next IRQ; M=3 SLEEP (OEMPowerOff sub_800F73B0) is a
-               real power-down — notify the user, then park. */
+               real power-down - notify the user, then park. */
             if (d->crn == 7) {
                 if (d->l) {
                     EmitMovBaseDisp32Imm32(cursor, kStateReg, rd_disp, 0u);
@@ -126,7 +126,7 @@ public:
                 return cursor;
             }
 
-            /* CCLKCFG (CRn=c6) — XScale Core Dev Manual Table 7-25. The
+            /* CCLKCFG (CRn=c6) - XScale Core Dev Manual Table 7-25. The
                frequency change completes instantly under emulation (no PLL
                relock), so a write has no retained state; reads return 0
                (active, non-turbo). */
@@ -158,7 +158,7 @@ public:
         return EmitRaiseUndAndReturn(cursor, d, ctx);
     }
 
-    /* MCRR/MRRC — XScale supports these only to CP0, the DSP 40-bit
+    /* MCRR/MRRC - XScale supports these only to CP0, the DSP 40-bit
        accumulator acc0 (MAR/MRA, Core Dev Manual §2.3.1 Table 2-6); any
        other coprocessor UNDs (§2.2.4). */
     uint8_t* EmitRegisterTransferDouble(uint8_t*      cursor,

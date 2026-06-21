@@ -24,7 +24,7 @@ void CerfVirtBlitter::OnReady() {
 
 namespace {
 /* Per-dst-index source offset for one axis. MUST replicate swblt.cpp's exact
-   accumulator walk (402-530, 759-913), NOT floor(c*src/dst) — they differ
+   accumulator walk (402-530, 759-913), NOT floor(c*src/dst) - they differ
    (2->3 stretch is 0,1,1 not 0,0,1) and a mismatch is +/-1px corruption. */
 void FillAxis(std::vector<int32_t>& lut, int32_t dst_len, int32_t src_len) {
     lut.resize((size_t)dst_len);
@@ -159,7 +159,7 @@ bool CerfVirtBlitter::Execute(const CerfBltDescriptor& d) {
         ac.alpha_mask = (d_bpp == 4u) ? 0xFF000000u : 0u;
         /* Blend reads channels as (px & mask) >> shift to an 8-bit value, so the
            shift is the mask's trailing-zero count, not the 32-HighBitPos left-pack
-           shift d_shift carries — that one mis-aligns RGB and collapses opaque
+           shift d_shift carries - that one mis-aligns RGB and collapses opaque
            pixels to 0xFF000000 (black). */
         ac.red_shift   = BltAlpha::ShiftOf(d_masks[0]);
         ac.green_shift = BltAlpha::ShiftOf(d_masks[1]);

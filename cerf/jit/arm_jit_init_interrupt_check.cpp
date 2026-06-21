@@ -42,7 +42,7 @@ void ArmJit::InitializeInterruptCheck() {
     EmitCall   (p, reinterpret_cast<void*>(&InterruptDeliveryHelper));
     EmitAddRegImm32(p, kEsp, 12);
     EmitTestRegReg (p, kEax, kEax);
-    /* JZ short — skip exactly the JMP EAX (2 bytes). */
+    /* JZ short - skip exactly the JMP EAX (2 bytes). */
     Emit8(p, 0x74);
     Emit8(p, 0x02);
     EmitJmpReg(p, kEax);

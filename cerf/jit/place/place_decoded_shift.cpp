@@ -25,7 +25,7 @@ uint8_t* PlaceDecodedShift(uint8_t*           cursor,
         if (rs == ArmGpr::kR15) {
             const uint32_t ip = d->guest_address +
                 (ctx->jit->CpuState()->cpsr.bits.thumb_mode ? 4u : 8u);
-            /* MOV CL, byte ip — B0+CL imm8. */
+            /* MOV CL, byte ip - B0+CL imm8. */
             Emit8(cursor, 0xB0 + kCl); Emit8(cursor, static_cast<uint8_t>(ip));
         } else {
             /* MOV CL, byte ptr [ESI + offsetof(gprs[rs])]. */
@@ -68,7 +68,7 @@ uint8_t* PlaceDecodedShift(uint8_t*           cursor,
     switch (shift_typ) {
     case 0:  /* LSL */
         if (by_register) {
-            /* CMP CL, 0x20 — 80 /7. */
+            /* CMP CL, 0x20 - 80 /7. */
             Emit8(cursor, 0x80); EmitModRmReg(cursor, 3, kCl, 7); Emit8(cursor, 0x20);
             uint8_t* jb_lt32  = EmitJbLabel(cursor);
             uint8_t* jz_eq32  = EmitJzLabel(cursor);
@@ -185,13 +185,13 @@ uint8_t* PlaceDecodedShift(uint8_t*           cursor,
 
     case 3:  /* ROR */
         if (by_register) {
-            /* TEST CL, CL — 84 ModRM(3, CL, CL). */
+            /* TEST CL, CL - 84 ModRM(3, CL, CL). */
             Emit8(cursor, 0x84); EmitModRmReg(cursor, 3, kCl, kCl);
             uint8_t* jz_no_shift = EmitJzLabel(cursor);
-            /* AND CL, 0x1F — 80 /4. */
+            /* AND CL, 0x1F - 80 /4. */
             Emit8(cursor, 0x80); EmitModRmReg(cursor, 3, kCl, 4); Emit8(cursor, 0x1F);
             uint8_t* jz_by_zero = EmitJzLabel(cursor);
-            /* ROR result, CL — D3 /1. */
+            /* ROR result, CL - D3 /1. */
             emit_shift_cl(1);
             uint8_t* jmp_done1 = EmitJmpLabel(cursor);
 
@@ -205,7 +205,7 @@ uint8_t* PlaceDecodedShift(uint8_t*           cursor,
             FixupLabel(jz_by_zero, cursor);
             if (needs_shifter_carry_out) {
                 EmitMovRegReg(cursor, kEcx, result_reg);
-                /* SHL ECX, 1 — D1 /4. */
+                /* SHL ECX, 1 - D1 /4. */
                 Emit8(cursor, 0xD1); EmitModRmReg(cursor, 3, kEcx, 4);
             }
             FixupLabel(jmp_done1, cursor);
@@ -215,7 +215,7 @@ uint8_t* PlaceDecodedShift(uint8_t*           cursor,
                 /* ROR #0 = RRX (rotate-right with extend through CF). */
                 EmitBtBaseDisp32Imm(cursor, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, x86_flags)), 0);
-                /* RCR result, 1 — D1 /3. */
+                /* RCR result, 1 - D1 /3. */
                 Emit8(cursor, 0xD1); EmitModRmReg(cursor, 3, result_reg, 3);
             } else if (shift_amount == 1) {
                 emit_shift_one(1);

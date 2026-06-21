@@ -129,10 +129,10 @@ void ArmDecoder::DecodeThumbPushPopRegisters(DecodedInsn* d, ThumbOpcode op) {
     arm_op.block_data_transfer.register_list = op.push_pop_registers.r_list;
     if (op.push_pop_registers.r) {
         if (op.push_pop_registers.l) {
-            /* POP — include R15 (PC). */
+            /* POP - include R15 (PC). */
             arm_op.block_data_transfer.register_list |= 1u << ArmGpr::kR15;
         } else {
-            /* PUSH — include R14 (LR). */
+            /* PUSH - include R14 (LR). */
             arm_op.block_data_transfer.register_list |= 1u << ArmGpr::kR14;
         }
     }

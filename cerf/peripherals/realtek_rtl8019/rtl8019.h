@@ -62,7 +62,7 @@ private:
     void RaiseInterruptLocked(uint8_t bits);
     void ClearInterruptIfDrainedLocked();
 
-    /* Full NIC_RESET behavior — guest writes to NIC_RESET (offset
+    /* Full NIC_RESET behavior - guest writes to NIC_RESET (offset
        0x1F) and PowerOn both route here. */
     void ResetLocked();
 
@@ -75,11 +75,11 @@ private:
 
     mutable std::mutex state_mutex_;
 
-    /* NIC_COMMAND register at offset 0 — selects page for offsets
+    /* NIC_COMMAND register at offset 0 - selects page for offsets
        1..0x0F via bits 6-7. */
     uint8_t nic_command_ = 0u;
 
-    /* Page 0 — control + RX/TX. */
+    /* Page 0 - control + RX/TX. */
     uint8_t  nic_page_start_  = 0u;
     uint8_t  nic_page_stop_   = 0u;
     uint8_t  nic_boundary_    = 0u;
@@ -100,19 +100,19 @@ private:
     uint8_t  nic_intr_mask_   = 0u;
     uint8_t  nic_missed_cnt_  = 0u;
 
-    /* Page 1 — physical MAC + multicast filter + current page. */
+    /* Page 1 - physical MAC + multicast filter + current page. */
     std::array<uint8_t, 6> nic_phys_addr_{};
     std::array<uint8_t, 8> nic_mc_addr_{};
     uint8_t                nic_current_ = 0u;
 
     /* DMA state for the NIC_RACK_NIC remote-DMA register at offset
-       0x10 — driver sets nic_rmt_addr_/nic_rmt_count_ + CR_DMA_*,
+       0x10 - driver sets nic_rmt_addr_/nic_rmt_count_ + CR_DMA_*,
        then byte-streams through this register. */
     uint16_t dma_count_  = 0u;
     uint16_t dma_offset_ = 0u;
 
     /* FCSR (Function Control / Status Register) at attribute offset
-       0x3FA — PCMCIA function register the driver reads to check
+       0x3FA - PCMCIA function register the driver reads to check
        whether the on-card INT is pending. */
     uint8_t fcsr_ = 0u;
 

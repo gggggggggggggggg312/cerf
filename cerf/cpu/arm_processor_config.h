@@ -43,7 +43,7 @@ public:
     virtual bool     HasLoadStoreDouble()         const = 0;
 
     /* Thumb ISA presence (v4T+). On a no-Thumb core CPSR.T is
-       unwritable and BX is undefined — guests rely on that:
+       unwritable and BX is undefined - guests rely on that:
        jlime's linexec writes CPSR|0xEF (T set) on SA-1110 and
        expects the T write ignored, as on real silicon. */
     virtual bool     HasThumb()                   const { return true; }

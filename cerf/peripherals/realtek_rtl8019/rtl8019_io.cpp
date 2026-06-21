@@ -42,7 +42,7 @@ uint8_t PageOf(uint8_t cmd) {
 
 [[noreturn]] void HaltUnsupported(const char* op, uint32_t offset,
                                   uint8_t page, uint32_t value) {
-    LOG(Caution, "[NE2000] %s offset 0x%02X page %u value 0x%X — "
+    LOG(Caution, "[NE2000] %s offset 0x%02X page %u value 0x%X - "
             "unsupported register access; halting\n",
             op, offset, page, value);
     CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -205,7 +205,7 @@ uint16_t Rtl8019::ReadIo16(uint32_t card_io) {
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
     if (offset != 0x10) {
-        LOG(Caution, "[NE2000] read16 unsupported offset 0x%02X — only "
+        LOG(Caution, "[NE2000] read16 unsupported offset 0x%02X - only "
                 "NIC_RACK_NIC supports 16-bit reads; halting\n", offset);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -255,7 +255,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
                     }
                     if (nic_command_ & kCrXmit) {
                         /* Clear TSR at TX start (host-runtime
-                           pattern — TSR is left at 0 throughout;
+                           pattern - TSR is left at 0 throughout;
                            completion is signaled by ISR_XMIT only). */
                         nic_xmit_status_ = 0u;
                         const bool loopback =
@@ -264,7 +264,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
                         if (!loopback) {
                             TransmitFromCardRamLocked(tx_pending);
                         } else {
-                            /* Loopback configured — silently complete
+                            /* Loopback configured - silently complete
                                without going to the wire. */
                             nic_command_ &= ~kCrXmit;
                             RaiseInterruptLocked(kIsrXmitBit);
@@ -326,7 +326,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
 
             case 0x07:
                 if (page == 0) {
-                    nic_intr_status_ &= ~value;  /* W1C — ack */
+                    nic_intr_status_ &= ~value;  /* W1C - ack */
                     ClearInterruptIfDrainedLocked();
                 } else if (page == 1) {
                     nic_current_ = value;
@@ -410,7 +410,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
                 break;
             }
 
-            case 0x1F:  /* NIC_RESET — any write triggers chip reset */
+            case 0x1F:  /* NIC_RESET - any write triggers chip reset */
                 ResetLocked();
                 break;
 
@@ -440,7 +440,7 @@ void Rtl8019::WriteIo16(uint32_t card_io, uint16_t value) {
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
     if (offset != 0x10) {
-        LOG(Caution, "[NE2000] write16 unsupported offset 0x%02X = 0x%04X — "
+        LOG(Caution, "[NE2000] write16 unsupported offset 0x%02X = 0x%04X - "
                 "only NIC_RACK_NIC supports 16-bit writes; halting\n",
                 offset, value);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);

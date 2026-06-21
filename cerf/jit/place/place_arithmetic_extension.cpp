@@ -81,7 +81,7 @@ uint8_t* PlaceArithmeticExtension(uint8_t*      cursor,
         store_gpr(d->rd, kEax);
         break;
 
-    case 4:  /* UMULL — Rn:Rd = Rm * Rs (unsigned) */
+    case 4:  /* UMULL - Rn:Rd = Rm * Rs (unsigned) */
         load_gpr(kEax, d->rm);
         mul_gpr_eax(d->rs);
         store_gpr(d->rd, kEdx);  /* high half */
@@ -91,7 +91,7 @@ uint8_t* PlaceArithmeticExtension(uint8_t*      cursor,
         }
         break;
 
-    case 5:  /* UMLAL — Rn:Rd += Rm * Rs (unsigned) */
+    case 5:  /* UMLAL - Rn:Rd += Rm * Rs (unsigned) */
         load_gpr(kEax, d->rm);
         mul_gpr_eax(d->rs);
         add_eax_gpr(kEax, d->rn);
@@ -103,7 +103,7 @@ uint8_t* PlaceArithmeticExtension(uint8_t*      cursor,
         }
         break;
 
-    case 6:  /* SMULL — Rn:Rd = Rm * Rs (signed) */
+    case 6:  /* SMULL - Rn:Rd = Rm * Rs (signed) */
         load_gpr(kEax, d->rm);
         imul_gpr_eax(d->rs);
         store_gpr(d->rd, kEdx);
@@ -113,7 +113,7 @@ uint8_t* PlaceArithmeticExtension(uint8_t*      cursor,
         }
         break;
 
-    case 7:  /* SMLAL — Rn:Rd += Rm * Rs (signed) */
+    case 7:  /* SMLAL - Rn:Rd += Rm * Rs (signed) */
         load_gpr(kEax, d->rm);
         imul_gpr_eax(d->rs);
         add_eax_gpr(kEax, d->rn);
@@ -126,7 +126,7 @@ uint8_t* PlaceArithmeticExtension(uint8_t*      cursor,
         break;
 
     default:
-        /* UNDEFINED — emit raise. */
+        /* UNDEFINED - emit raise. */
         EmitPush32(cursor, d->guest_address);
         EmitPush32(cursor,
             static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ctx->jit->Cpu())));

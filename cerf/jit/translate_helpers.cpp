@@ -23,10 +23,10 @@ inline bool PrevInsnStoredFlagsToX86Flags(const uint8_t* cursor) {
     return disp == kCpuStateX86FlagsOfs;
 }
 
-/* SAHF — opcode 9E, no operands. */
+/* SAHF - opcode 9E, no operands. */
 inline void EmitSahf(uint8_t*& p) { x86::Emit8(p, 0x9E); }
 
-/* ROR AH, 1 — D0 /1 with modrm mod=11 reg=1 r/m=AH(4).
+/* ROR AH, 1 - D0 /1 with modrm mod=11 reg=1 r/m=AH(4).
    modrm = (11 << 6) | (1 << 3) | 4 = 0xCC. */
 inline void EmitRorAh1(uint8_t*& p) {
     x86::Emit8(p, 0xD0);
@@ -40,7 +40,7 @@ inline void EmitLoadX86FlagsToAhAndSahf(uint8_t*& p) {
     EmitSahf(p);
 }
 
-/* Load V bit from ArmCpuState::x86_overflow + ROR AH, 1 — restores
+/* Load V bit from ArmCpuState::x86_overflow + ROR AH, 1 - restores
    the host EFLAGS.OF for the upcoming JO/JNO. Used by VS/VC and as
    a prefix for GE/LT/GT/LE which need both NZCV and V. */
 inline void EmitLoadOverflowAndRorAh(uint8_t*& p) {
@@ -53,7 +53,7 @@ inline void EmitLoadOverflowAndRorAh(uint8_t*& p) {
    for the signed-compare encodings. */
 inline void EmitLoadOverflowToAlAndRorAl(uint8_t*& p) {
     x86::EmitMovByteRegBaseDisp32(p, x86::kAl, x86::kStateReg, kCpuStateX86OverflowOfs);
-    /* ROR AL, 1 — D0 /1 modrm mod=11 reg=1 r/m=AL(0) = 0xC8. */
+    /* ROR AL, 1 - D0 /1 modrm mod=11 reg=1 r/m=AL(0) = 0xC8. */
     x86::Emit8(p, 0xD0);
     x86::EmitModRmReg(p, 3, 0, 1);
 }
@@ -90,19 +90,19 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
     uint8_t* skip2 = nullptr;
 
     switch (d->cond) {
-    case 0:  /* EQ — Z set ⇒ skip if Z clear */
+    case 0:  /* EQ - Z set ⇒ skip if Z clear */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         skip1 = x86::EmitJnzLabel32(cursor);
         break;
 
-    case 1:  /* NE — Z clear ⇒ skip if Z set */
+    case 1:  /* NE - Z clear ⇒ skip if Z set */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         skip1 = x86::EmitJzLabel32(cursor);
         break;
 
-    case 2:  /* CS / HS — C set ⇒ skip if C clear */
+    case 2:  /* CS / HS - C set ⇒ skip if C clear */
         if (!flags_loaded) {
             x86::EmitBtBaseDisp32Imm(cursor, x86::kStateReg, kCpuStateX86FlagsOfs, 0);
         } else if (!all_flags_set) {
@@ -111,7 +111,7 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJncLabel32(cursor);
         break;
 
-    case 3:  /* CC / LO — C clear ⇒ skip if C set */
+    case 3:  /* CC / LO - C clear ⇒ skip if C set */
         if (!flags_loaded) {
             x86::EmitBtBaseDisp32Imm(cursor, x86::kStateReg, kCpuStateX86FlagsOfs, 0);
         } else if (!all_flags_set) {
@@ -120,29 +120,29 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJcLabel32(cursor);
         break;
 
-    case 4:  /* MI — N set ⇒ skip if N clear */
+    case 4:  /* MI - N set ⇒ skip if N clear */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         skip1 = x86::EmitJnsLabel32(cursor);
         break;
 
-    case 5:  /* PL — N clear ⇒ skip if N set */
+    case 5:  /* PL - N clear ⇒ skip if N set */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         skip1 = x86::EmitJsLabel32(cursor);
         break;
 
-    case 6:  /* VS — V set ⇒ skip if V clear */
+    case 6:  /* VS - V set ⇒ skip if V clear */
         EmitLoadOverflowAndRorAh(cursor);
         skip1 = x86::EmitJnoLabel32(cursor);
         break;
 
-    case 7:  /* VC — V clear ⇒ skip if V set */
+    case 7:  /* VC - V clear ⇒ skip if V set */
         EmitLoadOverflowAndRorAh(cursor);
         skip1 = x86::EmitJoLabel32(cursor);
         break;
 
-    case 8:  /* HI — C set AND Z clear. Skip if NOT(HI) = C clear OR Z set. */
+    case 8:  /* HI - C set AND Z clear. Skip if NOT(HI) = C clear OR Z set. */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         /* Flip CF, then JBE (CF set OR ZF set). */
@@ -150,14 +150,14 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJbeLabel32(cursor);
         break;
 
-    case 9:  /* LS — C clear OR Z set. Skip if NOT(LS) = C set AND Z clear. */
+    case 9:  /* LS - C clear OR Z set. Skip if NOT(LS) = C set AND Z clear. */
         if (!flags_loaded) EmitLoadX86FlagsToAhAndSahf(cursor);
         else if (!all_flags_set) EmitSahf(cursor);
         x86::EmitCmc(cursor);
         skip1 = x86::EmitJaLabel32(cursor);
         break;
 
-    case 10: /* GE — N == V. Skip if N != V. */
+    case 10: /* GE - N == V. Skip if N != V. */
         if (!flags_loaded) {
             EmitLoadOverflowToAlAndRorAl(cursor);
             EmitLoadX86FlagsToAhAndSahf(cursor);
@@ -168,7 +168,7 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJlLabel32(cursor);
         break;
 
-    case 11: /* LT — N != V. Skip if N == V. */
+    case 11: /* LT - N != V. Skip if N == V. */
         if (!flags_loaded) {
             EmitLoadOverflowToAlAndRorAl(cursor);
             EmitLoadX86FlagsToAhAndSahf(cursor);
@@ -179,7 +179,7 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJgeLabel32(cursor);
         break;
 
-    case 12: /* GT — Z clear AND N == V. Skip if Z set OR N != V. */
+    case 12: /* GT - Z clear AND N == V. Skip if Z set OR N != V. */
         if (!flags_loaded) {
             EmitLoadOverflowToAlAndRorAl(cursor);
             EmitLoadX86FlagsToAhAndSahf(cursor);
@@ -190,7 +190,7 @@ uint8_t* PlaceConditionCheck(uint8_t* cursor, const DecodedInsn* d, BlockContext
         skip1 = x86::EmitJleLabel32(cursor);
         break;
 
-    case 13: /* LE — Z set OR N != V. Skip if Z clear AND N == V. */
+    case 13: /* LE - Z set OR N != V. Skip if Z clear AND N == V. */
         if (!flags_loaded) {
             EmitLoadOverflowToAlAndRorAl(cursor);
             EmitLoadX86FlagsToAhAndSahf(cursor);

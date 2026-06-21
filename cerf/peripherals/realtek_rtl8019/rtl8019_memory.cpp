@@ -57,7 +57,7 @@ uint8_t Rtl8019::ReadAttribute8(uint32_t offset) {
     }
     if (offset < kCisSize * 2u) {
         /* CIS ROM is 8-bit but the card is accessed in 16-bit mode.
-           Each ROM byte appears at two consecutive even addresses —
+           Each ROM byte appears at two consecutive even addresses -
            the driver compensates by multiplying ROM offsets by 2
            before access. */
         return kCisData[offset / 2u];
@@ -111,7 +111,7 @@ uint16_t Rtl8019::ReadCommon16(uint32_t offset) {
         return static_cast<uint16_t>(card_ram_[off]) |
                (static_cast<uint16_t>(card_ram_[off + 1]) << 8);
     }
-    /* See ReadCommon8 — HwRamTest probes outside RAM and expects 0. */
+    /* See ReadCommon8 - HwRamTest probes outside RAM and expects 0. */
     return 0u;
 }
 
@@ -132,5 +132,5 @@ void Rtl8019::WriteCommon16(uint32_t offset, uint16_t value) {
         card_ram_[off + 1] = static_cast<uint8_t>(value >> 8);
         return;
     }
-    /* See WriteCommon8 — off-range writes silently no-op. */
+    /* See WriteCommon8 - off-range writes silently no-op. */
 }

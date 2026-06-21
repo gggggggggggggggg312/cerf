@@ -53,7 +53,7 @@ private:
         Peripheral::FastWriteFn write;
         void*                   ctx;
         /* For 64-bit ReadDword/WriteDword which can't fit through the
-           FastReadFn/FastWriteFn signatures. Host-side only — JIT
+           FastReadFn/FastWriteFn signatures. Host-side only - JIT
            never emits 64-bit MMIO. */
         Peripheral*             p;
     };

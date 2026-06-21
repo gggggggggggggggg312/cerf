@@ -10,7 +10,7 @@ namespace {
 
 using namespace x86;
 
-/* Emit AND DWORD PTR [ESI + offsetof(cpsr)], ~0x20 — clears CPSR
+/* Emit AND DWORD PTR [ESI + offsetof(cpsr)], ~0x20 - clears CPSR
    bit 5 (ThumbMode). The reference uses an absolute-disp32 form
    against &Cpu.CPSR; CERF uses [base+disp32] off the pinned ESI
    so the emit is per-instance-state-aware. */
@@ -65,7 +65,7 @@ uint8_t* PlaceThumbLoadAddressPC(uint8_t*      cursor,
                                  DecodedInsn*  d,
                                  BlockContext* /* ctx */) {
     using namespace x86;
-    /* ADD Rd, PC, #imm — the EA is fully known at emit time:
+    /* ADD Rd, PC, #imm - the EA is fully known at emit time:
        (PC + 4) word-aligned, plus the 8-bit imm shifted left 2. */
     const uint32_t address =
         ((d->guest_address + 4u) & 0xFFFFFFFCu) +
@@ -90,7 +90,7 @@ uint8_t* PlaceThumbLongBranch(uint8_t*      cursor,
         break;
 
     case 2:
-        /* BL high half — stage the upper-half destination in R14;
+        /* BL high half - stage the upper-half destination in R14;
            the next instruction (low half, case 1 or 3) commits R15
            and pushes the return on the shadow stack. */
         EmitMovRegImm32(cursor, kEax,
@@ -99,7 +99,7 @@ uint8_t* PlaceThumbLongBranch(uint8_t*      cursor,
         break;
 
     case 1:
-        /* BLX low half — Thumb→ARM mode switch + branch. Clear
+        /* BLX low half - Thumb→ARM mode switch + branch. Clear
            ThumbMode, R15 = (R14 + offset) & ~3 (word-align for ARM),
            R14 = PC + 3 (one opcode ahead + Thumb-bit indicator),
            push shadow stack, R15Modified. */
@@ -115,7 +115,7 @@ uint8_t* PlaceThumbLongBranch(uint8_t*      cursor,
         break;
 
     case 3:
-        /* BL low half — Thumb→Thumb branch. R15 = R14 + offset
+        /* BL low half - Thumb→Thumb branch. R15 = R14 + offset
            (no alignment mask; Thumb instructions are halfword-aligned
            already), R14 = PC + 3, push shadow stack, R15Modified. */
         EmitMovRegBaseDisp32(cursor, kEax, kStateReg, GprDisp(ArmGpr::kR14));
@@ -128,7 +128,7 @@ uint8_t* PlaceThumbLongBranch(uint8_t*      cursor,
         break;
 
     default:
-        /* h_two_bits is 2 bits wide so always 0..3 — unreachable. */
+        /* h_two_bits is 2 bits wide so always 0..3 - unreachable. */
         break;
     }
     return cursor;

@@ -9,7 +9,7 @@ class StateReader;
 /* Shared MediaQ 2D GE, MQ-1100/1132 + MQ-200 (MQ-200 Data Book Table 5-63..5-74;
    MQ-1132 datasheet Reg 4-83..4-98). GE00R command + operands are family-uniform
    (here); colour register indices, field widths, solid-fill encoding, Source-FIFO
-   packing are per-part (virtual) — split them wrong and the other part draws garbage. */
+   packing are per-part (virtual) - split them wrong and the other part draws garbage. */
 
 /* The owning peripheral exposes its framebuffer to the engine. */
 class MediaQGeHost {
@@ -128,7 +128,7 @@ protected:
     static void RopPixel(uint8_t* fb, uint32_t fbsize, uint64_t addr,
                          uint32_t bpp, uint32_t pmask, uint8_t rop, uint32_t color);
 
-    /* Per-part: the line operand encoding differs across the family — MQ-1132
+    /* Per-part: the line operand encoding differs across the family - MQ-1132
        GE01R[31] selects quadrant-vs-direction (datasheet Reg 4-85, the base
        body), MQ-200 has GE01R[29]=Y-major + GE00R X_DIR/Y_DIR (MS line.cpp,
        the MQ-200 override). Decoding one chip's form for the other draws garbage. */

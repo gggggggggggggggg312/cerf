@@ -23,16 +23,16 @@ public:
 
     /* Drain one 16-bit word from the prefetch FIFO for the configured
        CS. Called by Omap3530GpmcCs0Window peripheral when the driver
-       memcpys from PA 0x08000000 — the FIFO data tap that fmd.c:393
+       memcpys from PA 0x08000000 - the FIFO data tap that fmd.c:393
        reads after STARTENGINE. */
     uint16_t DrainPrefetchByte16(uint32_t cs);
 
     /* Push one 16-bit word to the prefetch FIFO write-side. Called by
-       Omap3530GpmcCs0Window on writes to PA 0x08000000 — the
+       Omap3530GpmcCs0Window on writes to PA 0x08000000 - the
        memcpy((BYTE*)pFifo, pData, ...) write side at fmd.c:456. */
     void PushPrefetchByte16(uint32_t cs, uint16_t value);
 
-    /* Single-byte FIFO write — covers the byte-granular tail of an
+    /* Single-byte FIFO write - covers the byte-granular tail of an
        unaligned memcpy. Goes through the NAND state machine the
        same way as PushPrefetchByte16, but advances data_offset by 1
        instead of 2. */
@@ -123,7 +123,7 @@ private:
     void     WriteNandData16 (uint32_t cs, uint16_t value);
     uint16_t ReadNandData16  (uint32_t cs);
 
-    /* Do NOT wire AssertIrq(20) on IRQENABLE writes — the EVM3530 OAL
+    /* Do NOT wire AssertIrq(20) on IRQENABLE writes - the EVM3530 OAL
        installs no ISR for GPMC, so dispatch lands at an uninitialised
        entry and the kernel prefetch-aborts on OAL static-IO. */
     std::mutex irq_mu_;

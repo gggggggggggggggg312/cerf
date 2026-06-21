@@ -111,7 +111,7 @@ void ArmJit::JitDecode(JitBlock* containing_block, uint32_t guest_pc) {
                    prefetch-abort vector. */
                 insn.place_fn      = &PlaceRaiseAbortPrefetchException;
                 insn.guest_address = guest_pc;
-                insn.cond          = 14;  /* AL — unconditional */
+                insn.cond          = 14;  /* AL - unconditional */
                 insn.immediate     = mmu_->State()->fault_address;
                 insn.reserved3     = mmu_->State()->fault_status.word;
                 ++i;
@@ -143,7 +143,7 @@ void ArmJit::JitDecode(JitBlock* containing_block, uint32_t guest_pc) {
         /* Stop at an unconditional control-leave (return / uncond jump):
            bytes after are unreachable by fall-through (inline literal
            pools); decoding them marks their words as code, false-tripping
-           the SMC flush. BL/BLX are calls (return falls through) — exclude. */
+           the SMC flush. BL/BLX are calls (return falls through) - exclude. */
         if (insn.r15_modified && insn.cond == 14u &&
             !(insn.place_fn == &PlaceBranch && insn.l) &&
             insn.place_fn != &PlaceBlxReg) {
@@ -160,7 +160,7 @@ void* ArmJit::JitCompile(uint32_t guest_pc) {
     emu_.Get<RateProbe>().Inc(RateProbe::Counter::JitCompiles);
 #endif
     if (tc_flush_pending_) {
-        /* Armed by OnTranslationRegimeChange. Safe here — compile is
+        /* Armed by OnTranslationRegimeChange. Safe here - compile is
            reached from Run(), never from inside arena code. */
         tc_flush_pending_ = false;
         FlushTranslationCache(0, 0xFFFFFFFFu);
@@ -173,7 +173,7 @@ void* ArmJit::JitCompile(uint32_t guest_pc) {
 
     do {
         /* Resolve insn[0]'s PA from the fetch itself (this also warms the
-           I-TLB for the decode that follows) — never a separate page-table
+           I-TLB for the decode that follows) - never a separate page-table
            walk, which would diverge from the fetch mid-TTBR0-setup. MMU
            off ⇒ VA == PA. */
         const bool     mmu_on  = mmu_->State()->control_register.bits.m;
@@ -208,7 +208,7 @@ void* ArmJit::JitCompile(uint32_t guest_pc) {
                 containing_block->phys_start !=
                     (block_ctx_.block_phys_page_base |
                      (containing_block->guest_start & 0x00000FFFu))) {
-                /* Stale containing outer (same VA region, different phys) —
+                /* Stale containing outer (same VA region, different phys) -
                    evict so we don't sub-entry into dead native. */
                 space.RemoveExact(containing_block->guest_start);
                 containing_block = nullptr;
@@ -296,12 +296,12 @@ void* ArmJit::JitCompile(uint32_t guest_pc) {
        native_start is finalized. */
     JitApplyFixups();
 
-    /* Restore MMU fault state — the decoder's instruction-fetch
+    /* Restore MMU fault state - the decoder's instruction-fetch
        translations may have overwritten it. */
     mmu_->State()->fault_status.word = cached_fault_status;
     mmu_->State()->fault_address     = cached_fault_address;
 
-    /* Return the unused tail of the arena allocation — past records
+    /* Return the unused tail of the arena allocation - past records
        AND past emitted code. */
     arena_.FreeUnusedTail(code_location + native_size);
 

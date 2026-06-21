@@ -27,7 +27,7 @@ int ArmJit::LocateEntrypoints() {
        Cpu.CPSR.Bits.ThumbMode. */
     const uint32_t instruction_size = CpuState()->cpsr.bits.thumb_mode ? 2u : 4u;
 
-    /* Range of the decoded stream — used by branch-into-stream
+    /* Range of the decoded stream - used by branch-into-stream
        checks below. */
     const uint32_t guest_start = block_ctx_.insns[0].actual_guest_address;
     const uint32_t guest_end =
@@ -119,7 +119,7 @@ int ArmJit::LocateEntrypoints() {
                    insn.rd == ArmGpr::kR14 &&
                    insn.rn == ArmGpr::kR15 &&
                    insn.i == 1) {
-            /* "ADD LR, PC, #Imm" — destination is PC + decoded
+            /* "ADD LR, PC, #Imm" - destination is PC + decoded
                immediate. If destination lies inside the stream,
                mark it as an entrypoint so the eventual call into
                it doesn't have to round-trip through R15ModifiedHelper. */
@@ -139,7 +139,7 @@ int ArmJit::LocateEntrypoints() {
             }
         }
 
-        /* Compute the FlagsNeeded mask — which CPSR flag bits this
+        /* Compute the FlagsNeeded mask - which CPSR flag bits this
            instruction's condition predicate consumes. */
         insn.flags_needed = static_cast<uint8_t>(kFlagListByCondPair[insn.cond / 2]);
 
@@ -152,7 +152,7 @@ int ArmJit::LocateEntrypoints() {
             }
         }
 
-        /* Compute the FlagsSet mask — which CPSR flag bits this
+        /* Compute the FlagsSet mask - which CPSR flag bits this
            instruction produces (only when the S-bit is set). */
         if (insn.s) {
             if (insn.place_fn == &PlaceDataProcessing) {
@@ -169,7 +169,7 @@ int ArmJit::LocateEntrypoints() {
 
                 if (insn.r15_modified) {
                     if (insn.opcode < 8 || insn.opcode > 11) {
-                        /* SUBS PC, LR, #X / similar — copies SPSR
+                        /* SUBS PC, LR, #X / similar - copies SPSR
                            to CPSR which sets all flags. TST/TEQ/CMP/CMN
                            (8/9/10/11) don't write Rd so this clause
                            skips them. */
@@ -186,7 +186,7 @@ int ArmJit::LocateEntrypoints() {
                 /* QADD / QSUB / etc set Q (not modelled) and N/Z. */
                 insn.flags_set = static_cast<uint8_t>(kFlagN | kFlagZ);
             } else if (insn.place_fn == &PlaceMSRImmediate) {
-                /* MSR CPSR_f, #Imm — write to CPSR flags field
+                /* MSR CPSR_f, #Imm - write to CPSR flags field
                    when bit 3 of the field-mask Rn is set and op1
                    bit 1 is clear (CPSR vs SPSR). */
                 if (!(insn.op1 & 2u) && (insn.rn & 8u)) {
@@ -194,18 +194,18 @@ int ArmJit::LocateEntrypoints() {
                 }
             } else if (insn.place_fn == &PlaceMRSorMSR) {
                 if (insn.op1 == 1) {
-                    /* MSR CPSR, Rm — full CPSR write. */
+                    /* MSR CPSR, Rm - full CPSR write. */
                     insn.flags_set = static_cast<uint8_t>(kFlagsAll);
                 } else if (insn.op1 == 0) {
-                    /* MRS Rd, CPSR — reads all flags. */
+                    /* MRS Rd, CPSR - reads all flags. */
                     insn.flags_needed |= static_cast<uint8_t>(kFlagsAll);
                 }
             } else if (insn.place_fn == &PlaceLoadStoreExtension) {
-                /* LDRSH / STRD / similar — S-bit is a sign-extend
+                /* LDRSH / STRD / similar - S-bit is a sign-extend
                    selector, not a flag-set request. No flags. */
             } else {
                 /* S-bit set on a place_fn that doesn't model the
-                   S effect — programmer / decoder error. */
+                   S effect - programmer / decoder error. */
                 LOG(Caution, "ArmJit::LocateEntrypoints: S-bit set on insn at "
                     "0x%08X with unhandled place_fn\n", insn.guest_address);
                 CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -222,7 +222,7 @@ int ArmJit::LocateEntrypoints() {
         uint32_t j = i + 1;
         for (; j < block_ctx_.num_insns; ++j) {
             if (block_ctx_.insns[j].entry_point) {
-                /* Marker present — start of next entrypoint. */
+                /* Marker present - start of next entrypoint. */
                 break;
             }
             block_ctx_.insns[j].entry_point =

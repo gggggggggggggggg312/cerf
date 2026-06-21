@@ -51,17 +51,17 @@ constexpr uint16_t kPenIntrMask        = 0x0010u;
 constexpr uint16_t kIoAdcCntrDoSample     = 0x4000u; /* bit 14 */
 constexpr uint16_t kIoAdcCntrAdcSelY      = 0x0800u; /* bit 11 */
 constexpr uint16_t kIoAdcCntrPenTimingEn  = 0x0400u; /* bit 10 */
-/* P2.H:421 — Odo ARM uses TOUCH_AUDIO_CRYSTAL (proven by TCHPDD.CPP:
+/* P2.H:421 - Odo ARM uses TOUCH_AUDIO_CRYSTAL (proven by TCHPDD.CPP:
    1260 CRYSTAL-branch reading UCB reg 10 fires in our log), so the
    12-bit sample mask applies, not the UCB1100 10-bit one. */
 constexpr uint16_t kTouchSampleValid      = 0x0FFFu;
 
-/* TCHMDD.C:91 X_SCALE_FACTOR — GWES divides calibrated coord by 4
+/* TCHMDD.C:91 X_SCALE_FACTOR - GWES divides calibrated coord by 4
    to get screen pixel; with v_Calibrated=FALSE the calibration is
    identity so raw_x = pixel_x * 4 is what reaches GWES. */
 constexpr int     kCalScaleFactor          = 4;
 
-/* P2.H:403 penState — set in ucbRegister bit 12 = PEN UP. */
+/* P2.H:403 penState - set in ucbRegister bit 12 = PEN UP. */
 constexpr uint16_t kUcbRegisterPenState   = 0x1000u;
 
 }  /* namespace */
@@ -216,7 +216,7 @@ void OdoArm720TouchSound::WriteHalf(uint32_t addr, uint16_t value) {
                 uint16_t v = ucb_regs_[reg];
                 /* UCB register 10: TCHPDD.CPP:1258-1270 spins on
                    bits 10/11 (touch + ADC cal complete) after
-                   writing start bits — auto-set both so polls
+                   writing start bits - auto-set both so polls
                    exit instantly. */
                 if (reg == 0x0A) v |= 0x0C00u;
                 /* UCB register 9: kernel reads to check pen state

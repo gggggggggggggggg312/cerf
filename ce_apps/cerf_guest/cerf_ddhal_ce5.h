@@ -8,7 +8,7 @@
 
 #pragma pack(push, 4)
 
-/* ddraw.h _DDPIXELFORMAT — 0x20 bytes (8 DWORDs); identical CE5/CE6. */
+/* ddraw.h _DDPIXELFORMAT - 0x20 bytes (8 DWORDs); identical CE5/CE6. */
 typedef struct _Ce5_DDPIXELFORMAT {
     DWORD dwSize;
     DWORD dwFlags;
@@ -20,10 +20,10 @@ typedef struct _Ce5_DDPIXELFORMAT {
     union { DWORD dwRGBAlphaBitMask; DWORD dwYUVAlphaBitMask; };
 } Ce5_DDPIXELFORMAT;
 
-/* ddraw.h _DDSCAPS — single DWORD on CE. */
+/* ddraw.h _DDSCAPS - single DWORD on CE. */
 typedef struct _Ce5_DDSCAPS { DWORD dwCaps; } Ce5_DDSCAPS;
 
-/* ddrawi.h _VIDMEMINFO — 0x50 bytes. Offsets per the ce5-oak comments. */
+/* ddrawi.h _VIDMEMINFO - 0x50 bytes. Offsets per the ce5-oak comments. */
 typedef struct _Ce5_VIDMEMINFO {
     DWORD               fpPrimary;          /* 0x00 FLATPTR primary surface */
     DWORD               dwFlags;            /* 0x04 */
@@ -36,8 +36,8 @@ typedef struct _Ce5_VIDMEMINFO {
     DWORD               dwTextureAlign;     /* 0x3c */
     DWORD               dwZBufferAlign;     /* 0x40 */
     DWORD               dwAlphaAlign;       /* 0x44 */
-    DWORD               dwNumHeaps;         /* 0x48 — 0 = HAL owns all video mem */
-    DWORD               pvmList;            /* 0x4c LPVIDMEM — NULL when dwNumHeaps=0 */
+    DWORD               dwNumHeaps;         /* 0x48 - 0 = HAL owns all video mem */
+    DWORD               pvmList;            /* 0x4c LPVIDMEM - NULL when dwNumHeaps=0 */
 } Ce5_VIDMEMINFO;
 
 #define CE5_DD_ROP_SPACE (256 / 32)   /* ddraw.h DD_ROP_SPACE */
@@ -97,7 +97,7 @@ typedef struct _Ce5_DDCORECAPS {
     DWORD       dwSVBCaps2;
 } Ce5_DDCORECAPS;
 
-/* ddrawi.h _DDHAL_DDCALLBACKS — note the CE5 order/field set. */
+/* ddrawi.h _DDHAL_DDCALLBACKS - note the CE5 order/field set. */
 typedef struct _Ce5_DDHAL_DDCALLBACKS {
     DWORD dwSize;
     DWORD dwFlags;
@@ -133,11 +133,11 @@ typedef struct _Ce5_DDHAL_DDSURFACECALLBACKS {
     PVOID SetOverlayPosition;
     PVOID reserved4;
     PVOID SetPalette;
-    PVOID reserved5;            /* slot14 (bit 0x4000) — runtime size pad, unused */
-    PVOID reserved6;            /* slot15 (bit 0x8000) — runtime size pad, unused */
+    PVOID reserved5;            /* slot14 (bit 0x4000) - runtime size pad, unused */
+    PVOID reserved6;            /* slot15 (bit 0x8000) - runtime size pad, unused */
 } Ce5_DDHAL_DDSURFACECALLBACKS;
 
-/* ddrawi.h _DDHALMODEINFO (ce5-oak ddrawi.h:1533) — 36 bytes. The CE5 ddcore
+/* ddrawi.h _DDHALMODEINFO (ce5-oak ddrawi.h:1533) - 36 bytes. The CE5 ddcore
    loader unconditionally dereferences lpModeInfo for the primary mode dims/bpp
    (ddcore sub_376511C @0x37656F4 LDR [lpModeInfo]), so dwNumModes>=1 + a valid
    table is mandatory or it faults on our NULL. */
@@ -154,7 +154,7 @@ typedef struct _Ce5_DDHALMODEINFO {
     DWORD dwAlphaBitMask;
 } Ce5_DDHALMODEINFO;
 
-/* ddrawi.h _DDHALINFO — 460 bytes. */
+/* ddrawi.h _DDHALINFO - 460 bytes. */
 typedef struct _Ce5_DDHALINFO {
     DWORD           dwSize;                 /* a1[0]   = 460 */
     PVOID           lpDDCallbacks;          /* a1[1] */

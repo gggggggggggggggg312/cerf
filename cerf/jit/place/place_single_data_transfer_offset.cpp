@@ -22,7 +22,7 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
     }
 
     if (d->i) {
-        /* Register-form Operand2 — run the shifter, then add/sub
+        /* Register-form Operand2 - run the shifter, then add/sub
            the result against the base. EDX receives the shifted
            value (PlaceDecodedShift output target). */
         cursor = PlaceDecodedShift(cursor, d, ctx, kEdx, /*needs_sco=*/false);
@@ -40,14 +40,14 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
             /* Pre-indexed: EA = base ± shifted-Rm; write EA to ECX
                (and, if W=1, to EBP for the caller's writeback). */
             if (d->u) {
-                /* ADD ECX, EDX — 0x03 /r ModRM(3, EDX, ECX). */
+                /* ADD ECX, EDX - 0x03 /r ModRM(3, EDX, ECX). */
                 Emit8(cursor, 0x03); EmitModRmReg(cursor, 3, kEdx, kEcx);
             } else {
-                /* SUB ECX, EDX — 0x2B /r ModRM(3, EDX, ECX). */
+                /* SUB ECX, EDX - 0x2B /r ModRM(3, EDX, ECX). */
                 Emit8(cursor, 0x2B); EmitModRmReg(cursor, 3, kEdx, kEcx);
             }
             if (d->w) {
-                /* MOV EBP, ECX — caller stores EBP into Cpu.GPRs[Rn]. */
+                /* MOV EBP, ECX - caller stores EBP into Cpu.GPRs[Rn]. */
                 EmitMovRegReg(cursor, kEbp, kEcx);
             }
         } else {
@@ -56,10 +56,10 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
                caller can write it back to Rn. */
             if (d->u == 0) {
                 /* Down direction: NEG EDX so the LEA below adds the
-                   negated value. NEG r32 — 0xF7 /3 ModRM(3, EDX, 3). */
+                   negated value. NEG r32 - 0xF7 /3 ModRM(3, EDX, 3). */
                 Emit8(cursor, 0xF7); EmitModRmReg(cursor, 3, kEdx, 3);
             }
-            /* LEA EBP, [ECX + EDX] — 0x8D mod=0 r/m=4(SIB) reg=EBP;
+            /* LEA EBP, [ECX + EDX] - 0x8D mod=0 r/m=4(SIB) reg=EBP;
                SIB ss=0 index=EDX base=ECX. */
             Emit8(cursor, 0x8D);
             EmitModRmReg(cursor, 0, 4, kEbp);
@@ -68,7 +68,7 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
     } else {
         /* Immediate-form Operand2 (d->offset already decoded). */
         if (d->rn == ArmGpr::kR15) {
-            /* PC-relative load/store — the decoder pre-computed
+            /* PC-relative load/store - the decoder pre-computed
                R15 ± Offset and stashed it in reserved3. Move that
                literal into ECX as the effective address. */
             EmitMovRegImm32(cursor, kEcx, d->reserved3);
@@ -90,7 +90,7 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
                     EmitSubRegImm32(cursor, kEcx, static_cast<uint32_t>(d->offset));
                 }
                 if (d->w) {
-                    /* Writeback enabled — stage EA in EBP for the
+                    /* Writeback enabled - stage EA in EBP for the
                        caller's store-back to Rn. */
                     EmitMovRegReg(cursor, kEbp, kEcx);
                 }
@@ -105,12 +105,12 @@ uint8_t* PlaceSingleDataTransferOffset(uint8_t*           cursor,
                    compact LEA disp8 form; else disp32. */
                 if (static_cast<uint32_t>(static_cast<int8_t>(offset_to_add)) ==
                     offset_to_add) {
-                    /* LEA EBP, [ECX + disp8] — 0x8D mod=1 r/m=ECX reg=EBP disp8. */
+                    /* LEA EBP, [ECX + disp8] - 0x8D mod=1 r/m=ECX reg=EBP disp8. */
                     Emit8(cursor, 0x8D);
                     EmitModRmReg(cursor, 1, kEcx, kEbp);
                     Emit8(cursor, static_cast<uint8_t>(offset_to_add));
                 } else {
-                    /* LEA EBP, [ECX + disp32] — 0x8D mod=2 r/m=ECX reg=EBP disp32. */
+                    /* LEA EBP, [ECX + disp32] - 0x8D mod=2 r/m=ECX reg=EBP disp32. */
                     Emit8(cursor, 0x8D);
                     EmitModRmReg(cursor, 2, kEcx, kEbp);
                     Emit32(cursor, offset_to_add);

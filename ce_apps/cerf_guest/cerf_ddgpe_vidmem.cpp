@@ -23,7 +23,7 @@ private:
 };
 
 /* Flip-chain back buffer: CPU-writable guest RAM (DDGPESurf self-alloc) but tagged
-   VIDEOMEMORY so DDGPECreateSurface won't OR in SYSTEMMEMORY — a video/system class
+   VIDEOMEMORY so DDGPECreateSurface won't OR in SYSTEMMEMORY - a video/system class
    mismatch makes ddcore reject the Flip (sub_377C594). SurfaceFbPa keys on FB-region
    residency, not this cap, so it still resolves to the guest-RAM VA. */
 class CerfSysVidSurf : public DDGPESurf {
@@ -130,7 +130,7 @@ extern "C" void CerfPrimaryShadowPresent(void) {
 
 /* The DDGPE lib's AllocVideoSurface routes here with GPE_REQUIRE_VIDEO_MEMORY
    (ddgpe.cpp:85 -> AllocSurface(DDGPESurf**) -> (GPESurf**) cast, which drops
-   pixelFormat — re-derived from format). REQUIRE/BACK_BUFFER must come from
+   pixelFormat - re-derived from format). REQUIRE/BACK_BUFFER must come from
    video memory; PREFER tries video then falls back; otherwise system memory. */
 SCODE CerfDDGPE::AllocSurface(GPESurf** ppSurf, int width, int height,
                               EGPEFormat format, int surfaceFlags) {
@@ -212,7 +212,7 @@ SCODE CerfDDGPE::ApplyFbMode() {
         m_pPrimarySurface = NULL;
     }
     /* CerfVidSurf (a DDGPESurf): DDGPECreateSurface calls the virtual SetDDGPESurf on
-       the primary (ddhsurf.cpp:204) — a plain GPESurf faults — and m_fInVideoMemory=1
+       the primary (ddhsurf.cpp:204) - a plain GPESurf faults - and m_fInVideoMemory=1
        tags it VIDEOMEMORY (it IS the FB-PA scanout), so DDGPE won't OR in SYSTEMMEMORY
        and make ddcore reject the flip on a primary/back-buffer class mismatch. */
     m_pPrimarySurface = new CerfVidSurf((int)g_FbWidth, (int)g_FbHeight, fb,

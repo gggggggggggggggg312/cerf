@@ -48,7 +48,7 @@ void Omap3530Dss::HandleDssSysconfigWriteLocked(uint32_t value) {
 void Omap3530Dss::HandleDispcSysconfigWriteLocked(uint32_t value) {
     dispc_[kDispcSysconfig / 4u] = value & ~kSysconfigSoftReset;
     if (value & kSysconfigSoftReset) {
-        /* dssai.cpp:3996+ — DISPC_SYSCONFIG SOFTRESET / DISPC_SYSSTATUS
+        /* dssai.cpp:3996+ - DISPC_SYSCONFIG SOFTRESET / DISPC_SYSSTATUS
            RESETDONE poll. Same instantaneous-reset model. */
         for (auto& w : dispc_) w = 0u;
         dispc_[kDispcSysstatus / 4u] = kSysstatusResetDone;
@@ -59,7 +59,7 @@ void Omap3530Dss::HandleDispcSysconfigWriteLocked(uint32_t value) {
 
 void Omap3530Dss::HandleDispcIrqstatusWriteLocked(uint32_t value) {
     /* Write-1-to-clear. dssai.cpp:791,2317,4224,4239 use
-       SETREG32(IRQSTATUS, X) = read|X then write back — implementing
+       SETREG32(IRQSTATUS, X) = read|X then write back - implementing
        this as plain assignment would clear every bit the reader
        just saw, silently masking the next IRQ assertion. */
     dispc_[kDispcIrqstatus / 4u] &= ~(value & kIrqMask);
@@ -200,7 +200,7 @@ void Omap3530Dss::AdvanceScanTick() {
 
     if (ctrl & kCtrlLcdEnable) {
         dispc_[kDispcIrqstatus / 4u] |= kIrqVsync;
-        /* GO bit auto-clears at next VFP — dssai.cpp:4114 FlushRegs
+        /* GO bit auto-clears at next VFP - dssai.cpp:4114 FlushRegs
            polls until clear, dssai.cpp:4144 WaitForFlushDone same.
            Without this the BSP spins forever on shadow-reg commit. */
         dispc_[kDispcControl / 4u] = ctrl & ~kCtrlGoLcd;

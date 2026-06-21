@@ -76,7 +76,7 @@ public:
         const uint32_t poff = off - kDsiPllBase;
         uint32_t v;
         if (poff == kPllStatus) {
-            /* MUST derive, not store — dssai.cpp:4882 polls RESET_DONE
+            /* MUST derive, not store - dssai.cpp:4882 polls RESET_DONE
                after CLK_CTRL handshake, :5076 polls LOCK_STATUS after
                PLL_GO. Plain storage = both stay 0 = InitDsiPll fails. */
             v = 0u;
@@ -84,7 +84,7 @@ public:
                 v |= kPllResetDone;
             if (pll_locked_) v |= kPllLockStatus;
         } else if (poff == kPllGo) {
-            /* Reads always return 0 — dssai.cpp:5061 waits for the
+            /* Reads always return 0 - dssai.cpp:5061 waits for the
                written GO_CMD bit to clear, modelled as "never stored
                in the first place". */
             v = 0u;
@@ -109,13 +109,13 @@ public:
             case kDsiSysstatus:
                 return;  /* read-only */
             case kDsiIrqstatus:
-                /* W1C — dssai.cpp:4848-4849 reads value then writes
+                /* W1C - dssai.cpp:4848-4849 reads value then writes
                    it back to clear all pending. */
                 dsi_[kDsiIrqstatus / 4u] &= ~value;
                 return;
             case kDsiClkCtrl: {
                 /* MUST mirror PWR_CMD bits[31:30] → PWR_STATUS bits[29:28]
-                   on write — dssai.cpp:4862 polls STATUS == CMD; plain
+                   on write - dssai.cpp:4862 polls STATUS == CMD; plain
                    storage = poll never succeeds = InitDsiPll fails. */
                 const uint32_t pwr_cmd = value & kPllPwrCmdMask;
                 const uint32_t new_status = pwr_cmd >> kPllPwrShift;

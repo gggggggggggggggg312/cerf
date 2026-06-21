@@ -41,7 +41,7 @@ int ArmCp15SctlrHandler::HandleWrite(ArmJit*  jit,
     ArmCp15ControlRegister reg;
     reg.word = new_value;
 
-    /* v4/v5 only — ARMv7 SCTLR has different reserved/fixed bits;
+    /* v4/v5 only - ARMv7 SCTLR has different reserved/fixed bits;
        applying ARM920T constraints to a v7 SCTLR write would UND
        or silently rewrite v7-specific bits the kernel just set. */
     if (!jit->ProcessorConfig()->HasCp15V6() &&
@@ -66,7 +66,7 @@ int ArmCp15SctlrHandler::HandleWrite(ArmJit*  jit,
     const bool enabling_mmu = reg.bits.m && !state->control_register.bits.m;
 
     if (enabling_mmu) {
-        /* Seed ITLB[0] for guest_addr+4 — kernel prefetched the
+        /* Seed ITLB[0] for guest_addr+4 - kernel prefetched the
            next instruction before MCR and expects it executable
            under MMU-on without a page-table walk first. */
         const uint32_t actual_guest_addr = ((guest_addr & 0xFE000000u) == 0u)
@@ -74,7 +74,7 @@ int ArmCp15SctlrHandler::HandleWrite(ArmJit*  jit,
             : guest_addr;
 
         /* Identity PA at this transition (pre-MMU VA == PA); global so the
-           seed matches under any ASID. A present ITLB entry is executable —
+           seed matches under any ASID. A present ITLB entry is executable -
            the fast-path fetch skips the permission re-check the walk did. */
         const uint32_t seed_va_page = (actual_guest_addr + 4u) & 0xFFFFF000u;
         const uint32_t seed_pa_page = (guest_addr + 4u) & 0xFFFFF000u;
@@ -148,10 +148,10 @@ void ArmCp15SctlrHandler::InitializeTrampoline(ArmJit* jit) {
     EmitCall   (p, reinterpret_cast<void*>(&ArmCp15SctlrHandler::HandleWriteStaticHelper));
     EmitAddRegImm32(p, kEsp, 16);
     EmitTestRegReg (p, kEax, kEax);
-    /* JNZ short — skip exactly the POP EAX (1 byte). */
+    /* JNZ short - skip exactly the POP EAX (1 byte). */
     Emit8(p, 0x75);
     Emit8(p, 0x01);
-    /* POP EAX (1 byte) — discards JIT block ret addr when EAX==0. */
+    /* POP EAX (1 byte) - discards JIT block ret addr when EAX==0. */
     Emit8(p, 0x58);
     /* RETN. */
     Emit8(p, 0xC3);

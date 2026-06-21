@@ -68,13 +68,13 @@ bool ArmDecoder::DecodeThumb(DecodedInsn* insn, uint16_t opcode_word) {
         insn->h_two_bits = op.long_branch.h;
         switch (insn->h_two_bits) {
         case 0:
-            /* Unconditional long branch — signed 11-bit offset
+            /* Unconditional long branch - signed 11-bit offset
                scaled << 1. */
             insn->offset       = 2 * op.unconditional_branch.offset11;
             insn->r15_modified = true;
             break;
         case 2:
-            /* BL high half — 11-bit offset shifted left 12 (range
+            /* BL high half - 11-bit offset shifted left 12 (range
                ±4 MB). Sign-extend the 10-bit value to 32 bits. */
             if (op.long_branch.offset & 0x400u) {
                 insn->offset = static_cast<int32_t>(
@@ -84,8 +84,8 @@ bool ArmDecoder::DecodeThumb(DecodedInsn* insn, uint16_t opcode_word) {
                     op.long_branch.offset << 12);
             }
             break;
-        case 1:  /* BLX low half — Thumb→ARM transition. */
-        case 3:  /* BL low half — Thumb→Thumb. */
+        case 1:  /* BLX low half - Thumb→ARM transition. */
+        case 3:  /* BL low half - Thumb→Thumb. */
             insn->offset       = op.long_branch.offset << 1;
             insn->r15_modified = true;
             break;
@@ -130,7 +130,7 @@ void ArmDecoder::DecodeThumbCase2(DecodedInsn* d, ThumbOpcode op) {
        reserved1==1). === */
 void ArmDecoder::DecodeThumbConditionalBranch(DecodedInsn* d, ThumbOpcode op) {
     if (op.conditional_branch.cond == 0xFu) {
-        /* SWI — synthesize ARM SoftwareInterrupt encoding. */
+        /* SWI - synthesize ARM SoftwareInterrupt encoding. */
         ArmOpcode arm_op;
         arm_op.word = 0;
         arm_op.software_interrupt.cond      = 0xEu;
@@ -143,7 +143,7 @@ void ArmDecoder::DecodeThumbConditionalBranch(DecodedInsn* d, ThumbOpcode op) {
         }
         DecodeArm(d, arm_op.word);
     } else if (op.conditional_branch.cond == 0xEu) {
-        /* "break" opcode (not BKPT) — used by CE's assert mechanism
+        /* "break" opcode (not BKPT) - used by CE's assert mechanism
            as a deliberate UND-fault trigger. */
         d->place_fn = &PlaceRaiseUndefinedException;
     } else {
@@ -159,7 +159,7 @@ void ArmDecoder::DecodeThumbConditionalBranch(DecodedInsn* d, ThumbOpcode op) {
     }
 }
 
-/* === PC-relative load — LDR Rd, [PC + #imm]. === */
+/* === PC-relative load - LDR Rd, [PC + #imm]. === */
 void ArmDecoder::DecodeThumbPCRelativeLoad(DecodedInsn* d, ThumbOpcode op) {
     ArmOpcode arm_op;
     arm_op.word = 0;

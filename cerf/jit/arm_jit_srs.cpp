@@ -26,7 +26,7 @@ uint32_t* GetBankedR13(ArmCpuState* state, uint32_t target_mode) {
 
     case ArmMode::kUser:
     case ArmMode::kSystem:
-        /* User/System R13 — parked in the current privileged mode's
+        /* User/System R13 - parked in the current privileged mode's
            bank slot per CERF's banking model. */
         switch (current_mode) {
         case ArmMode::kSupervisor: return &state->gprs_svc[ArmGpr::kR13Svc];
@@ -56,13 +56,13 @@ void __fastcall ArmJit::SrsHelper(uint32_t encoded,
 
     if (current_mode == ArmMode::kUser || current_mode == ArmMode::kSystem) {
         LOG(Caution, "SrsHelper pc=0x%08X: executed in User/System mode "
-                      "(CPSR.M=0x%X) — UNPREDICTABLE\n",
+                      "(CPSR.M=0x%X) - UNPREDICTABLE\n",
                       guest_pc, current_mode);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
     /* ddi0406c B9.3.16: target Hyp (0x1A) is UNPREDICTABLE. */
     if (target_mode == 0x1Au) {
-        LOG(Caution, "SrsHelper pc=0x%08X: target Hyp mode (0x1A) — UNPREDICTABLE\n",
+        LOG(Caution, "SrsHelper pc=0x%08X: target Hyp mode (0x1A) - UNPREDICTABLE\n",
             guest_pc);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -84,7 +84,7 @@ void __fastcall ArmJit::SrsHelper(uint32_t encoded,
     uint8_t* host_lr = jit->mmu_->TranslateWrite(state, address);
     if (!host_lr) {
         LOG(Caution, "SrsHelper pc=0x%08X: TranslateWrite failed for LR slot "
-                      "VA 0x%08X — SRS to non-RAM or aborted store not supported\n",
+                      "VA 0x%08X - SRS to non-RAM or aborted store not supported\n",
                       guest_pc, address);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -93,7 +93,7 @@ void __fastcall ArmJit::SrsHelper(uint32_t encoded,
     uint8_t* host_spsr = jit->mmu_->TranslateWrite(state, address + 4u);
     if (!host_spsr) {
         LOG(Caution, "SrsHelper pc=0x%08X: TranslateWrite failed for SPSR slot "
-                      "VA 0x%08X — SRS to non-RAM or aborted store not supported\n",
+                      "VA 0x%08X - SRS to non-RAM or aborted store not supported\n",
                       guest_pc, address + 4u);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }

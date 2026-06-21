@@ -17,7 +17,7 @@
 namespace {
 
 /* TVR reload uses kernel's dwReschedIncrement (3686/36864/92160)
-   per TIME720.C:305-309 — chip 1-off loads (TIME720.C:167-171)
+   per TIME720.C:305-309 - chip 1-off loads (TIME720.C:167-171)
    fire the error path. IRQ bypasses IrqController per
    INT720.C:38 (TIR read direct). */
 
@@ -171,7 +171,7 @@ void OdoArm720CpuTimer::WriteWord(uint32_t addr, uint32_t value) {
             period_start_ = Clock::now();
         }
     } else if (slot == kSlotTir) {
-        /* W1C — see INT720.C `*pTIR = TIR;` pattern. */
+        /* W1C - see INT720.C `*pTIR = TIR;` pattern. */
         tir_ &= ~value;
     } else {
         HaltUnsupportedAccess("WriteWord TVR", addr, value);
@@ -192,7 +192,7 @@ void OdoArm720CpuTimer::TickLoop() {
         }
 
         if (period_ms == 0) {
-            /* Timer off — sleep short and re-check the mode
+            /* Timer off - sleep short and re-check the mode
                register. Host doesn't expose a wake-on-write
                channel into the peripheral state, so polling at
                1 ms is the simplest correct shape. */
@@ -222,7 +222,7 @@ void OdoArm720CpuTimer::TickLoop() {
                 tir_ |= kTirSetBit;
             }
 
-            /* Wake the JIT outside the lock — ArmJit::SetInterruptPending
+            /* Wake the JIT outside the lock - ArmJit::SetInterruptPending
                takes its own interrupt_lock_. */
             emu_.Get<ArmJit>().SetInterruptPending();
         }
@@ -257,9 +257,9 @@ void OdoArm720CpuTimer::WriteHalf(uint32_t addr, uint16_t value) {
     /* No 16-bit writes to CPUISR / TIR / TVR are exercised by the
        verified BSP (ARM720.H REG() macros are 32-bit DWORD only).
        A 16-bit write here means a non-BSP-verified code path is
-       active — halt loudly. */
+       active - halt loudly. */
     LOG(Caution, "OdoArm720CpuTimer::WriteHalf at 0x%08X = 0x%04X "
-            "— ARM720 CPU-interface registers are 32-bit-only per "
+            "- ARM720 CPU-interface registers are 32-bit-only per "
             "ARM720.H REG() macros; halt rather than guess the "
             "half-write semantic.\n", addr, value);
     CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);

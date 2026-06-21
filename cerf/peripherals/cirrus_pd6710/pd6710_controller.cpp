@@ -43,7 +43,7 @@ constexpr uint8_t kIfsCd1       = 0x04u;
 constexpr uint8_t kIfsCd2       = 0x08u;
 constexpr uint8_t kIfsCardReady = 0x20u;
 
-/* PWR_VCC_POWER | PWR_OUTPUT_ENABLE — the powered-on pattern the BSP
+/* PWR_VCC_POWER | PWR_OUTPUT_ENABLE - the powered-on pattern the BSP
    driver writes (pd6710.h bits 0x10 / 0x80). */
 constexpr uint8_t kPowerOnPattern = 0x90u;
 
@@ -303,7 +303,7 @@ void Pd6710Controller::OnCardDetectChanged(PcmciaSlot& slot) {
         pulse = (reg_status_change_int_cfg_ & kCfgCardDetectEnable) != 0u;
     }
     if (!slot.HasCard()) {
-        /* Card removal drops the (level-triggered) card IRQ with it —
+        /* Card removal drops the (level-triggered) card IRQ with it -
            the DeviceEmulator host runtime clears EINT8 on RemoveCard. */
         if (auto* line = emu_.TryGet<Pd6710CardIrqLine>()) line->Deassert();
     }

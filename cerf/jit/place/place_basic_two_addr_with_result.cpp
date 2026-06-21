@@ -15,7 +15,7 @@ uint8_t* PlaceBasicTwoAddrWithResult(uint8_t*      cursor,
     using namespace x86;
     if (d->rn == d->rd && d->rn != ArmGpr::kR15) {
         if (d->i) {
-            /* OP r/m32, imm32 — opcode + ModRM(mod=10 r/m=ESI reg=arith_imm32_reg) + disp32 + imm32. */
+            /* OP r/m32, imm32 - opcode + ModRM(mod=10 r/m=ESI reg=arith_imm32_reg) + disp32 + imm32. */
             Emit8(cursor, arith_imm32_opcode);
             EmitModRmReg(cursor, 2, kStateReg, arith_imm32_reg);
             Emit32(cursor,

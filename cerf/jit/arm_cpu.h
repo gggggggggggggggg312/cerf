@@ -21,7 +21,7 @@ public:
     void SaveState(StateWriter& w);
     void RestoreState(StateReader& r);
 
-    /* Called by ArmJit::OnReady — wires the back-pointer to the
+    /* Called by ArmJit::OnReady - wires the back-pointer to the
        owning ArmJit. Resolving ArmJit inside ArmCpu::OnReady would
        form a service-locator cycle and halt. */
     void LateInit(ArmJit* jit);
@@ -42,7 +42,7 @@ public:
     void* RaiseIrqException           (uint32_t inst_ptr);
     void* RaiseSoftwareInterruptException(uint32_t inst_ptr);
 
-    /* Must run BEFORE RaiseResetException — the SVC bank slot
+    /* Must run BEFORE RaiseResetException - the SVC bank slot
        must hold the SP value when post-reset BankSwitch rotates
        it into visible R13. */
     void SetInitialStackPointer(uint32_t sp);

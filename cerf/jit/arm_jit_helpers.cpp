@@ -69,7 +69,7 @@ uint8_t* __fastcall ArmJit::TranslateReadWriteHelper(uint32_t va, ArmJit* jit) {
 
 uint8_t* __fastcall ArmJit::MapGuestPhysicalToHostRamHelper(uint32_t paddr, ArmJit* jit) {
     /* TTBR-write reachability check. Page tables must live in writable
-       host RAM — TryTranslateWrite returns nullptr for both unmapped
+       host RAM - TryTranslateWrite returns nullptr for both unmapped
        PAs and read-only (flash/ROM) regions, matching the reference's
        BoardMapGuestPhysicalToHostRAM semantics. */
     return jit->memory_->TryTranslateWrite(paddr);
@@ -225,14 +225,14 @@ void ArmJit::FlushTranslationCache(uint32_t va, uint32_t length) {
 #endif
         FlushNativeAddrCache();
         /* Shadow-stack entries cache native destinations for guest
-           return addresses — after a TC flush those native pointers
+           return addresses - after a TC flush those native pointers
            are stale (point into freed arena memory). Drop the whole
            stack with one count reset; the next BL emit refills. */
         shadow_stack_count_ = 0;
         blocks_arm_  .FlushAll();
         blocks_thumb_.FlushAll();
         arena_.Flush();
-        /* All translations gone — reset SMC tracking so the next I-cache
+        /* All translations gone - reset SMC tracking so the next I-cache
            invalidate no-ops until code is written again. */
         std::memset(mmu_->State()->code_xlat_bitmap, 0,
                     mmu_->State()->code_word_bitmap_bytes);

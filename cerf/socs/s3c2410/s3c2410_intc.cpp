@@ -29,7 +29,7 @@ public:
     void AssertSubIrq(int main_source_bit, int sub_source_bit) override;
     void DeliverPendingIrq() override;
 
-    /* MMIO surface — called by the sibling S3C2410IntcMmio Peripheral
+    /* MMIO surface - called by the sibling S3C2410IntcMmio Peripheral
        (same TU; static_cast from IrqController& is safe). */
     uint32_t ReadReg (uint32_t offset);
     void     WriteReg(uint32_t offset, uint32_t value);
@@ -87,7 +87,7 @@ void S3C2410Intc::RecomputeIntpndIntoffset() {
     }
     /* Default priority config: lowest source bit number wins. The
        chip's full priority arbiter (rotation enabled per ARB) is
-       not modelled — CE leaves PRIORITY at the reset value. */
+       not modelled - CE leaves PRIORITY at the reset value. */
     const int bit = std::countr_zero(pending);
     storage_[kSlotINTPND]    = (1u << bit);
     storage_[kSlotINTOFFSET] = static_cast<uint32_t>(bit);
@@ -100,7 +100,7 @@ bool S3C2410Intc::HasPendingUnmasked() const {
 void S3C2410Intc::AssertIrq(int source_bit) {
     if (source_bit < 0 || source_bit >= 32) {
         LOG(Caution, "S3C2410Intc::AssertIrq: source_bit %d out of "
-                "range — main SRCPND is 32 bits per S3C2410 UM\n",
+                "range - main SRCPND is 32 bits per S3C2410 UM\n",
                 source_bit);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -110,11 +110,11 @@ void S3C2410Intc::AssertIrq(int source_bit) {
         std::lock_guard<std::mutex> lk(state_mutex_);
         const uint32_t bit_mask = 1u << source_bit;
 
-        /* FIQ is not modelled — fail loud rather than silently dropping
+        /* FIQ is not modelled - fail loud rather than silently dropping
            the assertion or routing it to the IRQ vector incorrectly. */
         if (storage_[kSlotINTMOD] & bit_mask) {
             LOG(Caution, "S3C2410Intc::AssertIrq: source %d configured "
-                    "as FIQ (INTMOD bit set) — FIQ routing not "
+                    "as FIQ (INTMOD bit set) - FIQ routing not "
                     "modelled\n", source_bit);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }
@@ -133,7 +133,7 @@ void S3C2410Intc::AssertSubIrq(int main_source_bit, int sub_source_bit) {
        SubInterruptCollection bitfield union in dev_emu's devices.h. */
     if (sub_source_bit < 0 || sub_source_bit >= 11) {
         LOG(Caution, "S3C2410Intc::AssertSubIrq: sub_source_bit %d out "
-                "of range — SUBSRCPND has 11 bits per S3C2410 UM\n",
+                "of range - SUBSRCPND has 11 bits per S3C2410 UM\n",
                 sub_source_bit);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -151,12 +151,12 @@ void S3C2410Intc::AssertSubIrq(int main_source_bit, int sub_source_bit) {
 
         if (storage_[kSlotINTMOD] & main_mask) {
             LOG(Caution, "S3C2410Intc::AssertSubIrq: main source %d "
-                    "configured as FIQ (INTMOD bit set) — FIQ routing "
+                    "configured as FIQ (INTMOD bit set) - FIQ routing "
                     "not modelled\n", main_source_bit);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }
 
-        /* Sub-pending stays latched even when INTSUBMSK masks it —
+        /* Sub-pending stays latched even when INTSUBMSK masks it -
            drivers read SUBSRCPND directly to demux sub-IRQs. */
         storage_[kSlotSUBSRCPND] |= sub_mask;
 
@@ -187,7 +187,7 @@ void S3C2410Intc::DeliverPendingIrq() {
 
     /* Faulting PC is the next-instruction PC at this between-blocks
        observation point; ArmCpu::RaiseIrqException applies the
-       per-spec +4 itself. The pending bit stays set — kernel ack via
+       per-spec +4 itself. The pending bit stays set - kernel ack via
        INTPND W1C clears it through WriteReg's ClearInterruptPending. */
     jit.Cpu()->RaiseIrqException(state->gprs[ArmGpr::kR15]);
 }
@@ -222,7 +222,7 @@ void S3C2410Intc::WriteReg(uint32_t offset, uint32_t value) {
             case kSlotSRCPND:
             case kSlotINTPND:
             case kSlotSUBSRCPND:
-                /* W1C — bit set in `value` clears that bit. The kernel's
+                /* W1C - bit set in `value` clears that bit. The kernel's
                    IRQ handler exit sequence writes 1s to clear pending
                    bits before IRETing. */
                 storage_[slot] &= ~value;
@@ -238,7 +238,7 @@ void S3C2410Intc::WriteReg(uint32_t offset, uint32_t value) {
                 break;
 
             case kSlotINTOFFSET:
-                /* Read-only on the chip — drop writes. */
+                /* Read-only on the chip - drop writes. */
                 break;
 
             case kSlotINTMOD:
@@ -247,12 +247,12 @@ void S3C2410Intc::WriteReg(uint32_t offset, uint32_t value) {
                 break;
 
             default:
-                /* unreachable — slot bounds-checked above */
+                /* unreachable - slot bounds-checked above */
                 break;
         }
     }
 
-    /* Mirror JIT pending against post-W1C state — when the last
+    /* Mirror JIT pending against post-W1C state - when the last
        unmasked source drains, the trampoline must re-arm to no-deliver. */
     auto& jit = emu_.Get<ArmJit>();
     if (needs_halt) jit.SetInterruptPending();
@@ -271,7 +271,7 @@ void S3C2410Intc::RestoreState(StateReader& r) {
 
 void S3C2410Intc::PostRestore() {
     /* Re-derive the JIT IRQ-pending latch from the restored SRCPND/INTMSK after
-       every peripheral's RestoreState has run — the INTC owns the CPU IRQ line.
+       every peripheral's RestoreState has run - the INTC owns the CPU IRQ line.
        Same lock-then-notify-outside-lock shape as WriteReg. */
     bool pending = false;
     {

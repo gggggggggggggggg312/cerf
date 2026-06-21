@@ -60,7 +60,7 @@ void ArmCpuBankSwitch(ArmCpuState* state) {
 
     case ArmMode::kUser:
     case ArmMode::kSystem:
-        /* No bank for these modes — GPRs[13]/[14] already hold the
+        /* No bank for these modes - GPRs[13]/[14] already hold the
            user-view values. */
         break;
 
@@ -70,7 +70,7 @@ void ArmCpuBankSwitch(ArmCpuState* state) {
         break;
 
     default:
-        /* Mode field corrupt — leave state alone; caller will fault
+        /* Mode field corrupt - leave state alone; caller will fault
            on the next instruction. */
         break;
     }
@@ -156,7 +156,7 @@ void ArmCpuUpdateCpsr(ArmJit* jit, ArmCpuState* state, ArmPsr new_psr) {
         state->gprs[ArmGpr::kR15] &= 0xFFFFFFFEu;
     }
 
-    /* IRQ-disable change — same lock-and-patch pattern as the
+    /* IRQ-disable change - same lock-and-patch pattern as the
        WithFlags variant. */
     if (state->cpsr.bits.irq_disable != new_psr.bits.irq_disable) {
         std::lock_guard<std::mutex> guard(jit->InterruptLock());

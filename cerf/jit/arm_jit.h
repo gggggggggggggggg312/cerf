@@ -42,7 +42,7 @@ public:
     void Run();
 
     /* MUST establish ESI = ArmCpuState* and EBX = ArmMmuState*
-       before CALLing ECX — every Place fn emit addresses CPU/MMU
+       before CALLing ECX - every Place fn emit addresses CPU/MMU
        fields off these pinned bases and reading anything else
        reads wrong state. */
     static void __cdecl Dispatch(void*        native_pc,
@@ -55,7 +55,7 @@ public:
 
     ArmProcessorConfig* ProcessorConfig() { return processor_config_; }
 
-    /* Cached ArmProcessorConfig::HasThumb() — read on every guest
+    /* Cached ArmProcessorConfig::HasThumb() - read on every guest
        CPSR write, too hot for a virtual call. */
     bool HasThumb() const { return has_thumb_; }
 
@@ -118,7 +118,7 @@ public:
     uint32_t* NextPageHostAddressPtr()    { return &next_page_host_address_; }
     uint32_t* NextPageIoAddressPtr()      { return &next_page_io_address_; }
 
-    /* Cleared on every JitCodeArena flush — cached host pointers
+    /* Cleared on every JitCodeArena flush - cached host pointers
        become stale the moment the arena reuses their slabs. */
     void* NativeAddr(ExceptionVector v) const {
         return native_addrs_[static_cast<uint32_t>(v)];
@@ -136,7 +136,7 @@ public:
 
     void* IdleEvent() const { return idle_event_; }
 
-    /* Caller MUST hold InterruptLock — the body try_locks + aborts
+    /* Caller MUST hold InterruptLock - the body try_locks + aborts
        if not held, since concurrent peripheral threads racing the
        trampoline-byte patch produces torn (cpsr, byte) state. */
     void UpdateInterruptOnPoll();
@@ -169,7 +169,7 @@ public:
     static void __fastcall WfiHelper(ArmJit* jit);
 
     /* JIT-emitted helper: a SoC power-down detector (e.g. XScale PWRMODE=SLEEP)
-       calls this to enter deep sleep — halt the CPU and run the recovery prompt
+       calls this to enter deep sleep - halt the CPU and run the recovery prompt
        (GuestDeepSleep). The SoC strategy owns the detection, this owns the entry. */
     static void __fastcall EnterDeepSleepHelper(ArmJit* jit);
 
@@ -177,7 +177,7 @@ public:
        return + io_pending_address_ set ⇒ peripheral I/O dispatch;
        nullptr without io_pending set ⇒ data abort. */
     /* __fastcall: ECX = va, EDX = jit. Slow path behind the JIT-emitted
-       inline TLB fast probe — only reached on an inline miss. */
+       inline TLB fast probe - only reached on an inline miss. */
     static uint8_t* __fastcall TranslateReadHelper     (uint32_t va, ArmJit* jit);
     static uint8_t* __fastcall TranslateWriteHelper    (uint32_t va, ArmJit* jit);
     static uint8_t* __fastcall TranslateReadWriteHelper(uint32_t va, ArmJit* jit);
@@ -192,7 +192,7 @@ public:
     static void* __cdecl FindBlockNativeStartHelper(ArmJit*  jit,
                                                     uint32_t guest_pc);
 
-    /* One-byte naked RET — shadow-stack slots for "not yet jitted"
+    /* One-byte naked RET - shadow-stack slots for "not yet jitted"
        return addresses point here; the eventual BX LR / MOV PC,LR JMPs
        to the slot value as a native address, so it must be executable. */
     static void NotJittedHelper();
@@ -253,13 +253,13 @@ public:
     }
 
     /* Context switch (FCSE PID / TTBR0 / CONTEXTIDR change): drop the
-       VA-keyed native caches. NOT a TC flush — phys-keyed blocks survive
+       VA-keyed native caches. NOT a TC flush - phys-keyed blocks survive
        and the current block keeps executing. */
     void ContextSwitchFlush();
     static void __fastcall ContextSwitchFlushHelper(ArmJit* jit);
 
     /* SMC: on an I-cache invalidate, drop blocks on phys pages written since
-       the last invalidate (the code_page_dirty set in ArmMmuState) — targeted,
+       the last invalidate (the code_page_dirty set in ArmMmuState) - targeted,
        not a whole-cache flush. */
     void InvalidateDirtyCodePages();
     static void __fastcall InvalidateDirtyCodePagesHelper(ArmJit* jit);

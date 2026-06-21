@@ -21,7 +21,7 @@ public:
     /* proc-sa1100.S:33  #define DCACHELINESIZE 32. */
     uint32_t CacheLineSize()              const override { return 32; }
 
-    /* proc-sa1100.S:242 cpu_arch_name "armv4" — StrongARM has no Thumb. */
+    /* proc-sa1100.S:242 cpu_arch_name "armv4" - StrongARM has no Thumb. */
     bool     HasThumb()                   const override { return false; }
     bool     HasDsp()                     const override { return false; }
     bool     HasLoadStoreDouble()         const override { return false; }

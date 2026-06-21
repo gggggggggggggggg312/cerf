@@ -28,7 +28,7 @@ constexpr uint8_t kRcrMonitor   = 0x20;
 
 /* IEEE 802.3 CRC32 polynomial (bit-reversed). Used by the NE2000
    multicast hash filter (NIC_MC_ADDR is an 8-byte = 64-bit hash
-   table indexed by bits of the dest-MAC CRC32 — the chip accepts a
+   table indexed by bits of the dest-MAC CRC32 - the chip accepts a
    multicast frame iff its index bit is set). */
 constexpr uint32_t kCrc32Poly = 0xEDB88320u;
 
@@ -50,7 +50,7 @@ Rtl8019::Rtl8019(CerfEmulator& emu) : PcmciaCard(emu) {
     for (std::size_t i = 0; i < kMacLen; ++i) {
         card_rom_[i * 2] = guest_mac_[i];
     }
-    /* 'W' 'W' at offsets 14/15 — CardSlotTest() reads these to
+    /* 'W' 'W' at offsets 14/15 - CardSlotTest() reads these to
        distinguish 8-bit cards from 16-bit cards. We're 16-bit. */
     card_rom_[14] = 'W';
     card_rom_[15] = 'W';
@@ -68,7 +68,7 @@ Rtl8019::Rtl8019(CerfEmulator& emu) : PcmciaCard(emu) {
 void Rtl8019::DetachRx() {
     if (!rx_installed_) return;
     /* SetReceiveCallback swaps under the backend's rx mutex, which the backend
-       also holds across delivery — after this returns no RX path can re-enter
+       also holds across delivery - after this returns no RX path can re-enter
        the dying card. */
     emu_.Get<NetworkBackend>().SetReceiveCallback(nullptr);
     rx_installed_ = false;
@@ -140,7 +140,7 @@ void Rtl8019::RaiseInterruptLocked(uint8_t bits) {
     fcsr_ |= kFcsrIntr;
     /* Drive the slot IRQ line only when the bit is unmasked AND we're
        not propagating ISR_RESET (the reset bit is a status indicator,
-       not a real interrupt source — the PCMCIA driver polls for it
+       not a real interrupt source - the PCMCIA driver polls for it
        during init, doesn't want an IRQ). */
     if (bits != kIsrResetBit && (nic_intr_mask_ & bits) != 0u) {
         slot_->RaiseIrq();
@@ -204,7 +204,7 @@ void Rtl8019::OnRxFrame(const uint8_t* frame, std::size_t len) {
     if (!(nic_data_config_ & kDcrNormal))               return;  /* loopback */
     if (nic_rcv_config_ & kRcrMonitor)                  return;
 
-    /* Multicast filter — when RCR_MULTICAST is set, a multicast
+    /* Multicast filter - when RCR_MULTICAST is set, a multicast
        frame is accepted only if it passes the chip's CRC-hashed
        lookup against NIC_MC_ADDR (or is a broadcast and
        RCR_BROADCAST is set). Unicast frames bypass this filter. */

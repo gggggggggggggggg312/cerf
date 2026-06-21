@@ -53,7 +53,7 @@ void PeripheralDispatcher::Register(Peripheral* p) {
 
     if (entries_.size() > 128u) {
         LOG(Caution, "PeripheralDispatcher::Register: more than 128 peripherals "
-                "registered — the JIT IO helper's per-emit-site cache slot is a "
+                "registered - the JIT IO helper's per-emit-site cache slot is a "
                 "signed int8 holding the entries_ array index; index space "
                 "exhausted.\n");
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);

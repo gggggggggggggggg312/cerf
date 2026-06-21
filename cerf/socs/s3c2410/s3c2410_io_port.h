@@ -50,12 +50,12 @@ private:
     /* Word-aligned register block. The remaining (0x100000 - 0xC0) of
        the 1 MB section is unused; access there halts via the slot
        bound check. Power-on reset values of EINTMASK / EINTPEND are
-       documented as 0 per S3C2410 UM § 9 — matching the default. */
+       documented as 0 per S3C2410 UM § 9 - matching the default. */
     uint32_t storage_[kSlotCount] = {};
 
     /* External lines currently held asserted by peripherals
        (level-triggered sources). EINTPEND re-latches from this on
-       every guest EINTPEND/EINTMASK write — a level line that stays
+       every guest EINTPEND/EINTMASK write - a level line that stays
        high keeps interrupting until the peripheral drops it. */
     uint32_t eint_level_ = 0u;
 };

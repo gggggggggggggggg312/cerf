@@ -43,7 +43,7 @@ bool CerfVirtLineDrawer::Execute(const CerfLineDescriptor& l) {
     const uint8_t  rop2_mark  = (uint8_t)l.mix;
     const uint8_t  rop2_space = (uint8_t)(l.mix >> 8);
 
-    /* (maj_dx, maj_dy, min_dx, min_dy) per octant — the coordinate form of
+    /* (maj_dx, maj_dy, min_dx, min_dy) per octant - the coordinate form of
        swblt's MajorDPtr/MinorDPtr/MajorDPixel/MinorDPixel (swline.cpp:87-100). */
     static const int8_t kDir[8][4] = {
         {  1,  0,  0,  1 }, {  0,  1,  1,  0 }, {  0,  1, -1,  0 }, { -1,  0,  0,  1 },

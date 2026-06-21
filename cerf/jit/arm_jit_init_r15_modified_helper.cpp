@@ -46,19 +46,19 @@ void ArmJit::InitializeR15ModifiedHelper() {
        anywhere in the 32-bit address space. */
     EmitCall(p, interrupt_check_);
 
-    /* TEST byte ptr [EBX + offsetof(control_register)], 1 — SCTLR.M
+    /* TEST byte ptr [EBX + offsetof(control_register)], 1 - SCTLR.M
        (bit 0) is the LSB of the first byte at offset 0 of
        ArmCp15ControlRegister. */
     EmitTestByteBaseDisp32Imm8(p, kMmuReg,
         static_cast<int32_t>(offsetof(ArmMmuState, control_register)), 1);
     uint8_t* jz_to_pid_not_needed_a = EmitJzLabel(p);
 
-    /* TEST ECX, 0xFE000000 — high 7 bits already set means address
+    /* TEST ECX, 0xFE000000 - high 7 bits already set means address
        already has a process ID encoded; skip fold. */
     EmitTestRegImm32(p, kEcx, 0xFE000000u);
     uint8_t* jnz_to_pid_not_needed_b = EmitJnzLabel(p);
 
-    /* OR ECX, [EBX + offsetof(process_id)] — apply FCSE fold. */
+    /* OR ECX, [EBX + offsetof(process_id)] - apply FCSE fold. */
     EmitOrRegBaseDisp32(p, kEcx, kMmuReg,
         static_cast<int32_t>(offsetof(ArmMmuState, process_id)));
 

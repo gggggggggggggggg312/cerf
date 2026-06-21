@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-/* TOCentry — 32 bytes per romldr.h. Fields named verbatim from the
+/* TOCentry - 32 bytes per romldr.h. Fields named verbatim from the
    original C struct; `lpszFileName` carries the resolved ASCII name
    rather than the in-ROM LPSTR VA. `ftTime` is the 64-bit FILETIME
    value (low | high<<32). */
@@ -21,7 +21,7 @@ struct ParsedTOCentry {
     uint32_t    ulLoadOffset     = 0;
 };
 
-/* FILESentry — 28 bytes per romldr.h. */
+/* FILESentry - 28 bytes per romldr.h. */
 struct ParsedFILESentry {
     uint32_t    dwFileAttributes = 0;
     uint64_t    ftTime           = 0;
@@ -31,7 +31,7 @@ struct ParsedFILESentry {
     uint32_t    ulLoadOffset     = 0;
 };
 
-/* ROMHDR — 84 bytes per romldr.h. Field names match the C struct
+/* ROMHDR - 84 bytes per romldr.h. Field names match the C struct
    exactly. `pExtensions` is a 32-bit kernel-VA in the ROM, not a host
    pointer. The kernel's baked pTOC slot is set by romimage to the
    kernel-VA of this struct. */
@@ -60,7 +60,7 @@ struct ParsedROMHDR {
     uint32_t ulTrackingLen   = 0;
 };
 
-/* ParsedTOC — what the kernel sees at one pTOC slot: a ROMHDR
+/* ParsedTOC - what the kernel sees at one pTOC slot: a ROMHDR
    followed by `romhdr.nummods` TOCentry records, then
    `romhdr.numfiles` FILESentry records. `romhdr_va` is the kernel-VA
    romimage burned into the kernel binary's pTOC slot. */

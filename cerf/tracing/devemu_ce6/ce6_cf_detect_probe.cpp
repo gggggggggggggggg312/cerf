@@ -14,7 +14,7 @@ namespace {
 /* pcmcia.dll on this image is pcc_pcm.dll (DEVICEEMULATOR platform.bib):
    binding walks HKLM\Drivers\PCMCIA\Detect\NN in RunDetectors
    (sub_C08E686C; exec VA = extracted-PE link VA). Pinned: the hive has
-   only the SERIAL + NE2000 detectors — no disk detector, CF can't bind. */
+   only the SERIAL + NE2000 detectors - no disk detector, CF can't bind. */
 class Ce6CfDetectProbe : public Service {
 public:
     using Service::Service;

@@ -124,7 +124,7 @@ union ThumbOpcode {
         uint16_t opcode    : 3;
     } add_to_stack_pointer;
 
-    struct {  /* PUSH / POP {Rlist, R} — R selects LR (push) or PC (pop). */
+    struct {  /* PUSH / POP {Rlist, R} - R selects LR (push) or PC (pop). */
         uint16_t r_list    : 8;
         uint16_t r         : 1;
         uint16_t reserved1 : 2;
@@ -141,7 +141,7 @@ union ThumbOpcode {
         uint16_t opcode    : 3;
     } multiple_load_store;
 
-    struct {  /* Conditional branch (Bxx) — encoded with 8-bit signed
+    struct {  /* Conditional branch (Bxx) - encoded with 8-bit signed
                  offset; cond == 0xF selects SWI. */
         int16_t  s_offset8 : 8;
         uint16_t cond      : 4;
@@ -155,13 +155,13 @@ union ThumbOpcode {
         uint16_t opcode    : 3;
     } software_interrupt;
 
-    struct {  /* Unconditional branch — 11-bit signed offset. */
+    struct {  /* Unconditional branch - 11-bit signed offset. */
         int16_t  offset11  : 11;
         uint16_t reserved1 : 2;
         uint16_t opcode    : 3;
     } unconditional_branch;
 
-    struct {  /* BL — two-instruction long branch; H selects which half. */
+    struct {  /* BL - two-instruction long branch; H selects which half. */
         uint16_t offset : 11;
         uint16_t h      : 2;
         uint16_t opcode : 3;

@@ -12,7 +12,7 @@
 namespace {
 
 /* Kernel reads via BOTH 16-bit REG (CFWP2.C:266-270) AND 32-bit
-   struct (ARMINT.C:66) — must share storage with 32-bit
+   struct (ARMINT.C:66) - must share storage with 32-bit
    zero-extending the high half. */
 
 constexpr uint32_t kPcmciaPaBase   = 0x10000410u;
@@ -104,7 +104,7 @@ void OdoArm720Pcmcia::WriteHalf(uint32_t addr, uint16_t value) {
     if (IsControlSlot(off)) {
         if (value != 0) {
             LOG(Caution, "Odo PCMCIA: activation write to "
-                    "PCMCIA_REG%c = 0x%04X — non-zero control "
+                    "PCMCIA_REG%c = 0x%04X - non-zero control "
                     "bits set, no host PCMCIA model behind this "
                     "peripheral.\n", SlotIndex(off), value);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -116,11 +116,11 @@ void OdoArm720Pcmcia::WriteHalf(uint32_t addr, uint16_t value) {
     }
     if (IsIntrSlot(off)) {
         if ((value & ~kPcmciaStateIntr) != 0) {
-            /* P2.H:455 — bits 1-4 are R/O line states (PCMCIA_INTR
+            /* P2.H:455 - bits 1-4 are R/O line states (PCMCIA_INTR
                / CD1/CD2/WP). Allowing W1C on them clears bits the
                hardware drives, falsifying card-detect state. */
             LOG(Caution, "Odo PCMCIA: write to PCMCIA_INTR_REG%c = "
-                    "0x%04X — bits other than PCMCIA_STATE_INTR "
+                    "0x%04X - bits other than PCMCIA_STATE_INTR "
                     "(0x0001) set; only bit 0 is documented W1C.\n",
                     SlotIndex(off), value);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -161,7 +161,7 @@ void OdoArm720Pcmcia::WriteWord(uint32_t addr, uint32_t value) {
         /* P2.H lines 442-455 define only bits 0-7 of each PCMCIA
            register; bits 16-31 are undocumented. A 32-bit write
            with non-zero high 16 bits is an unverified bit
-           pattern — halt rather than truncate silently. */
+           pattern - halt rather than truncate silently. */
         LOG(Caution, "Odo PCMCIA: WriteWord at 0x%08X = 0x%08X has "
                 "non-zero high 16 bits; only bits 0-7 are defined "
                 "per P2.H lines 442-455.\n", addr, value);

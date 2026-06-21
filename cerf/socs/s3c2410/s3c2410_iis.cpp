@@ -25,7 +25,7 @@ constexpr uint32_t kRegIISFIFO = 0x10u;
 constexpr uint32_t kIisconTxFifoReady = 0x80u;
 constexpr uint32_t kIisconRxFifoReady = 0x40u;
 
-constexpr int kIrqDma2 = 19;   /* INT_DMA2 = SRCPND bit 19 — wavedev's ISR target. */
+constexpr int kIrqDma2 = 19;   /* INT_DMA2 = SRCPND bit 19 - wavedev's ISR target. */
 
 /* Posted on DMA enable: MM_WOM_DONE generates INT_DMA2 only past this point,
    since DMA was off when earlier messages queued. See BSP IOIIS::SetOutputDMA. */
@@ -115,7 +115,7 @@ void S3C2410Iis::PlayCurrentQueue() {
 void S3C2410Iis::QueueOutput(const void* host_bytes, size_t length) {
     if (length != kBlockSize) {
         LOG(Caution, "S3C2410Iis::QueueOutput: length %zu != BLOCK_SIZE "
-                "%u — BSP requires single-block writes\n",
+                "%u - BSP requires single-block writes\n",
                 length, kBlockSize);
         return;
     }
@@ -132,8 +132,8 @@ void S3C2410Iis::QueueOutput(const void* host_bytes, size_t length) {
                     ResetCurrentQueue();
                     switch_out_queue_.store(false, std::memory_order_release);
                 } else {
-                    /* Drop the packet — CE got ahead of us, matches BSP. */
-                    LOG(Periph, "[IIS] dropping audio packet — CE "
+                    /* Drop the packet - CE got ahead of us, matches BSP. */
+                    LOG(Periph, "[IIS] dropping audio packet - CE "
                             "outran host audio\n");
                     return;
                 }

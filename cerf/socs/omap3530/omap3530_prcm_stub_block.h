@@ -145,7 +145,7 @@ public:
 
     void OnReady() override {
         Omap3530PrcmStubBlock::OnReady();
-        /* DATAIN all-1s — TWL (tps659xx.cpp:757) sets GPIO_INT_LOW
+        /* DATAIN all-1s - TWL (tps659xx.cpp:757) sets GPIO_INT_LOW
            on GPIO 0; with DATAIN=0 the level-low IRQ fires forever. */
         regs_[0x38u / 4u] = 0xFFFFFFFFu;
         emu_.Get<Omap3530GpioBus>().RegisterBank(BankIndex(), this);
@@ -188,7 +188,7 @@ public:
         std::lock_guard<std::mutex> lk(mu_);
         bool need_recompute = false;
         switch (off) {
-        case 0x18u:  /* IRQSTATUS1 — W1C on sticky bits only. */
+        case 0x18u:  /* IRQSTATUS1 - W1C on sticky bits only. */
             regs_[0x18 / 4u] &= ~value;
             need_recompute = true;
             break;

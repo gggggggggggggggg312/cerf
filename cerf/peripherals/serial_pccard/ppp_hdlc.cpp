@@ -57,7 +57,7 @@ void PppHdlc::Feed(const uint8_t* data, size_t n) {
         const uint8_t b = data[i];
         if (b == kFlag) {
             /* An escape immediately before the closing flag is an invalid
-               frame (pppframe.c receiver notes) — drop it. */
+               frame (pppframe.c receiver notes) - drop it. */
             if (in_frame_ && !in_escape_ && !rx_.empty()) EndFrame();
             rx_.clear();
             in_frame_  = true;

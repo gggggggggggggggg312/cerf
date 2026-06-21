@@ -12,7 +12,7 @@ namespace {
 
 /* The NAND PDD's MmMapIoSpace(PA=0x08000000, 0x1000) per platform.reg
    `MemBase[1]="08000000"`. fmd.c:393 memcpys 64 bytes from this region
-   into the sector buffer after STARTENGINE — every read drains the
+   into the sector buffer after STARTENGINE - every read drains the
    NAND state machine in Omap3530Gpmc. */
 class Omap3530GpmcCs0Window : public Peripheral {
 public:

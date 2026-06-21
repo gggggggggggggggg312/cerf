@@ -37,7 +37,7 @@ int ArmJit::JitOptimizeIR() {
 
         /* "LDR Rd, [PC + imm]" whose source is immutable ROM/flash: peek it
            and inline as MOV Rd, imm. The baked immediate has no SMC tracking,
-           so it is sound only for genuinely unwritable backing — AP-read-only
+           so it is sound only for genuinely unwritable backing - AP-read-only
            DRAM (e.g. the kernel-rewritten kuser TLS slot) is excluded. */
         if (insn.place_fn == &PlaceSingleDataTransfer &&
             insn.rn == ArmGpr::kR15 &&
@@ -161,7 +161,7 @@ int ArmJit::JitOptimizeIR() {
                    prev.i == 0 &&
                    prev.rm == ArmGpr::kR15 &&
                    prev.rd == ArmGpr::kR14) {
-            /* "MOV LR, PC" — followed by an R15-write is a CALL
+            /* "MOV LR, PC" - followed by an R15-write is a CALL
                idiom; route to a Place fn that pushes the return
                address onto the per-instance shadow stack. */
             if (insn.place_fn == &PlaceDataProcessing &&
@@ -173,7 +173,7 @@ int ArmJit::JitOptimizeIR() {
                        insn.rd == ArmGpr::kR15 &&
                        insn.rn != ArmGpr::kR14 &&
                        insn.l) {
-                /* LDR PC, [Rn, ...] where Rn isn't LR — CALL. The
+                /* LDR PC, [Rn, ...] where Rn isn't LR - CALL. The
                    Rn==LR case is the .NET CF switch-statement
                    dispatch table and must NOT be CALL-ified. */
                 insn.place_fn = &PlaceSingleDataTransferCALL;
@@ -185,7 +185,7 @@ int ArmJit::JitOptimizeIR() {
                    prev.i == 1 &&
                    insn.place_fn == &PlaceDataProcessing &&
                    insn.r15_modified) {
-            /* "ADD LR, PC, #Imm" followed by an R15-write — also
+            /* "ADD LR, PC, #Imm" followed by an R15-write - also
                a CALL idiom (e.g. "MOV PC, R12" after "ADD LR, PC, #4"). */
             insn.place_fn = &PlaceDataProcessingCALL;
         } else if (prev.place_fn == &PlaceSingleDataTransfer &&
@@ -287,7 +287,7 @@ int ArmJit::JitOptimizeIR() {
                  block_ctx_.insns[i + 3].cond == 12 &&  /* GT */
                  (block_ctx_.insns[i + 3].guest_address -
                   block_ctx_.insns[i + 3].reserved3) == 12u) {
-            /* Sentinel — PlaceCoprocRegisterTransfer reads operand2
+            /* Sentinel - PlaceCoprocRegisterTransfer reads operand2
                and emits a one-shot range flush instead of per-line. */
             insn.operand2 = 0xFFFFFFFFu;
             block_ctx_.insns[i + 1].place_fn = &PlaceNop;

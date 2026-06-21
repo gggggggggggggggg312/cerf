@@ -29,7 +29,7 @@ constexpr size_t   kFlashBytes      = (size_t)kBytesPerSector * kSectorsTotal;
 constexpr uint32_t kOobOffset       = 512u;
 constexpr uint32_t kBlockBytes      = kSectorsPerBlock * kBytesPerSector;
 
-/* Samsung K9F1208 chip ID — manufacturer 0xEC, device 0x76 — returned
+/* Samsung K9F1208 chip ID - manufacturer 0xEC, device 0x76 - returned
    in 2 bytes on CMD_READID (NFCMD = 0x90 then two NFDATA reads).
    FMD_Init at references/.../SMARTMEDIA/FMD/fmd.cpp tests
    ((Mfg << 8) | Dev) == 0xEC76 and bails out otherwise. */
@@ -80,8 +80,8 @@ private:
     uint8_t  nfcmd_  = 0;
     uint32_t nfaddr_ = 0;
 
-    /* NFSTAT bit 0 = ready. We never simulate busy — commands
-       complete instantly — so bit 0 is always set. FMD's NF_WAITRB
+    /* NFSTAT bit 0 = ready. We never simulate busy - commands
+       complete instantly - so bit 0 is always set. FMD's NF_WAITRB
        polls this in a tight loop until it sees 1. */
     uint32_t nfstat_ = 1u;
 
@@ -148,7 +148,7 @@ void S3C2410NandFlash::WriteByte(uint32_t addr, uint8_t value) {
             nfaddr_ = 0;
             break;
         case kCmdWrite2:
-            /* Phase-2 confirm — next NFDATA read returns success. */
+            /* Phase-2 confirm - next NFDATA read returns success. */
             break;
         case kCmdStatus:
             /* CE6-only opcode. Next NFDATA read returns status byte. */
@@ -157,7 +157,7 @@ void S3C2410NandFlash::WriteByte(uint32_t addr, uint8_t value) {
             HaltUnsupportedAccess("WriteByte NFCMD opcode", addr, value);
         }
 
-        /* Commands complete instantly — leave the ready bit set. */
+        /* Commands complete instantly - leave the ready bit set. */
         nfstat_ |= 1u;
         LOG(SocNand, "write NFCMD = 0x%02X\n", value);
         return;
@@ -169,7 +169,7 @@ void S3C2410NandFlash::WriteByte(uint32_t addr, uint8_t value) {
     }
 
     if (ofs == kOfsNFDATA) {
-        /* Page-data byte write — only valid during CMD_WRITE. The
+        /* Page-data byte write - only valid during CMD_WRITE. The
            driver writes 512 data bytes + 8 OOB bytes = 520 bytes
            sequentially through NFDATA after loading the 4-cycle
            address. */

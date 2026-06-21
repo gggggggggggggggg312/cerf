@@ -48,7 +48,7 @@ public:
 private:
     uint8_t ReadIndexedDataLocked();
     /* Returns true when the write flipped socket power; *power_on is
-       the new state. Applied to the slot after the lock drops —
+       the new state. Applied to the slot after the lock drops -
        SetPowered takes the slot bus lock, which ranks above
        state_mutex_. */
     bool WriteIndexedDataLocked(uint8_t value, bool* power_on);

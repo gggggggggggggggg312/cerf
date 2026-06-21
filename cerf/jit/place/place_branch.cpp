@@ -63,7 +63,7 @@ uint8_t* PlaceBranch(uint8_t*      cursor,
             EmitJmp32(cursor, ep->native_start);
         } else {
             /* MOV ECX, dest; CALL branch_helper. Resolves at runtime and
-               self-patches this 10-byte sequence into a JMP rel32 on hit —
+               self-patches this 10-byte sequence into a JMP rel32 on hit -
                safe to bake because same-page. */
             EmitMovRegImm32(cursor, kEcx, d->reserved3);
             EmitCall(cursor, ctx->branch_helper_target);

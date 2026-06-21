@@ -39,7 +39,7 @@ void ArmCpu::LateInit(ArmJit* jit) {
     if (jit_ != jit) {
         LOG(Caution,
             "ArmCpu::LateInit: re-bound to a different ArmJit instance "
-            "(jit_=%p new=%p) — multi-binding is a programming error\n",
+            "(jit_=%p new=%p) - multi-binding is a programming error\n",
             jit_, jit);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -145,7 +145,7 @@ void ArmCpu::DoRaiseReset() {
     if (has_pending_resume_mmu_) {
         /* Power-off-wake resume (S3C2410/DevEmu): EBOOT restores cp15 control/TTB/
            domain from SLEEPDATA and jumps to the saved VA with the MMU on
-           (startup.s wakeup routine). process_id is left as-is — the OS context
+           (startup.s wakeup routine). process_id is left as-is - the OS context
            the resume returns into is preserved across the parked sleep. */
         mmu_state->control_register.word       = pending_resume_mmu_control_;
         mmu_state->translation_table_base.word = pending_resume_mmu_ttbr0_;
@@ -166,7 +166,7 @@ void ArmCpu::DoRaiseReset() {
 }
 
 uint32_t* ArmCpu::GetUserModeRegisterAddress(int reg_num) {
-    /* R0..R12 and R15 never bank-switch — always come from gprs[]. */
+    /* R0..R12 and R15 never bank-switch - always come from gprs[]. */
     if (reg_num < 13 || reg_num > 14) {
         return &state_.gprs[reg_num];
     }

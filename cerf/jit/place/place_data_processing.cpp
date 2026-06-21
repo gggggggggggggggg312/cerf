@@ -172,7 +172,7 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
                 store_eax_to_rd();
                 EmitTestRegReg(cursor, kEax, kEax);
             } else {
-                /* MOV [ESI + offset], imm32 — C7 /0 mod=10. */
+                /* MOV [ESI + offset], imm32 - C7 /0 mod=10. */
                 EmitMovBaseDisp32Imm32(cursor, kStateReg,
                     static_cast<int32_t>(offsetof(ArmCpuState, gprs) + d->rd * 4),
                     imm);
@@ -180,12 +180,12 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
         } else {
             cursor = PlaceDecodedShift(cursor, d, ctx, imm_reg, needs_sco);
             if (d->s && d->rd == d->operand2) {
-                /* MOVES Rd, Rd — store optimized out (NetCF NULL check). */
+                /* MOVES Rd, Rd - store optimized out (NetCF NULL check). */
             } else {
                 store_imm_reg_to_rd();
             }
             if (d->s && d->rd != ArmGpr::kR15) {
-                /* TEST imm_reg, imm_reg — set ZF/SF, clear OF/CF. */
+                /* TEST imm_reg, imm_reg - set ZF/SF, clear OF/CF. */
                 EmitTestRegReg(cursor, imm_reg, imm_reg);
             }
         }
@@ -199,7 +199,7 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
             d->reserved3 = ~d->reserved3;
         } else {
             cursor = PlaceDecodedShift(cursor, d, ctx, imm_reg, needs_sco);
-            /* NOT imm_reg — F7 /2. */
+            /* NOT imm_reg - F7 /2. */
             Emit8(cursor, 0xF7); EmitModRmReg(cursor, 3, imm_reg, 2);
         }
         cursor = PlaceBasicTwoAddrWithResult(cursor, 0x21, 0x81, 4, d, ctx, imm_reg);
@@ -250,7 +250,7 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
                 reinterpret_cast<void*>(&ArmCpu::UpdateCpsrWithFlagsHelper));
             EmitAddRegImm32(cursor, kEsp, 8);
 
-            /* MOV EAX, [ESI + offsetof(gprs[15])] — re-load PC value
+            /* MOV EAX, [ESI + offsetof(gprs[15])] - re-load PC value
                the opcode case stored before CPSR restore. */
             EmitMovRegBaseDisp32(cursor, kEax, kStateReg,
                 static_cast<int32_t>(offsetof(ArmCpuState, gprs) + 15u * 4u));
@@ -259,17 +259,17 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
                based on CPSR.T. */
             EmitMovRegImm32(cursor, kEdx, ~uint32_t{1});
             EmitMovRegImm32(cursor, kEcx, ~uint32_t{3});
-            /* TEST DWORD PTR [ESI + offsetof(cpsr)], 0x20  —
+            /* TEST DWORD PTR [ESI + offsetof(cpsr)], 0x20  -
                F7 /0 mod=10 r/m=ESI(6) reg=0 disp32 imm32. */
             Emit8(cursor, 0xF7);
             EmitModRmReg(cursor, 2, kStateReg, 0);
             Emit32(cursor,
                 static_cast<uint32_t>(offsetof(ArmCpuState, cpsr)));
             Emit32(cursor, 0x20u);
-            /* CMOVNZ ECX, EDX — 0F 45 mod=11 r/m=EDX reg=ECX. */
+            /* CMOVNZ ECX, EDX - 0F 45 mod=11 r/m=EDX reg=ECX. */
             Emit8(cursor, 0x0F); Emit8(cursor, 0x45);
             EmitModRmReg(cursor, 3, kEdx, kEcx);
-            /* AND EAX, ECX — 23 mod=11 r/m=ECX reg=EAX. */
+            /* AND EAX, ECX - 23 mod=11 r/m=ECX reg=EAX. */
             Emit8(cursor, 0x23);
             EmitModRmReg(cursor, 3, kEcx, kEax);
             EmitMovBaseDisp32Reg(cursor, kStateReg,
@@ -289,7 +289,7 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
                         offsetof(ArmCpuState, gprs) + 15u * 4u),
                     kEax);
             }
-            /* No-Thumb core: a data-proc PC write is a plain branch —
+            /* No-Thumb core: a data-proc PC write is a plain branch -
                CPSR.T does not exist, bit 0 is not consumed. */
         } else {
             /* Thumb-state data-proc Rd=PC (Thumb hi-ops synthesized into
@@ -303,8 +303,8 @@ uint8_t* PlaceDataProcessing(uint8_t*      cursor,
                 kEax);
         }
         if (d->opcode == 13 && d->rm == ArmGpr::kR14 && !d->i && !d->s) {
-            /* MOV R15, R14 — plain return idiom (shadow-stack fast path).
-               MOVS R15, R14 (S=1) is an exception return — falls through
+            /* MOV R15, R14 - plain return idiom (shadow-stack fast path).
+               MOVS R15, R14 (S=1) is an exception return - falls through
                to PlaceR15ModifiedHelper with the CPSR restore from above. */
             EmitJmp32(cursor, ctx->pop_shadow_stack_helper_target);
         } else {

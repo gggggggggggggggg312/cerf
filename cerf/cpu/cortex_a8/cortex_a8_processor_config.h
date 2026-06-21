@@ -4,7 +4,7 @@
 
 /* Cortex-A8 core invariants identical across every Cortex-A8 SoC. Per-SoC
    concretes override only MIDR, CCSIDR/CLIDR, CpuClockHz, and the timer
-   dividers — a per-part value placed here is reported by every Cortex-A8 SoC. */
+   dividers - a per-part value placed here is reported by every Cortex-A8 SoC. */
 class CortexA8ProcessorConfigBase : public ArmProcessorConfig {
 public:
     using ArmProcessorConfig::ArmProcessorConfig;

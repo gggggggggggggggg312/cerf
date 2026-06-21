@@ -14,7 +14,7 @@ namespace {
 
 /* 64 KB PC Card I/O space (BSP pcc_smdk2410.reg WindowEntry2:
    0x11000000-0x1100FFFF). The PCIC index/data ports at 0x3E0/0x3E1
-   must decode ahead of the I/O windows — a window programmed over
+   must decode ahead of the I/O windows - a window programmed over
    0x3E0 would otherwise make the PCIC unreachable. */
 constexpr uint32_t kBase = 0x11000000u;
 constexpr uint32_t kSize = 0x00010000u;

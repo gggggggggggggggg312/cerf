@@ -38,7 +38,7 @@ void ArmJit::InitializeBranchHelper() {
                          static_cast<int32_t>(offsetof(ArmCpuState, gprs) + 15 * 4),
                          kEcx);
 
-    /* Lookup helper call — returns the destination's native_start (via the
+    /* Lookup helper call - returns the destination's native_start (via the
        VA jump cache) directly in EAX, or null. */
     EmitPushReg(p, kEcx);                                         /* arg2: guest_pc */
     EmitPush32(p, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(this)));
@@ -51,7 +51,7 @@ void ArmJit::InitializeBranchHelper() {
     uint8_t* must_compile = EmitJzLabel(p);
 
     /* Hit path: EAX is native_start. Self-patch the 10-byte MOV+CALL at the
-       call site into JMP rel32 — reached only for same-page targets (chosen
+       call site into JMP rel32 - reached only for same-page targets (chosen
        in PlaceBranch), so the baked JMP is phys-stable across context switch. */
     EmitMovRegReg(p, kEdi, kEax);
     /* EAX = EDI - 5 (computed via MOV+SUB since no LEA primitive). */

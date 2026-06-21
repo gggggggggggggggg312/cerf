@@ -11,7 +11,7 @@
 
 namespace {
 
-/* PPFS virtual peer — always-reply-0xFF makes kernel read_header
+/* PPFS virtual peer - always-reply-0xFF makes kernel read_header
    (PPFS.C:143-150) fail the 0xAA5555AA sentinel and bail in µs
    instead of MDPPFS.C:78-132 spinning ~60s waiting for AUTOFD.
    Removing the AUTOFD-toggle state machine restores the spin. */
@@ -29,7 +29,7 @@ constexpr uint32_t kParIntr        = 0x00100000u;
 constexpr uint32_t kParAutoFd      = 0x00020000u;
 constexpr uint32_t kParDataIn      = 0x0000FF00u;
 
-/* Peer-driven bits — read returns the peer's view regardless of
+/* Peer-driven bits - read returns the peer's view regardless of
    what the kernel last wrote into these positions. */
 constexpr uint32_t kPeerDrivenMask = kParAutoFd | kParIntr | kParDataIn;
 

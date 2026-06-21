@@ -8,7 +8,7 @@
 namespace {
 
 /* Win32 VK -> PS/2 Set 2 scancode; device_code = scancode | extended<<8.
-   Standard PS/2 Set 2 — kernel ScanCodeToVKeyEx (SCTOVK.CPP) is the reverse map;
+   Standard PS/2 Set 2 - kernel ScanCodeToVKeyEx (SCTOVK.CPP) is the reverse map;
    deviating from Set 2 shuffles all keys. */
 struct ScancodeEntry { uint8_t scancode; bool extended; };
 

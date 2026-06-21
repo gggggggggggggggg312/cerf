@@ -12,7 +12,7 @@
 
 #include <mutex>
 
-/* ARMINT.C:222 — cpuMr is inverted: bit SET = ENABLED (clearing
+/* ARMINT.C:222 - cpuMr is inverted: bit SET = ENABLED (clearing
    the bit masks). Treating cpuMr like a standard mask register
    inverts kernel IRQ-enable logic and no IRQs deliver. */
 
@@ -49,7 +49,7 @@ void OdoArm720BoardIntc::NotifyJitInterruptState() {
 void OdoArm720BoardIntc::AssertIrq(int source_bit) {
     if (source_bit < 0 || source_bit >= 32) {
         LOG(Caution, "OdoArm720BoardIntc::AssertIrq: source_bit %d "
-                "out of range — cpuIsr/cpuMr are 32-bit registers "
+                "out of range - cpuIsr/cpuMr are 32-bit registers "
                 "per ODOREGS.H struct cpureg\n", source_bit);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -76,7 +76,7 @@ void OdoArm720BoardIntc::DeAssertIrq(int source_bit) {
 void OdoArm720BoardIntc::AssertSubIrq(int main_source_bit, int sub_source_bit) {
     LOG(Caution, "OdoArm720BoardIntc::AssertSubIrq: Odo board "
             "INTC has no sub-interrupt register (main=%d, sub=%d) "
-            "— caller is targeting the wrong SoC\n",
+            "- caller is targeting the wrong SoC\n",
             main_source_bit, sub_source_bit);
     CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
 }
@@ -99,7 +99,7 @@ void OdoArm720BoardIntc::DeliverPendingIrq() {
 uint32_t OdoArm720BoardIntc::ReadReg32(uint32_t offset) {
     if (offset != kSlotCpuIsr && offset != kSlotCpuMr) {
         LOG(Caution, "OdoArm720BoardIntc::ReadReg32: offset 0x%X "
-                "out of range — only 0x00 (cpuIsr) and 0x04 (cpuMr) "
+                "out of range - only 0x00 (cpuIsr) and 0x04 (cpuMr) "
                 "are defined per ODOREGS.H\n", offset);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
@@ -149,7 +149,7 @@ void OdoArm720BoardIntc::WriteReg32(uint32_t offset, uint32_t value) {
 #endif
     if (offset == kSlotCpuIsr) {
         LOG(Caution, "OdoArm720BoardIntc::WriteReg32 cpuIsr=0x%08X "
-                "— kernel writes cpuIsr but BSP source (ARMINT.C) "
+                "- kernel writes cpuIsr but BSP source (ARMINT.C) "
                 "never does; scope must be extended with the right "
                 "semantic before continuing\n", value);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
@@ -174,7 +174,7 @@ void OdoArm720BoardIntc::WriteReg16(uint32_t offset, uint16_t value) {
 #endif
     if (slot_offset == kSlotCpuIsr) {
         LOG(Caution, "OdoArm720BoardIntc::WriteReg16 cpuIsr offset=0x%X "
-                "value=0x%04X — kernel writes cpuIsr but BSP source "
+                "value=0x%04X - kernel writes cpuIsr but BSP source "
                 "(ARMINT.C) never does; scope must be extended with "
                 "the right semantic before continuing\n",
                 offset, value);

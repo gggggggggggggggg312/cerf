@@ -78,7 +78,7 @@ union ArmThumbOpcode {
         uint16_t opcode    : 3;
     } load_store_register_offset;
 
-    /* LDRH/STRH/LDSB/LDSH Rd, [Rb, Ro] — signed/unsigned half/byte. */
+    /* LDRH/STRH/LDSB/LDSH Rd, [Rb, Ro] - signed/unsigned half/byte. */
     struct {
         uint16_t rd        : 3;
         uint16_t rb        : 3;
@@ -177,7 +177,7 @@ union ArmThumbOpcode {
         uint16_t opcode    : 3;
     } unconditional_branch;
 
-    /* BL prefix/suffix pair — H==10 first half, H==11 second half. */
+    /* BL prefix/suffix pair - H==10 first half, H==11 second half. */
     struct {
         uint16_t offset    : 11;
         uint16_t h         : 2;

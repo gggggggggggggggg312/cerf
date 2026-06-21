@@ -22,7 +22,7 @@ uint8_t* PlaceMSRImmediate(uint8_t*      cursor,
         static_cast<uint32_t>(reinterpret_cast<uintptr_t>(ctx->jit->Cpu()));
 
     if (d->op1 & 2u) {
-        /* MSR SPSR, imm — call UpdatePSRMaskHelper(current, new, mask, cpu)
+        /* MSR SPSR, imm - call UpdatePSRMaskHelper(current, new, mask, cpu)
            and store result to SPSR. */
         EmitPush32(cursor, cpu_imm);
         EmitPush32(cursor, field_mask);
@@ -36,7 +36,7 @@ uint8_t* PlaceMSRImmediate(uint8_t*      cursor,
     } else {
         /* MSR CPSR, imm */
         if (d->rn == 8) {
-            /* Flags-only fast path — call UpdateFlagsHelper(cpu, imm). */
+            /* Flags-only fast path - call UpdateFlagsHelper(cpu, imm). */
             EmitPush32(cursor, d->immediate);
             EmitPush32(cursor, cpu_imm);
             EmitCall(cursor, reinterpret_cast<void*>(&ArmCpu::UpdateFlagsHelper));

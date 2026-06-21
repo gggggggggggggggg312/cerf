@@ -61,7 +61,7 @@ public:
 
     /* PXA255 has no VFP / media coprocessor (Intel Media Processing =
        40-bit DSP accumulator via CP0, not VFP). All v6/v7 ISA additions
-       absent — inherit base defaults (false). */
+       absent - inherit base defaults (false). */
 
     /* PXA255 max run mode (PXA255 manual Table 3-20 CCCR): 3.6864 MHz
        crystal * L_mult(27) * M(x4) = 398.13 MHz core; OSCR is the

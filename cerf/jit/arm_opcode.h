@@ -163,7 +163,7 @@ union ArmOpcode {
         uint32_t cond       : 4;
     } branch_exchange;
 
-    struct {  /* LDRH / STRH / LDRSB / LDRSH — register-offset form. */
+    struct {  /* LDRH / STRH / LDRSB / LDRSH - register-offset form. */
         uint32_t rm         : 4;
         uint32_t reserved1  : 1;
         uint32_t h          : 1;
@@ -180,7 +180,7 @@ union ArmOpcode {
         uint32_t cond       : 4;
     } half_word_signed_transfer_register;
 
-    struct {  /* LDRH / STRH / LDRSB / LDRSH — immediate-offset form. */
+    struct {  /* LDRH / STRH / LDRSB / LDRSH - immediate-offset form. */
         uint32_t offset_low : 4;
         uint32_t reserved1  : 1;
         uint32_t h          : 1;

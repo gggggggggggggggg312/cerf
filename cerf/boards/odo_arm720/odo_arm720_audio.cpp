@@ -31,7 +31,7 @@ constexpr uint32_t kSlotDmaHigh    = 0x04u;
 /* DRAM PA base from MAP720.H line 39. */
 constexpr uint32_t kDramPaBase     = 0x0C000000u;
 
-/* TCHAUD.H:103-106 — playback intr bits. */
+/* TCHAUD.H:103-106 - playback intr bits. */
 constexpr uint16_t kIoSoundStrPlaybackIntr    = (1u << 13);
 constexpr uint16_t kIoSoundStrPlaybackEndIntr = (1u << 12);
 

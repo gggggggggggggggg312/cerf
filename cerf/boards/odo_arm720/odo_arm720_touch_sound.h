@@ -27,7 +27,7 @@ public:
 
     /* Caller MUST follow with AssertIrq(kSourceTouchAudioAdcIntr)
        or kernel ISR never runs and playback hangs. Returns true
-       if `bits` were already set — kernel end-of-stream signal
+       if `bits` were already set - kernel end-of-stream signal
        per WAVEPDD.C:246-253; audio worker halts on this. */
     bool RaiseSoundStrBits(uint16_t bits);
 
