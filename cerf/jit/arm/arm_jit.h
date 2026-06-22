@@ -6,7 +6,12 @@
 
 #include "../../core/log.h"
 #include "../../core/service.h"
+#include "../../core/cerf_emulator.h"
+#include "../../boards/board_detector.h"
+#include "../../tracing/trace_manager.h"
+#include "../guest_engine.h"
 #include "arm_cpu.h"
+#include "arm_cpu_ops.h"
 #include "arm_jit_types.h"
 #include "block_context.h"
 #include "cpu_state.h"
@@ -21,12 +26,15 @@ class ArmProcessorConfig;
 class CoprocEmitter;
 class EmulatedMemory;
 
-class ArmJit : public Service {
+class ArmJit : public GuestEngine {
 public:
-    using Service::Service;
+    using GuestEngine::GuestEngine;
     ~ArmJit() override;
 
     void OnReady() override;
+    bool ShouldRegister() override {
+        return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+    }
 
     ArmCpuState* CpuState() { return cpu_->State(); }
 
@@ -39,7 +47,16 @@ public:
        block at the same VA, which the place_fn must not bake a JMP to). */
     JitBlock* LookupBlockByVaPhys(uint32_t folded_va, uint32_t phys);
 
-    void Run();
+    void     Run() override;
+    bool     DeepSleep()    const override { return cpu_->State()->deep_sleep != 0; }
+    bool     ResetPending() const override { return cpu_->State()->reset_pending != 0; }
+    uint32_t Pc()           const override { return cpu_->State()->gprs[15]; }
+    void     DispatchTraceIter() override {
+#if CERF_DEV_MODE
+        ArmCpuState* s = cpu_->State();
+        emu_.Get<TraceManager>().DispatchRunLoopIter(s->gprs, ArmCpuGetCpsrWithFlags(s));
+#endif
+    }
 
     /* MUST establish ESI = ArmCpuState* and EBX = ArmMmuState*
        before CALLing ECX - every Place fn emit addresses CPU/MMU

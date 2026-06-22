@@ -65,7 +65,7 @@
 #include "place_fns.h"
 #include "../x86_emit.h"
 
-REGISTER_SERVICE(ArmJit);
+REGISTER_SERVICE_AS(ArmJit, GuestEngine);
 
 ArmJit::~ArmJit() {
     if (interrupt_check_) {
