@@ -20,6 +20,7 @@ public:
     ~ArmMmu() override;
 
     void OnReady() override;
+    bool ShouldRegister() override;
 
     ArmMmuState* State() { return &state_; }
 

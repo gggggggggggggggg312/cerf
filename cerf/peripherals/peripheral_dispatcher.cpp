@@ -13,7 +13,9 @@
 REGISTER_SERVICE(PeripheralDispatcher);
 
 void PeripheralDispatcher::OnReady() {
-    mmu_ = &emu_.Get<ArmMmu>();
+    /* mmu_ is read only by the ARM MMIO-dispatch helpers; a non-ARM engine
+       registers no ArmMmu, so the dependency is optional. */
+    mmu_ = emu_.TryGet<ArmMmu>();
 }
 
 std::vector<Peripheral*> PeripheralDispatcher::RegisteredPeripherals() const {

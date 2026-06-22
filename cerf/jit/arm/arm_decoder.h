@@ -3,6 +3,8 @@
 #include <cstdint>
 
 #include "../../core/service.h"
+#include "../../core/cerf_emulator.h"
+#include "../../boards/board_detector.h"
 
 class ArmCpu;
 class ArmProcessorConfig;
@@ -16,6 +18,9 @@ public:
     using Service::Service;
 
     void OnReady() override;
+    bool ShouldRegister() override {
+        return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+    }
 
     /* ARM-mode 32-bit instruction decode. Returns false on UNDEFINED
        (caller stops decoding the block). */

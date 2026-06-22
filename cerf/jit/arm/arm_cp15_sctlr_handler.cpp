@@ -6,6 +6,7 @@
 
 #include <cstddef>
 
+#include "../../boards/board_detector.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../cpu/arm_processor_config.h"
@@ -19,6 +20,10 @@
 #include "../x86_emit.h"
 
 REGISTER_SERVICE(ArmCp15SctlrHandler);
+
+bool ArmCp15SctlrHandler::ShouldRegister() {
+    return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+}
 
 ArmCp15SctlrHandler::~ArmCp15SctlrHandler() {
     if (trampoline_) {

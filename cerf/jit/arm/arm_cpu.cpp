@@ -6,6 +6,7 @@
 
 #include <mutex>
 
+#include "../../boards/board_detector.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../cpu/arm_processor_config.h"
@@ -19,6 +20,10 @@
 #include "../../state/state_stream.h"
 
 REGISTER_SERVICE(ArmCpu);
+
+bool ArmCpu::ShouldRegister() {
+    return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+}
 
 void ArmCpu::SaveState(StateWriter& w) { w.Write(state_); }
 

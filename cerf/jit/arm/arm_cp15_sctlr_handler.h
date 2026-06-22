@@ -14,6 +14,7 @@ public:
     ~ArmCp15SctlrHandler() override;
 
     void OnReady() override;
+    bool ShouldRegister() override;
 
     /* Per-instance JIT trampoline that cp15 c1 SCTLR-write emit
        sites CALL into. Body baked with the live ArmJit pointer

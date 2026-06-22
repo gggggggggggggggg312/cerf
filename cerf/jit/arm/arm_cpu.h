@@ -15,6 +15,7 @@ public:
     using Service::Service;
 
     void OnReady() override;
+    bool ShouldRegister() override;
 
     ArmCpuState* State() { return &state_; }
 
