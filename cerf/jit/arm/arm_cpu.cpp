@@ -162,6 +162,10 @@ void ArmCpu::DoRaiseReset() {
     } else {
         mmu_state->control_register.word = 0;
         mmu_state->process_id            = 0;
+        /* A CPU reset clears TTBCR to 0 (N=b000, TTBR0-only): Cortex-A8 TRM
+           (ARM DDI0344K) §3.2.33 Table 3-64. A bootloader entered post-reset
+           sets only TTBR0 and depends on N=0 to route every VA through it. */
+        mmu_state->ttbcr = 0;
         if (jit_->ProcessorConfig()->HasL2CacheAuxControl()) {
             /* L2 Cache Auxiliary Control Register reset value (ARM DDI0344K §3.2.55). */
             mmu_state->l2_aux_control = 0x00000042u;
