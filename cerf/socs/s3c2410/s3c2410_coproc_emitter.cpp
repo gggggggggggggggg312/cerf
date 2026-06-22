@@ -1,11 +1,11 @@
-#include "../../jit/coproc_emitter.h"
+#include "../../jit/arm/coproc_emitter.h"
 
 #include <cstddef>
 
 #include "../../core/cerf_emulator.h"
-#include "../../jit/arm_mmu_state.h"
-#include "../../jit/cpu_state.h"
-#include "../../jit/place_fns.h"
+#include "../../jit/arm/arm_mmu_state.h"
+#include "../../jit/arm/cpu_state.h"
+#include "../../jit/arm/place_fns.h"
 #include "../../jit/x86_emit.h"
 #include "../../boards/board_detector.h"
 

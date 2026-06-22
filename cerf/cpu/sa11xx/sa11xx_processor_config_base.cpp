@@ -2,8 +2,8 @@
 
 #include <intrin.h>
 
-#include "../../jit/decoded_insn.h"
-#include "../../jit/place_fns.h"
+#include "../../jit/arm/decoded_insn.h"
+#include "../../jit/arm/place_fns.h"
 
 uint16_t Sa11xxProcessorConfigBase::CycleCostFor(const DecodedInsn& d) const {
     if (d.place_fn == &PlaceBlockDataTransfer) {

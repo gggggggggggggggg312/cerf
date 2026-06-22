@@ -5,7 +5,7 @@
 #include "../core/log.h"
 #include "../core/rate_probe.h"
 #include "../cpu/emulated_memory.h"
-#include "../jit/arm_mmu.h"
+#include "../jit/arm/arm_mmu.h"
 
 #include <algorithm>
 #include <intrin.h>
