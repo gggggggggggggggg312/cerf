@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <mutex>
+#include <optional>
 
 #include "../../core/log.h"
 #include "../../core/service.h"
@@ -51,6 +52,9 @@ public:
     bool     DeepSleep()    const override { return cpu_->State()->deep_sleep != 0; }
     bool     ResetPending() const override { return cpu_->State()->reset_pending != 0; }
     uint32_t Pc()           const override { return cpu_->State()->gprs[15]; }
+
+    std::optional<uint8_t*> PeekGuestVa(uint32_t va) override;
+
     void     DispatchTraceIter() override {
 #if CERF_DEV_MODE
         ArmCpuState* s = cpu_->State();
