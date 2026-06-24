@@ -23,6 +23,11 @@ public:
     }
     const char*    GetShortBoardName()  const override { return "Rockhopper"; }
     const wchar_t* GetBootLogoResource() const override { return L"OEM_NEC"; }
+
+    /* Fixed 640x480 CRT mode (ragexl.reg default WIDTH=0x280/HEIGHT=0x1e0). */
+    std::optional<PreferredWindowSize> GetPreferredWindowSize() const override {
+        return PreferredWindowSize{640u, 480u};
+    }
 };
 
 }  /* namespace */

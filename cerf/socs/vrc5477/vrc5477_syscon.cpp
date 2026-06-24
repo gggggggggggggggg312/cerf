@@ -65,6 +65,7 @@ public:
         r.ReadBytes(regs_, sizeof(regs_));
         emu_.Get<Vrc5477Intc>().RestoreState(r);
     }
+    void PostRestore() override { emu_.Get<Vrc5477Intc>().Renotify(); }
 
 private:
     template <typename T> T Read(uint32_t addr) {
