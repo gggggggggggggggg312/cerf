@@ -172,7 +172,7 @@ public:
     /* A deep-sleep wake reaches the CPU through this same reset path; is_resume
        marks that case so the UI surfaces a RESUMING banner, while a bare reset
        surfaces a REBOOTING banner. */
-    void SetResetPending(bool is_resume = false);
+    void SetResetPending(bool is_resume = false) override;
 
     /* Halt the guest CPU for deep sleep until a reset wakes it (SoC power-down
        register write, JIT thread). Re-arms the poll so the next poll parks. */
@@ -251,13 +251,18 @@ public:
 
     /* (0, 0xFFFFFFFF) = whole-cache flush. va/length are widened
        to per-SoC cache-line size before the range-overlap check. */
-    void FlushTranslationCache(uint32_t va, uint32_t length);
+    void FlushTranslationCache(uint32_t va, uint32_t length) override;
 
     /* Re-derive the interrupt-poll trampoline byte from current CPU state.
        After a bulk CPU-state restore the byte is stale (only Set/Clear-
        InterruptPending update it), so a restored-pending IRQ goes
        undelivered until the next peripheral event without this. */
-    void ResyncInterruptPoll();
+    void ResyncInterruptPoll() override;
+
+    void SaveCpuState(StateWriter& w)    override;
+    void RestoreCpuState(StateReader& r) override;
+    void SaveMmuState(StateWriter& w)    override;
+    void RestoreMmuState(StateReader& r) override;
 
     /* SCTLR.M 1→0 mid-block: drops host-side VA dispatch caches now,
        defers the arena flush to the next JitCompile. An arena flush
