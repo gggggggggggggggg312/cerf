@@ -47,7 +47,8 @@ constexpr uint8_t kFcsrIntr    = 0x02;
 uint8_t Rtl8019::ReadAttribute8(uint32_t offset) {
     std::lock_guard<std::mutex> lk(state_mutex_);
     if (offset == kFcsrOffset) {
-        return fcsr_;
+        const uint8_t intr = (nic_intr_status_ & nic_intr_mask_) ? kFcsrIntr : 0u;
+        return (fcsr_ & ~kFcsrIntr) | intr;
     }
     if (offset == kCorOffset) {
         return cor_;
@@ -70,13 +71,7 @@ uint8_t Rtl8019::ReadAttribute8(uint32_t offset) {
 void Rtl8019::WriteAttribute8(uint32_t offset, uint8_t value) {
     std::lock_guard<std::mutex> lk(state_mutex_);
     if (offset == kFcsrOffset) {
-        fcsr_ = value;
-        /* Driver acks the interrupt by writing FCSR_INTR_ACK; we
-           clear FCSR_INTR + FCSR_INTR_ACK on receipt per the
-           function-control spec. */
-        if (fcsr_ & kFcsrIntrAck) {
-            fcsr_ &= ~(kFcsrIntr | kFcsrIntrAck);
-        }
+        fcsr_ = value & ~(kFcsrIntr | kFcsrIntrAck);
         return;
     }
     if (offset == kCorOffset) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../core/service.h"
+#include "../pcic82365/pcic82365.h"
 #include "../pcmcia/pcmcia_slot.h"
 
 #include <cstdint>
@@ -61,24 +62,7 @@ private:
 
     uint8_t index_ = 0u;
 
-    uint8_t reg_power_control_          = 0u;
-    uint8_t reg_card_status_change_     = 0u;
-    uint8_t reg_status_change_int_cfg_  = 0u;
-    uint8_t reg_window_enable_          = 0u;
-    uint8_t reg_io_window_control_      = 0u;
-    uint8_t reg_interrupt_and_gen_ctrl_ = 0u;
-    uint8_t reg_chip_info_              = 0u;
+    uint8_t reg_chip_info_ = 0u;   /* PD6710-specific chip-detect probe register (0x1F) */
 
-    /* Window mapping register files, PD6710 datasheet §7-§8: I/O maps
-       0-1 start/end (index 0x08-0x0F) + offsets (0x36-0x39); memory
-       maps 0-4 start/end/offset (0x10-0x35, stride 8, low 6 of each
-       group). Each entry stores the raw programmed byte. */
-    uint8_t io_start_lo_[2] = {};
-    uint8_t io_start_hi_[2] = {};
-    uint8_t io_end_lo_  [2] = {};
-    uint8_t io_end_hi_  [2] = {};
-    uint8_t io_off_lo_  [2] = {};
-    uint8_t io_off_hi_  [2] = {};
-    uint8_t mem_reg_[5][6]  = {};   /* [win][start_lo,start_hi,end_lo,end_hi,off_lo,off_hi] */
-    uint8_t timing_[6]      = {};   /* setup/cmd/recovery × 2 timing sets */
+    Pcic82365 exca_;
 };

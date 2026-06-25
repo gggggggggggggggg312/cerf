@@ -137,7 +137,8 @@ void Rtl8019::ResetLocked() {
 
 void Rtl8019::RaiseInterruptLocked(uint8_t bits) {
     nic_intr_status_ |= bits;
-    fcsr_ |= kFcsrIntr;
+    /* FCSR Intr is live (ISR & IMR), computed in ReadAttribute8; a stored copy
+       desyncs on INTR_ACK so giisr misses an asserting card (cardserv.h FCR_FCSR_INTR). */
     /* Drive the slot IRQ line only when the bit is unmasked AND we're
        not propagating ISR_RESET (the reset bit is a status indicator,
        not a real interrupt source - the PCMCIA driver polls for it
