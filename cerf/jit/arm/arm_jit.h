@@ -54,6 +54,7 @@ public:
     uint32_t Pc()           const override { return cpu_->State()->gprs[15]; }
 
     std::optional<uint8_t*> PeekGuestVa(uint32_t va) override;
+    uint8_t* ResolveGuestVaToHost(uint32_t va) override;
 
     void     DispatchTraceIter() override {
 #if CERF_DEV_MODE
@@ -263,6 +264,7 @@ public:
     void RestoreCpuState(StateReader& r) override;
     void SaveMmuState(StateWriter& w)    override;
     void RestoreMmuState(StateReader& r) override;
+    void SetInjectionBand(uint32_t va, uint32_t pa, uint32_t size) override;
 
     /* SCTLR.M 1→0 mid-block: drops host-side VA dispatch caches now,
        defers the arena flush to the next JitCompile. An arena flush
