@@ -1,5 +1,7 @@
 #include "arm_mmu.h"
 
+#include <cstring>
+
 #include "../../boards/board_detector.h"
 #include "../../boards/page_table_builder.h"
 #include "../../core/cerf_emulator.h"
@@ -189,4 +191,20 @@ bool ArmMmu::ExecPageGlobal(uint32_t va) const {
                                  /*need_write=*/false);
     return w >= 0 &&
            state_.instruction_tlb.entries[base + static_cast<uint32_t>(w)].global != 0u;
+}
+
+bool ArmMmu::AccessPaged(ArmCpuState* cpu_state, uint32_t va,
+                         uint8_t* host_buf, uint32_t n, bool is_load) {
+    for (uint32_t done = 0; done < n; ) {
+        const uint32_t va_cur = va + done;
+        uint8_t* host = is_load ? TranslateRead (cpu_state, va_cur)
+                                : TranslateWrite(cpu_state, va_cur);
+        if (host == nullptr) return false;
+        const uint32_t page_left = 0x1000u - (va_cur & 0xFFFu);
+        const uint32_t chunk = (n - done < page_left) ? (n - done) : page_left;
+        if (is_load) std::memcpy(host_buf + done, host, chunk);
+        else         std::memcpy(host, host_buf + done, chunk);
+        done += chunk;
+    }
+    return true;
 }

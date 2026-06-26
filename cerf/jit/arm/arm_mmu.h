@@ -37,6 +37,10 @@ public:
     uint8_t* TranslateReadWrite(ArmCpuState* cpu_state, uint32_t va);
     uint8_t* TranslateExecute (ArmCpuState* cpu_state, uint32_t va);
 
+    /* Word-aligned VFP/NEON multi-byte loads may page-cross (ARM ARM DDI0406C A3.2 Table A3-1). */
+    bool AccessPaged(ArmCpuState* cpu_state, uint32_t va,
+                     uint8_t* host_buf, uint32_t n, bool is_load);
+
     /* No walk, no TLB fill, no abort raise - diagnostic-only. */
     std::optional<uint8_t*> PeekDataTlb(uint32_t va) const;
 
