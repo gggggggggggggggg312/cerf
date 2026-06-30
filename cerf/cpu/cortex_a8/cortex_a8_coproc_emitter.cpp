@@ -2,7 +2,7 @@
 
 #include "../../core/cerf_emulator.h"
 #include "../../jit/arm/place_fns.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 
 namespace {
 
@@ -11,7 +11,7 @@ public:
     using CoprocEmitter::CoprocEmitter;
 
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         if (!bd) return false;
         const SocFamily soc = bd->GetSoc();
         return soc == SocFamily::OMAP3530 || soc == SocFamily::iMX51;

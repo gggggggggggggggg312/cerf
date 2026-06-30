@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../boards/page_table_builder.h"
 #include "../../core/cerf_emulator.h"
 #include "../../cpu/arm_processor_config.h"
@@ -14,7 +14,7 @@
 REGISTER_SERVICE(ArmMmu);
 
 bool ArmMmu::ShouldRegister() {
-    return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+    return emu_.Get<BoardContext>().GetCpuArch() == CpuArch::Arm;
 }
 
 ArmMmu::~ArmMmu() = default;

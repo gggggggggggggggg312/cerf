@@ -1,6 +1,6 @@
 #include "arm_processor_config.h"
 
-#include "../boards/board_detector.h"
+#include "../boards/board_context.h"
 #include "../core/cerf_emulator.h"
 
 namespace {
@@ -10,7 +10,7 @@ public:
     using ArmProcessorConfig::ArmProcessorConfig;
 
     bool ShouldRegister() override {
-        return emu_.Get<BoardDetector>().GetBoard() == Board::Unknown;
+        return emu_.Get<BoardContext>().GetBoard() == Board::Unknown;
     }
 
     uint32_t PcStoreOffset()              const override { return 0; }

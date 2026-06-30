@@ -1,7 +1,7 @@
 #include "../../socs/s3c2410/s3c2410_touch_calibration.h"
 
 #include "../../core/cerf_emulator.h"
-#include "../board_detector.h"
+#include "../board_context.h"
 
 namespace {
 
@@ -18,7 +18,7 @@ public:
     using S3C2410TouchCalibration::S3C2410TouchCalibration;
 
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         return bd && bd->GetBoard() == Board::Smdk2410DevEmu;
     }
 

@@ -11,7 +11,7 @@ board runs exactly one of them, picked by its CPU architecture.
 (`cerf/jit/guest_engine.h`) and never names a concrete engine.
 `ArmJit` and `MipsJit` each `REGISTER_SERVICE_AS(<engine>,
 GuestEngine)`; the winner is selected by
-`BoardDetector::GetCpuArch()` (`enum class CpuArch { Arm, Mips }`),
+`BoardContext::GetCpuArch()` (`enum class CpuArch { Arm, Mips }`),
 so `ArmJit::ShouldRegister` returns true on `CpuArch::Arm` and
 `MipsJit::ShouldRegister` on `CpuArch::Mips`. Every ARM-engine
 service (`ArmCpu`, `ArmMmu`, `ArmDecoder`, `ArmCp15SctlrHandler`)

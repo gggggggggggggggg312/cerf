@@ -8,7 +8,7 @@
 #include "../../core/log.h"
 #include "../../core/service.h"
 #include "../../core/cerf_emulator.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../tracing/trace_manager.h"
 #include "../guest_engine.h"
 #include "arm_cpu.h"
@@ -34,7 +34,7 @@ public:
 
     void OnReady() override;
     bool ShouldRegister() override {
-        return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+        return emu_.Get<BoardContext>().GetCpuArch() == CpuArch::Arm;
     }
 
     ArmCpuState* CpuState() { return cpu_->State(); }

@@ -129,6 +129,7 @@ struct ParsedRom {
 class RomParserService : public Service {
 public:
     using Service::Service;
+    bool ShouldRegister() override;
     void OnReady() override;
 
     /* True once every declared partition parsed successfully. */

@@ -3,7 +3,7 @@
 #include "../../host/keyboard_map.h"
 #include "../../host/keyboard_router.h"
 #include "../../peripherals/intel_i8042/i8042_controller.h"
-#include "../board_detector.h"
+#include "../board_context.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -20,7 +20,7 @@ public:
     using KeyboardInput::KeyboardInput;
 
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         return bd && bd->GetBoard() == Board::NecRockhopper;
     }
 

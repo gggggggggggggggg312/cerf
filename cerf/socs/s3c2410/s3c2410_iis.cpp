@@ -2,7 +2,7 @@
 
 #include "s3c2410_iis.h"
 
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../host/audio_activity_widget.h"
@@ -34,7 +34,7 @@ constexpr UINT kMsgOutDmaEnable = 0xC001u;
 }  /* namespace */
 
 bool S3C2410Iis::ShouldRegister() {
-    auto* bd = emu_.TryGet<BoardDetector>();
+    auto* bd = emu_.TryGet<BoardContext>();
     return bd && bd->GetSoc() == SocFamily::S3C2410;
 }
 

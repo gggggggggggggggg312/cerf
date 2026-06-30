@@ -12,7 +12,7 @@
 #include "../../jit/arm/cpu_state.h"
 #include "../../jit/arm/place_fns.h"
 #include "../../jit/x86_emit.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 
 namespace {
 
@@ -21,7 +21,7 @@ public:
     using CoprocEmitter::CoprocEmitter;
 
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         return bd && bd->GetSoc() == SocFamily::PXA25x;
     }
 

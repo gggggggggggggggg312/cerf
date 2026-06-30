@@ -1,25 +1,17 @@
-#include "../board_detector.h"
+#include "../board_context.h"
 
 #include "../../core/cerf_emulator.h"
 
 namespace {
 
-/* Fingerprint string is unique to the Odo SMC91C94 HAL (HALETHER.C).
-   Changing it without proving uniqueness across the CE3 ROM set risks
-   false positives on other CE3 ROMs. */
-class OdoArm720Detector : public BoardDetector {
+class OdoArm720Context : public BoardContext {
 public:
-    using BoardDetector::BoardDetector;
-
-    bool ShouldRegister() override {
-        const auto blob = ReadKernelBlob();
-        return ContainsString(blob.data(), blob.size(),
-            "OEMEthInit: Error reading IP config from SMC EEPROM");
-    }
+    using BoardContext::BoardContext;
 
     Board       GetBoard()  const override { return Board::OdoArm720; }
     SocFamily   GetSoc()    const override { return SocFamily::Poseidon; }
     CpuArch     GetCpuArch() const override { return CpuArch::Arm; }
+    RomPlacingMode GetRomPlacingMode() const override { return RomPlacingMode::FlatContainer; }
     const char* BoardName() const override {
         return "Microsoft Windows CE Hardware Reference Platform, Philips Poseidon ASIC, ARM720T";
     }
@@ -34,4 +26,4 @@ public:
 
 }  /* namespace */
 
-REGISTER_SERVICE_AS(OdoArm720Detector, BoardDetector);
+REGISTER_SERVICE_AS(OdoArm720Context, BoardContext);

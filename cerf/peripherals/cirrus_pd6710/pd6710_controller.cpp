@@ -3,7 +3,7 @@
 #include "pd6710_card_irq_line.h"
 #include "pd6710_management_irq_line.h"
 
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../host/host_widget_registry.h"
@@ -34,7 +34,7 @@ Pd6710Controller::Pd6710Controller(CerfEmulator& emu)
     : Service(emu), slot_(emu, *this, L"PCMCIA #1") {}
 
 bool Pd6710Controller::ShouldRegister() {
-    auto* bd = emu_.TryGet<BoardDetector>();
+    auto* bd = emu_.TryGet<BoardContext>();
     return bd && bd->GetBoard() == Board::Smdk2410DevEmu;
 }
 

@@ -10,7 +10,7 @@
 #include "../../peripherals/peripheral_dispatcher.h"
 #include "../../socs/irq_controller.h"
 #include "../../state/state_stream.h"
-#include "../board_detector.h"
+#include "../board_context.h"
 
 REGISTER_SERVICE(DevEmuPs2Keyboard);
 
@@ -96,7 +96,7 @@ class DevEmuKeyboardInput : public KeyboardInput {
 public:
     using KeyboardInput::KeyboardInput;
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         return bd && bd->GetBoard() == Board::Smdk2410DevEmu;
     }
     void OnReady() override { emu_.Get<KeyboardRouter>().Register(this); }
@@ -110,7 +110,7 @@ public:
 REGISTER_SERVICE(DevEmuKeyboardInput);
 
 bool DevEmuPs2Keyboard::ShouldRegister() {
-    auto* bd = emu_.TryGet<BoardDetector>();
+    auto* bd = emu_.TryGet<BoardContext>();
     return bd && bd->GetBoard() == Board::Smdk2410DevEmu;
 }
 

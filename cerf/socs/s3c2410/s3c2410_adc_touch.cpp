@@ -4,7 +4,7 @@
 
 #include "s3c2410_touch_calibration.h"
 #include "../irq_controller.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../host/host_canvas.h"
@@ -67,7 +67,7 @@ class S3C2410TouchInput : public TouchInput {
 public:
     using TouchInput::TouchInput;
     bool ShouldRegister() override {
-        auto* bd = emu_.TryGet<BoardDetector>();
+        auto* bd = emu_.TryGet<BoardContext>();
         return bd && bd->GetSoc() == SocFamily::S3C2410;
     }
     void OnPenDown(int x, int y) override {
@@ -89,7 +89,7 @@ public:
 REGISTER_SERVICE_AS(S3C2410TouchInput, TouchInput);
 
 bool S3C2410AdcTouch::ShouldRegister() {
-    auto* bd = emu_.TryGet<BoardDetector>();
+    auto* bd = emu_.TryGet<BoardContext>();
     return bd && bd->GetSoc() == SocFamily::S3C2410;
 }
 

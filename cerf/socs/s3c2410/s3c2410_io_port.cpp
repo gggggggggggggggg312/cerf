@@ -1,6 +1,6 @@
 #include "s3c2410_io_port.h"
 
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/log.h"
 #include "../../host/guest_deep_sleep.h"
@@ -46,7 +46,7 @@ uint32_t RollupBitsFor(uint32_t eint_bits) {
 }  /* namespace */
 
 bool S3C2410IoPort::ShouldRegister() {
-    auto* bd = emu_.TryGet<BoardDetector>();
+    auto* bd = emu_.TryGet<BoardContext>();
     return bd && bd->GetSoc() == SocFamily::S3C2410;
 }
 

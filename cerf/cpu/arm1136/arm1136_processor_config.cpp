@@ -1,7 +1,7 @@
 #include "../arm_processor_config.h"
 
 #include "../../core/cerf_emulator.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 
 namespace {
 
@@ -10,7 +10,7 @@ public:
     using ArmProcessorConfig::ArmProcessorConfig;
 
     bool ShouldRegister() override {
-        return emu_.Get<BoardDetector>().GetBoard() == Board::ZuneKeel;
+        return emu_.Get<BoardContext>().GetBoard() == Board::ZuneKeel;
     }
 
     uint32_t PcStoreOffset()              const override { return 8; }

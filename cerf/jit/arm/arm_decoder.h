@@ -4,7 +4,7 @@
 
 #include "../../core/service.h"
 #include "../../core/cerf_emulator.h"
-#include "../../boards/board_detector.h"
+#include "../../boards/board_context.h"
 
 class ArmCpu;
 class ArmProcessorConfig;
@@ -19,7 +19,7 @@ public:
 
     void OnReady() override;
     bool ShouldRegister() override {
-        return emu_.Get<BoardDetector>().GetCpuArch() == CpuArch::Arm;
+        return emu_.Get<BoardContext>().GetCpuArch() == CpuArch::Arm;
     }
 
     /* ARM-mode 32-bit instruction decode. Returns false on UNDEFINED
