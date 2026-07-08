@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <intrin.h>
+#include <typeinfo>
 
 REGISTER_SERVICE(PeripheralDispatcher);
 
@@ -66,6 +67,21 @@ void PeripheralDispatcher::Register(Peripheral* p) {
 
 bool PeripheralDispatcher::IsPeripheralAddress(uint32_t addr) const {
     return LookupEntry(addr) != nullptr;
+}
+
+void PeripheralDispatcher::ValidatePhysReachable(uint32_t phys_addr_mask) const {
+    if (phys_addr_mask == 0xFFFFFFFFu) return;
+    for (const auto& e : entries_) {
+        if ((e.end - 1u) > phys_addr_mask) {
+            LOG(Caution, "PeripheralDispatcher: %s at [0x%08X..0x%08X) is above "
+                    "the SoC physical space (mask 0x%08X); it aliases to "
+                    "0x%08X and is unreachable/shadowed - relocate it into the "
+                    "addressable range\n",
+                    typeid(*e.p).name(), e.base, e.end, phys_addr_mask,
+                    e.base & phys_addr_mask);
+            CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
+        }
+    }
 }
 
 PeripheralDispatcher::Entry* PeripheralDispatcher::LookupEntry(uint32_t addr) const {

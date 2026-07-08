@@ -23,6 +23,12 @@ public:
 
     bool IsPeripheralAddress(uint32_t addr) const;
 
+    /* Fatal if any registered peripheral lies above the SoC's addressable
+       physical space: such a peripheral's guest accesses alias down into the
+       low physical region (masked by the MMU) and never route back to it, so
+       it is silently unreachable and may shadow a real peripheral. */
+    void ValidatePhysReachable(uint32_t phys_addr_mask) const;
+
     /* Every registered peripheral, in registration order. Drives the
        Hibernation uniform SaveState/RestoreState walk. */
     std::vector<Peripheral*> RegisteredPeripherals() const;
