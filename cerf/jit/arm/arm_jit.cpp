@@ -282,13 +282,6 @@ void ArmJit::ResyncInterruptPoll() {
     UpdateInterruptOnPoll();
 }
 
-void ArmJit::EnterDeepSleep() {
-    /* SA-1110 §9.5.3: PMCR.SF halts the CPU until a wake reset; re-arm the poll so it returns to the dispatcher (RunLoop parks). */
-    std::lock_guard<std::mutex> guard(interrupt_lock_);
-    cpu_->State()->deep_sleep = 1;
-    UpdateInterruptOnPoll();
-}
-
 void __fastcall ArmJit::WfiHelper(ArmJit* jit) {
     auto* state = jit->cpu_->State();
     if (state->irq_interrupt_pending != 0 || state->reset_pending != 0) return;
@@ -302,10 +295,6 @@ void __fastcall ArmJit::WfiHelper(ArmJit* jit) {
     const uint64_t cpu_hz = jit->ProcessorConfig()->CpuClockHz();
     state->guest_cycle_counter += static_cast<uint32_t>(
         (static_cast<uint64_t>(elapsed_ns) * cpu_hz) / 1000000000ull);
-}
-
-void __fastcall ArmJit::EnterDeepSleepHelper(ArmJit* jit) {
-    jit->emu_.Get<GuestDeepSleep>().Enter();
 }
 
 void ArmJit::NotifyResetDelivered() {
