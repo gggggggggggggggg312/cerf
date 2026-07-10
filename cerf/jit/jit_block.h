@@ -18,4 +18,8 @@ struct JitBlock {
        not a whole-tree scan. owner = the RB tree to RbDelete from. */
     JitBlock*       page_next;
     JitBlockIndex*  owner;
+
+    /* page_heads[] key: the backing-store offset (QEMU ram_addr), so every
+       alias of a byte in a repeating decode window shares one bucket. */
+    uint32_t        index_start;
 };

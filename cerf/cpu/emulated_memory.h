@@ -21,8 +21,12 @@ public:
 
     static constexpr size_t kMaxRegions = 64;
 
+    /* `decode_span` (0 = `size`) is the address space the chip select decodes onto
+       this region. A span wider than `size` repeats the region through the window,
+       which requires a power-of-two `size` dividing the span. */
     void AddRegion(uint32_t base, uint32_t size,
-                   DWORD page_protect = PAGE_READWRITE);
+                   DWORD page_protect = PAGE_READWRITE,
+                   uint32_t decode_span = 0);
 
     uint8_t* Translate(uint32_t vaddr);
 
@@ -80,7 +84,9 @@ public:
 private:
     struct Region {
         uint32_t              base         = 0;
-        uint32_t              size         = 0;
+        uint32_t              size         = 0;   /* backed bytes */
+        uint32_t              span         = 0;   /* decoded bytes; >= size */
+        uint32_t              wrap_mask    = 0xFFFFFFFFu;
         DWORD                 page_protect = 0;
         std::atomic<uint8_t*> host_ptr{nullptr};  /* lazy first-touch */
     };

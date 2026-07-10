@@ -257,7 +257,7 @@ void ArmJit::JitCreateEntrypoints(JitBlock* containing_block,
             stored = outer_idx.PlaceSubAt(slot, containing_block, new_block);
         } else {
             stored = outer_idx.PlaceOuterAt(slot, new_block);
-            space.IndexInsert(stored, &outer_idx);
+            space.IndexInsert(stored, &outer_idx, stored->phys_start);
         }
 
         for (uint32_t k = i; k < j; ++k) {

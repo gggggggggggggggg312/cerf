@@ -12,13 +12,23 @@ REGISTER_SERVICE(EmulatedMemory);
 void EmulatedMemory::OnReady() {
     auto& page = emu_.Get<PageTableBuilder>();
     for (const auto& r : page.BackedMemoryRegions()) {
-        AddRegion(r.pa_base, r.size, r.page_protect);
+        AddRegion(r.pa_base, r.size, r.page_protect, r.decode_span);
     }
 }
 
 void EmulatedMemory::AddRegion(uint32_t base, uint32_t size,
-                               DWORD page_protect) {
+                               DWORD page_protect, uint32_t decode_span) {
     std::lock_guard<std::mutex> lk(add_mutex_);
+
+    const uint32_t span = decode_span ? decode_span : size;
+    if (size == 0 || span < size || span % size != 0 ||
+        (span != size && (size & (size - 1u)) != 0)) {
+        LOG(Caution, "EmulatedMemory::AddRegion bad decode span: base=0x%08X "
+                "size=0x%X span=0x%X (span must be a multiple of a "
+                "power-of-two size)\n", base, size, span);
+        CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
+    }
+    const uint32_t wrap_mask = (span == size) ? 0xFFFFFFFFu : (size - 1u);
 
     /* count_.load(acquire) inside the writer lock - we hold the writer
        lock, so no other writer can be racing; the acquire pairs with
@@ -27,10 +37,10 @@ void EmulatedMemory::AddRegion(uint32_t base, uint32_t size,
 
     for (size_t i = 0; i < n; ++i) {
         const Region& r = regions_[i];
-        if (base < r.base + r.size && r.base < base + size) {
+        if (base < r.base + r.span && r.base < base + span) {
             LOG(Caution, "EmulatedMemory::AddRegion overlap: new "
                     "[0x%08X..0x%08X) vs existing [0x%08X..0x%08X)\n",
-                    base, base + size, r.base, r.base + r.size);
+                    base, base + span, r.base, r.base + r.span);
             CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
         }
     }
@@ -45,19 +55,21 @@ void EmulatedMemory::AddRegion(uint32_t base, uint32_t size,
 
     regions_[n].base         = base;
     regions_[n].size         = size;
+    regions_[n].span         = span;
+    regions_[n].wrap_mask    = wrap_mask;
     regions_[n].page_protect = page_protect;
 
     count_.store(n + 1, std::memory_order_release);
 
-    LOG(Mem, "AddRegion 0x%08X size 0x%X protect 0x%X (slot %zu)\n",
-        base, size, page_protect, n);
+    LOG(Mem, "AddRegion 0x%08X size 0x%X span 0x%X protect 0x%X (slot %zu)\n",
+        base, size, span, page_protect, n);
 }
 
 EmulatedMemory::Region* EmulatedMemory::FindRegion(uint32_t vaddr) {
     const size_t n = count_.load(std::memory_order_acquire);
     for (size_t i = 0; i < n; ++i) {
         Region& r = regions_[i];
-        if (vaddr >= r.base && vaddr < r.base + r.size) {
+        if (vaddr >= r.base && vaddr < r.base + r.span) {
             return &r;
         }
     }
@@ -101,13 +113,13 @@ uint8_t* EmulatedMemory::Translate(uint32_t vaddr) {
         LOG(Caution, "EmulatedMemory::Translate unmapped 0x%08X\n", vaddr);
         CerfFatalExit(CERF_FATAL_RUNTIME_ERROR);
     }
-    return EnsureBacked(r) + (vaddr - r->base);
+    return EnsureBacked(r) + ((vaddr - r->base) & r->wrap_mask);
 }
 
 uint8_t* EmulatedMemory::TryTranslate(uint32_t paddr) {
     Region* r = FindRegion(paddr);
     if (!r) return nullptr;
-    return EnsureBacked(r) + (paddr - r->base);
+    return EnsureBacked(r) + ((paddr - r->base) & r->wrap_mask);
 }
 
 uint8_t* EmulatedMemory::TryTranslateWrite(uint32_t paddr) {
@@ -125,7 +137,7 @@ uint8_t* EmulatedMemory::TryTranslateWrite(uint32_t paddr) {
         return nullptr;
     }
 
-    return EnsureBacked(r) + (paddr - r->base);
+    return EnsureBacked(r) + ((paddr - r->base) & r->wrap_mask);
 }
 
 bool EmulatedMemory::IsSlotRangeUniform(uint32_t pte, uint32_t pa) {
@@ -138,6 +150,8 @@ bool EmulatedMemory::IsSlotRangeUniform(uint32_t pte, uint32_t pa) {
     const uint32_t base = pa & ~(gran - 1u);
     Region* r = FindRegion(base);
     if (!r) return true;  /* base not RAM-backed: host_adjust is 0 regardless. */
+    /* A repeating region wraps mid-slot, so one host_adjust cannot cover it. */
+    if (r->wrap_mask != 0xFFFFFFFFu) return false;
     return base >= r->base &&
            static_cast<uint64_t>(base) + gran <=
                static_cast<uint64_t>(r->base) + r->size;
