@@ -62,6 +62,10 @@ private:
     void RaiseInterruptLocked(uint8_t bits);
     void ClearInterruptIfDrainedLocked();
 
+    /* No Vcc -> a PC Card drives no pin, its INT included. */
+    void SetIrqLineLocked(bool level);
+    void DriveIrqLineLowLocked();
+
     /* Full NIC_RESET behavior - guest writes to NIC_RESET (offset
        0x1F) and PowerOn both route here. */
     void ResetLocked();
@@ -72,6 +76,9 @@ private:
        reads it via the CIS path. */
     std::array<uint8_t, 6> guest_mac_{};
     bool rx_installed_ = false;
+
+    bool powered_  = false;
+    bool irq_line_ = false;
 
     mutable std::mutex state_mutex_;
 

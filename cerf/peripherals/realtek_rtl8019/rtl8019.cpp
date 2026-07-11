@@ -74,11 +74,13 @@ void Rtl8019::DetachRx() {
     rx_installed_ = false;
 }
 
-/* Shutdown quiesce: NetworkBackend is still alive here. Clearing rx_installed_
-   makes the destructor's DetachRx a no-op at shutdown (when NetworkBackend,
-   readied in our ctor, is already gone); a runtime eject still detaches via
-   the destructor with the backend alive. */
-void Rtl8019::OnShutdown() { DetachRx(); }
+void Rtl8019::OnShutdown() {
+    {
+        std::lock_guard<std::mutex> lk(state_mutex_);
+        DriveIrqLineLowLocked();
+    }
+    DetachRx();
+}
 
 Rtl8019::~Rtl8019() { DetachRx(); }
 
@@ -96,15 +98,31 @@ void Rtl8019::OnInserted() {
 
 void Rtl8019::PowerOn() {
     std::lock_guard<std::mutex> lk(state_mutex_);
+    powered_ = true;
     ResetLocked();
     LOG(Net, "[NE2000] power-on\n");
 }
 
 void Rtl8019::PowerOff() {
     std::lock_guard<std::mutex> lk(state_mutex_);
+    DriveIrqLineLowLocked();
     nic_command_ = kCrStop;
     cor_ = 0u;   /* Vcc off loses the attribute configuration */
     LOG(Net, "[NE2000] power-off\n");
+}
+
+void Rtl8019::SetIrqLineLocked(bool level) {
+    if (!powered_ || !slot_) return;
+    irq_line_ = level;
+    if (level) slot_->RaiseIrq();
+    else       slot_->ClearIrq();
+}
+
+void Rtl8019::DriveIrqLineLowLocked() {
+    const bool was_driving = powered_ && irq_line_;
+    powered_  = false;
+    irq_line_ = false;
+    if (was_driving) slot_->ClearIrq();
 }
 
 void Rtl8019::ResetLocked() {
@@ -133,6 +151,7 @@ void Rtl8019::ResetLocked() {
     card_ram_.fill(0);
     dma_count_       = 0u;
     dma_offset_      = 0u;
+    SetIrqLineLocked(false);
 }
 
 void Rtl8019::RaiseInterruptLocked(uint8_t bits) {
@@ -144,13 +163,13 @@ void Rtl8019::RaiseInterruptLocked(uint8_t bits) {
        not a real interrupt source - the PCMCIA driver polls for it
        during init, doesn't want an IRQ). */
     if (bits != kIsrResetBit && (nic_intr_mask_ & bits) != 0u) {
-        slot_->RaiseIrq();
+        SetIrqLineLocked(true);
     }
 }
 
 void Rtl8019::ClearInterruptIfDrainedLocked() {
     if ((nic_intr_status_ & nic_intr_mask_) != 0u) return;
-    slot_->ClearIrq();
+    SetIrqLineLocked(false);
 }
 
 /* rx_installed_ is host-coupling re-established at insert (OnInserted), not
@@ -193,6 +212,7 @@ void Rtl8019::RestoreState(StateReader& r) {
     r.Read(fcsr_); r.Read(cor_);
     r.ReadBytes(card_rom_.data(), card_rom_.size());
     r.ReadBytes(card_ram_.data(), card_ram_.size());
+    SetIrqLineLocked((nic_intr_status_ & nic_intr_mask_) != 0u);
 }
 
 void Rtl8019::OnRxFrame(const uint8_t* frame, std::size_t len) {

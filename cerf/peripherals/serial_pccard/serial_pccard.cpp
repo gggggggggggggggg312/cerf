@@ -1,8 +1,8 @@
 #include "serial_pccard.h"
 
-#include "serial_endpoint.h"
-#include "modem_personality.h"
-#include "host_serial_forward.h"
+#include "../serial/serial_endpoint.h"
+#include "../serial/modem_personality.h"
+#include "../serial/host_serial_forward.h"
 
 #include "../pcmcia/pcmcia_slot.h"
 #include "../../core/cerf_emulator.h"
@@ -29,10 +29,10 @@ std::wstring SerialPcCard::TooltipDetail() const {
     return kDisplayName;
 }
 
-/* CIS verified vs pcmcia.dll ParseCfTable + ser_card.c FindComConfig (COR attr
-   0x200, cfg idx 1, I/O 0x3F8). FUNCE present => CE6 DetectModem binds Unimodem
-   (DeviceType=3); forward mode omits it for a plain serial COMx on CE6 (CE3
-   DetectModem hardcodes "Modem" either way - serial.dll!DetectModem 0xF95F98). */
+/* SER_CARD2's DetectModem keys a serial-FUNCID card off CISTPL_FUNCE: no FUNCE
+   (or subtype 0) -> Drivers\PCMCIA\Serial, DeviceType=0, a plain COMx; a modem
+   subtype -> Drivers\PCMCIA\Modem, DeviceType=3, bound by Unimodem. ser_card.c
+   FindComConfig accepts only COR 0x200 / config index 1 / I/O 0x3F8. */
 void SerialPcCard::BuildCis() {
     cis_ = {0x21, 0x02, 0x02, 0x00};                  /* CISTPL_FUNCID: serial(2) */
     if (mode_ == Mode::Modem) {
@@ -60,25 +60,47 @@ void SerialPcCard::BuildCis() {
 }
 
 void SerialPcCard::OnInserted() {
-    if (mode_ == Mode::HostForward)
-        endpoint_ = std::make_unique<HostSerialForward>(
-            host_port_, emu_.Get<EmulationFreeze>());
-    else
+    if (mode_ == Mode::HostForward) {
+        auto fwd = std::make_unique<HostSerialForward>(host_port_, emu_);
+        PcmciaSlot* slot = slot_;
+        const uint64_t id = card_id_;
+        fwd->SetOnBridgeDead([slot, id] { slot->EjectCardIfResident(id); });
+        endpoint_ = std::move(fwd);
+    } else {
         endpoint_ = std::make_unique<ModemPersonality>(emu_);
+    }
     uart_ = std::make_unique<Serial16550>(*endpoint_,
                                           [this](bool a) { OnUartIrq(a); });
     endpoint_->BindUart(*uart_);
 }
 
 void SerialPcCard::OnShutdown() {
-    endpoint_.reset();   /* terminator dtor removes the RX callback (barrier) */
-    uart_.reset();       /* before the UART the terminator's RX path touches */
+    DriveIrqLineLow();
+    if (uart_) uart_->SetEndpoint(nullptr);
+    endpoint_.reset();
 }
 
-void SerialPcCard::PowerOn () { uart_->Reset(); endpoint_->OnOpen(); }
-void SerialPcCard::PowerOff() { endpoint_->OnClose(); }
+void SerialPcCard::PowerOn () {
+    powered_ = true;
+    uart_->Reset();
+    if (endpoint_) endpoint_->OnOpen();
+}
+
+void SerialPcCard::PowerOff() {
+    DriveIrqLineLow();
+    if (endpoint_) endpoint_->OnClose();
+}
+
+void SerialPcCard::DriveIrqLineLow() {
+    const bool was_driving = powered_;
+    powered_ = false;
+    fcsr_ &= (uint8_t)~FCR_FCSR_INTR;
+    if (was_driving && uart_irq_) slot_->ClearIrq();
+    uart_irq_ = false;
+}
 
 void SerialPcCard::OnUartIrq(bool asserted) {
+    if (!powered_) return;
     uart_irq_ = asserted;
     if (asserted) { fcsr_ |= FCR_FCSR_INTR; slot_->RaiseIrq(); }
     else          { fcsr_ &= (uint8_t)~FCR_FCSR_INTR; slot_->ClearIrq(); }
@@ -132,12 +154,14 @@ uint16_t SerialPcCard::ReadIo16(uint32_t offset) {
 void SerialPcCard::SaveState(StateWriter& w) {
     w.Write(cor_); w.Write(fcsr_);
     w.Write<uint8_t>(uart_irq_ ? 1u : 0u);
+    w.Write<uint8_t>(powered_ ? 1u : 0u);
     uart_->SaveState(w);
 }
 
 void SerialPcCard::RestoreState(StateReader& r) {
     r.Read(cor_); r.Read(fcsr_);
     uint8_t irq = 0; r.Read(irq); uart_irq_ = (irq != 0);
+    uint8_t pwr = 0; r.Read(pwr); powered_ = (pwr != 0);
     uart_->RestoreState(r);
 }
 

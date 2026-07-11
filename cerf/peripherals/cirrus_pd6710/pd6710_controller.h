@@ -54,7 +54,6 @@ private:
        state_mutex_. */
     bool WriteIndexedDataLocked(uint8_t value, bool* power_on);
 
-    bool IsCardPoweredLocked() const;
 
     PcmciaSlot slot_;
 

@@ -9,7 +9,7 @@
 #include <vector>
 
 class CerfEmulator;
-class Serial16550;
+class SerialLine;
 
 /* Terminates the guest PPP dial-up session as the PPP server/peer and bridges
    its IP (proto 0x0021) to the host NetworkBackend over libslirp's L2 Ethernet.
@@ -17,7 +17,7 @@ class Serial16550;
    follows CE's PPP stack (WINCE600 .../PPP2/PPP lcpopt.c, IPCP/option.c). */
 class PppTerminator {
 public:
-    PppTerminator(CerfEmulator& emu, Serial16550& uart);
+    PppTerminator(CerfEmulator& emu, SerialLine& uart);
     ~PppTerminator();
 
     void Start();   /* carrier up: begin a session, install host RX callback */
@@ -57,7 +57,7 @@ private:
     void PumpLocked();
 
     CerfEmulator& emu_;
-    Serial16550&  uart_;
+    SerialLine&   uart_;
     PppHdlc       hdlc_;
     std::mutex    mu_;   /* locked only at the public entry points */
 

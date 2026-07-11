@@ -382,11 +382,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
             case 0x0F:
                 if (page == 0) {
                     nic_intr_mask_ = value;
-                    if (nic_intr_mask_ & nic_intr_status_) {
-                        slot_->RaiseIrq();
-                    } else {
-                        slot_->ClearIrq();
-                    }
+                    SetIrqLineLocked((nic_intr_mask_ & nic_intr_status_) != 0u);
                 } else if (page == 1) {
                     nic_mc_addr_[7] = value;
                 } else {

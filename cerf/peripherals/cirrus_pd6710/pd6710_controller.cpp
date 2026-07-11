@@ -47,10 +47,6 @@ void Pd6710Controller::OnReady() {
     emu_.Get<HostWidgetRegistry>().Register(&slot_);
 }
 
-bool Pd6710Controller::IsCardPoweredLocked() const {
-    return exca_.CardPoweredByReg();
-}
-
 uint8_t Pd6710Controller::ReadPcicByte(uint32_t port) {
     std::lock_guard<std::mutex> lk(state_mutex_);
     if (port == kPortIndex) return index_;
