@@ -178,6 +178,7 @@ public:
     /* Halt the guest CPU for deep sleep until a reset wakes it (SoC power-down
        register write, JIT thread). Re-arms the poll so the next poll parks. */
     void EnterDeepSleep() override;
+    void ExitDeepSleep() override;
 
     /* Reset-delivery hook: GuestCpuReset runs the reset-line listeners
        and an armed GuestColdBoot hard reset (RAM wipe + replay + TC
