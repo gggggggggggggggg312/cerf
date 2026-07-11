@@ -8,9 +8,8 @@
 #include <vector>
 
 /* TOCentry - 32 bytes per romldr.h. Fields named verbatim from the
-   original C struct; `lpszFileName` carries the resolved ASCII name
-   rather than the in-ROM LPSTR VA. `ftTime` is the 64-bit FILETIME
-   value (low | high<<32). */
+   original C struct. `lpszFileName` holds the resolved ASCII name.
+   `ftTime` is the 64-bit FILETIME value (low | high<<32). */
 struct ParsedTOCentry {
     uint32_t    dwFileAttributes = 0;
     uint64_t    ftTime           = 0;
@@ -19,6 +18,8 @@ struct ParsedTOCentry {
     uint32_t    ulE32Offset      = 0;
     uint32_t    ulO32Offset      = 0;
     uint32_t    ulLoadOffset     = 0;
+    uint32_t    ulNtHeadersVa    = 0;
+    uint32_t    ulSecHeadersVa   = 0;
 };
 
 /* FILESentry - 28 bytes per romldr.h. */
@@ -118,6 +119,7 @@ struct ParsedRom {
     bool                         is_nosaj     = false;
     bool                         is_arnold    = false;
     bool                         is_nbf       = false;
+    bool                         is_ce1       = false;
     bool                         has_imgfs        = false;
     bool                         imgfs_is_ftl     = false;
     uint32_t                     imgfs_file_off   = 0;
@@ -167,6 +169,8 @@ public:
 
 private:
     bool ParseOne(ParsedRom& rom);
+
+    bool ParseCe1Xips(ParsedRom& rom);
 
     bool                   ok_ = false;
     std::vector<ParsedRom> loaded_;
