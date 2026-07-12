@@ -177,4 +177,8 @@ void Pd6710Controller::RestoreState(StateReader& r) {
     slot_.RestoreSlotState(r);
 }
 
+void Pd6710Controller::PostRestore() {
+    slot_.PostRestoreSlot();
+}
+
 REGISTER_SERVICE(Pd6710Controller);

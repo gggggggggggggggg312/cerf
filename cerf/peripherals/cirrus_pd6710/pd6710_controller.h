@@ -25,6 +25,7 @@ public:
        peripheral, which is on the hibernation walk; the controller is not). */
     void SaveState(StateWriter& w);
     void RestoreState(StateReader& r);
+    void PostRestore();
 
     /* PCIC register file at I/O ports 0x3E0 (INDEX) / 0x3E1 (DATA). */
     uint8_t ReadPcicByte (uint32_t port);

@@ -212,6 +212,10 @@ void Rtl8019::RestoreState(StateReader& r) {
     r.Read(fcsr_); r.Read(cor_);
     r.ReadBytes(card_rom_.data(), card_rom_.size());
     r.ReadBytes(card_ram_.data(), card_ram_.size());
+}
+
+void Rtl8019::PostRestore() {
+    std::lock_guard<std::mutex> lk(state_mutex_);
     SetIrqLineLocked((nic_intr_status_ & nic_intr_mask_) != 0u);
 }
 

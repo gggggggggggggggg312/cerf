@@ -49,6 +49,7 @@ public:
     const char* SaveId() const override { return "ne2000"; }
     void SaveState(StateWriter& w) override;
     void RestoreState(StateReader& r) override;
+    void PostRestore() override;
 
 private:
     void DetachRx();
