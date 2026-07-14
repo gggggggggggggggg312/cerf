@@ -58,6 +58,10 @@ constexpr uint32_t kIoBlockSize   = 0x20;
 
 }  /* namespace */
 
+bool Rtl8019::IoIgnoredLocked() const {
+    return (cor_ & kCorIndexMask) == 0u;
+}
+
 bool Rtl8019::MapCardIoLocked(uint32_t card_io, uint32_t* reg) const {
     const uint8_t index = cor_ & kCorIndexMask;
     if (index < kCorIndexFirst || index > kCorIndexLast) return false;
@@ -70,6 +74,7 @@ bool Rtl8019::MapCardIoLocked(uint32_t card_io, uint32_t* reg) const {
 
 uint8_t Rtl8019::ReadIo8(uint32_t card_io) {
     std::lock_guard<std::mutex> lk(state_mutex_);
+    if (IoIgnoredLocked()) return kBusFloat8;
     uint32_t offset;
     if (!MapCardIoLocked(card_io, &offset)) {
         LOG(Caution, "[NE2000] read8 io 0x%X outside configured block "
@@ -198,6 +203,7 @@ uint8_t Rtl8019::ReadIo8(uint32_t card_io) {
 
 uint16_t Rtl8019::ReadIo16(uint32_t card_io) {
     std::lock_guard<std::mutex> lk(state_mutex_);
+    if (IoIgnoredLocked()) return kBusFloat16;
     uint32_t offset;
     if (!MapCardIoLocked(card_io, &offset)) {
         LOG(Caution, "[NE2000] read16 io 0x%X outside configured block "
@@ -237,6 +243,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
     std::vector<uint8_t> tx_pending;
     {
         std::lock_guard<std::mutex> lk(state_mutex_);
+        if (IoIgnoredLocked()) return;
         uint32_t offset;
         if (!MapCardIoLocked(card_io, &offset)) {
             LOG(Caution, "[NE2000] write8 io 0x%X = 0x%02X outside "
@@ -428,6 +435,7 @@ void Rtl8019::WriteIo8(uint32_t card_io, uint8_t value) {
 
 void Rtl8019::WriteIo16(uint32_t card_io, uint16_t value) {
     std::lock_guard<std::mutex> lk(state_mutex_);
+    if (IoIgnoredLocked()) return;
     uint32_t offset;
     if (!MapCardIoLocked(card_io, &offset)) {
         LOG(Caution, "[NE2000] write16 io 0x%X = 0x%04X outside "

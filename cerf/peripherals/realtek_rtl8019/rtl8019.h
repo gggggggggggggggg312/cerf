@@ -129,6 +129,10 @@ private:
        the card decodes no I/O until a valid index is written. */
     uint8_t cor_ = 0u;
     bool MapCardIoLocked(uint32_t card_io, uint32_t* reg) const;
+    /* PC Card Standard Vol. 2 Electrical, 4.15.1: with the COR Function
+       Configuration Index at 0 the function uses the Memory Only interface and
+       host I/O cycles are ignored by the card. */
+    bool IoIgnoredLocked() const;
 
     static constexpr std::size_t kCardRomSize = 32;
     std::array<uint8_t, kCardRomSize> card_rom_{};
