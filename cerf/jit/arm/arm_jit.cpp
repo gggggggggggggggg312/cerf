@@ -303,6 +303,7 @@ void ArmJit::NotifyResetDelivered() {
 
 void ArmJit::SetResetPending(bool is_resume) {
     ArmCpuState* state = cpu_->State();
+    emu_.Get<GuestCpuReset>().SetPendingResume(is_resume);
     state->spsr.bits.irq_disable = 0;
     state->reset_pending          = 1;
     {

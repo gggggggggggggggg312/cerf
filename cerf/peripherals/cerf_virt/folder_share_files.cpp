@@ -1,14 +1,13 @@
 #include "folder_share_files.h"
 
 #include "folder_share_path.h"
-#include "cerf_virt_guest_mem.h"
+#include "folder_share_stage.h"
 #include "cerf_virt_folder_share_regs.h"
 #include "../../core/cerf_emulator.h"
 #include "../../core/device_config.h"
 #include "../../core/folder_share_config.h"
 
 #include <cstring>
-#include <vector>
 
 using namespace CerfVirt;
 
@@ -54,7 +53,7 @@ bool ShareModeOf(uint16_t mode, DWORD* out) {
     }
 }
 
-}  /* namespace */
+}
 
 bool FolderShareFiles::ShouldRegister() {
     return emu_.Get<DeviceConfig>().guest_additions;
@@ -126,10 +125,6 @@ uint16_t FolderShareFiles::Open(ServerPB& pb) {
     if (!DesiredAccess(pb.fOpenMode, &access) || !ShareModeOf(pb.fOpenMode, &share))
         return kErrorInvalidFunction;
 
-    /* A directory handle (which the shell opens for the folder view + change
-       notifications) needs FILE_FLAG_BACKUP_SEMANTICS, and a trailing separator
-       makes CreateFileW reject the path; without this an AFS volume can't be
-       opened as a handle and the kernel's change-notify setup derefs null. */
     while (path.size() > 3 && (path.back() == L'\\' || path.back() == L'/'))
         path.pop_back();
     HANDLE h = CreateFileW(path.c_str(), access, share, nullptr,
@@ -155,11 +150,9 @@ uint16_t FolderShareFiles::Read(ServerPB& pb) {
     LARGE_INTEGER pos; pos.QuadPart = pb.fPosition;
     if (!SetFilePointerEx(h, pos, nullptr, FILE_BEGIN)) return ErrFromLast();
 
-    std::vector<uint8_t> buf(want ? want : 1);
     DWORD got = 0;
-    if (!ReadFile(h, buf.data(), want, &got, nullptr)) return ErrFromLast();
-    if (got && !emu_.Get<CerfVirtGuestMem>().WriteBlob(pb.fDTAPtr, buf.data(), got))
-        return kErrorReadFault;
+    if (!ReadFile(h, emu_.Get<FolderShareStage>().IoBuf(), want, &got, nullptr))
+        return ErrFromLast();
     pb.fSize = got;
     return kErrorNoError;
 }
@@ -172,15 +165,12 @@ uint16_t FolderShareFiles::Write(ServerPB& pb) {
     const uint32_t want = pb.fSize;
     if (want > kFolderShareMaxReadWriteSize) return kErrorWriteFault;
 
-    std::vector<uint8_t> buf(want ? want : 1);
-    if (want && !emu_.Get<CerfVirtGuestMem>().ReadBlob(pb.fDTAPtr, buf.data(), want))
-        return kErrorWriteFault;
-
     LARGE_INTEGER pos; pos.QuadPart = pb.fPosition;
     if (!SetFilePointerEx(h, pos, nullptr, FILE_BEGIN)) return ErrFromLast();
 
     DWORD put = 0;
-    if (!WriteFile(h, buf.data(), want, &put, nullptr)) return ErrFromLast();
+    if (!WriteFile(h, emu_.Get<FolderShareStage>().IoBuf(), want, &put, nullptr))
+        return ErrFromLast();
     pb.fSize = put;
     return kErrorNoError;
 }

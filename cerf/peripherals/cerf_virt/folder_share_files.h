@@ -9,9 +9,6 @@
 #include <cstdint>
 #include <string>
 
-/* Open-file lifecycle + file I/O half of the folder-share server. Owns the
-   guest-handle -> Win32 HANDLE table; Read/Write move bytes between the host
-   file and the guest's fDTAPtr buffer through the live MMU. */
 class FolderShareFiles : public Service {
 public:
     using Service::Service;
@@ -19,12 +16,11 @@ public:
     bool ShouldRegister() override;
 
     static bool Owns(uint32_t code);
-    /* Returns the value for the channel Result register: a kError* code for
-       most ops, or the max I/O size for kServerGetMaxIOSize. */
+
     uint32_t Run(uint32_t code, CerfVirt::ServerPB& pb);
 
 private:
-    static constexpr int kMaxFd = 40;   /* matches the guest FSD's gFDList[] */
+    static constexpr int kMaxFd = 40;
     struct Slot {
         HANDLE       h = INVALID_HANDLE_VALUE;
         uint16_t     open_mode = 0;

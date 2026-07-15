@@ -161,22 +161,27 @@ uint8_t* ArmMmu::ServeInjectionBand(uint32_t va, ArmMmuAccess access) {
 }
 
 
-std::optional<uint8_t*> ArmMmu::PeekDataTlb(uint32_t va) const {
-    /* Diagnostic-only: never walks, never raises, never mutates TLB state.
-       Returns a host pointer only on a direct-mapped fast-TLB hit. */
+const ArmTlbEntry* ArmMmu::MatchDataTlb(uint32_t va, uint32_t* folded) const {
     uint32_t p = va;
     if (state_.control_register.bits.m && (p & 0xFE000000u) == 0u) {
         p |= state_.process_id;
     }
+    *folded = p;
     const uint8_t current_asid = static_cast<uint8_t>(state_.contextidr & 0xFFu);
     const uint32_t base = ArmTlbSetBase(p);
     const int w = ArmTlbMatchWay(&state_.data_tlb, base, p & 0xFFFFF000u,
-                                 current_asid, /*need_write=*/false);
-    if (w >= 0) {
-        const ArmTlbEntry& e = state_.data_tlb.entries[base + static_cast<uint32_t>(w)];
-        return reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(p) + e.va_addend);
-    }
-    return std::nullopt;
+                                 current_asid, false);
+    if (w < 0) return nullptr;
+    return &state_.data_tlb.entries[base + static_cast<uint32_t>(w)];
+}
+
+std::optional<uint8_t*> ArmMmu::PeekDataTlb(uint32_t va) const {
+    /* Diagnostic-only: never walks, never raises, never mutates TLB state.
+       Returns a host pointer only on a direct-mapped fast-TLB hit. */
+    uint32_t p = 0;
+    const ArmTlbEntry* e = MatchDataTlb(va, &p);
+    if (!e) return std::nullopt;
+    return reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(p) + e->va_addend);
 }
 
 bool ArmMmu::ExecPageGlobal(uint32_t va) const {

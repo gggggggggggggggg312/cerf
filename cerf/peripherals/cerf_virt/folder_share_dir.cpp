@@ -76,7 +76,7 @@ uint16_t FolderShareDir::Rename(ServerPB& pb) {
     if (e != kErrorNoError) return e;
     e = path.ToWin32Path(pb.fLfn.fName2, pb.fLfn.fName2Length, newn);
     if (e != kErrorNoError) return e;
-    /* MOVEFILE_COPY_ALLOWED: the share root may span more than one host volume. */
+
     return MoveFileExW(oldn.c_str(), newn.c_str(), MOVEFILE_COPY_ALLOWED)
                ? kErrorNoError : FolderSharePath::ErrorFromLastError();
 }
@@ -126,7 +126,7 @@ uint16_t FolderShareDir::GetInfo(ServerPB& pb) {
     const int16_t idx = pb.fIndex;
 
     if (idx == -1) {
-        /* One-shot existence/info lookup; never part of a Find enumeration. */
+
         if (pb.fFindTransactionID != 0xffffffff) return kErrorInvalidFunction;
         std::wstring file;
         uint16_t e = path.ToWin32Path(pb.fLfn.fName, pb.fLfn.fNameLength, file);
@@ -144,7 +144,7 @@ uint16_t FolderShareDir::GetInfo(ServerPB& pb) {
     }
 
     if (idx == 0) {
-        /* FindFirst with a wildcard in fName. */
+
         const uint32_t tid = pb.fFindTransactionID;
         if (tid != 0xffffffff && tid >= kMaxFc) return kErrorGeneralFailure;
         std::wstring spec;
@@ -171,7 +171,6 @@ uint16_t FolderShareDir::GetInfo(ServerPB& pb) {
         return kErrorNoError;
     }
 
-    /* FindNext on an in-progress enumeration. */
     const uint32_t tid = pb.fFindTransactionID;
     if (tid >= kMaxFc) return kErrorGeneralFailure;
     HANDLE hf = finds_[tid];

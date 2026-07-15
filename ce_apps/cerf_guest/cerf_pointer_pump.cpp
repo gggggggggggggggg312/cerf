@@ -1,7 +1,6 @@
 #include <windows.h>
 #include "cerf_regs_map.h"
 
-/* Register offsets below MUST match cerf/peripherals/cerf_virt/cerf_virt_pointer_regs.h. */
 #include "cerf/peripherals/cerf_virt/cerf_virt_addr_map.h"
 
 #define CERF_PTR_X            0x00u
@@ -21,10 +20,6 @@ static BOOL CerfMapPtrRegs(void) {
     return s_ptr_regs != NULL;
 }
 
-/* mouse_event is a coredll export callable from any thread (CE3 WINUSER.H:2247).
-   Do NOT make this an ActivateDeviceEx/RegisterDevice driver: CE mouse/kbd are
-   GWES-loaded via HKLM\HARDWARE\DEVICEMAP\* (WINCE600 KEYBD/PS2_8042 reg), so
-   registration never produces an input device. */
 static DWORD WINAPI CerfPointerPumpThread(LPVOID) {
     HMODULE h = LoadLibraryW(L"coredll.dll");
     PFN_mouse_event me = h ? (PFN_mouse_event)GetProcAddressW(h, L"mouse_event") : NULL;

@@ -47,6 +47,8 @@ public:
 
     uint8_t* PeekVaToHost(uint32_t va);
 
+    bool PeekVaToPa(uint32_t va, uint32_t* pa);
+
     /* I-TLB nG/global flag for va's page; slot absent ⇒ false. */
     bool ExecPageGlobal(uint32_t va) const;
 
@@ -89,6 +91,10 @@ public:
 private:
     template <ArmMmuAccess kAccess>
     uint8_t* MapGuestVirtualToHost(ArmCpuState* cpu_state, uint32_t p);
+
+    std::optional<uint32_t> WalkVaToPa(uint32_t va);
+
+    const ArmTlbEntry* MatchDataTlb(uint32_t va, uint32_t* folded) const;
 
     /* On a walk fault, serve va from the injection band if it lies inside it;
        nullptr otherwise (caller raises the abort). */
