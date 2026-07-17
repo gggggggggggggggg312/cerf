@@ -83,6 +83,7 @@ private:
    at 0x30000000 in every case; ulRAMStart only selects the kernel offset. */
 void Smdk2410DevEmuPageTableBuilder::OnReady() {
     uint32_t ram_start = 0;
+    bool     flash_window_xip = false;
     auto& rom = emu_.Get<RomParserService>();
     if (rom.Ok() && !rom.Loaded().empty()) {
         const ParsedRom& prim = rom.Primary();
@@ -95,6 +96,13 @@ void Smdk2410DevEmuPageTableBuilder::OnReady() {
         }
         if (ram_start == 0 && !prim.xips.empty()) {
             ram_start = prim.xips.front().toc.romhdr.ulRAMStart;
+        }
+        for (const auto& xip : prim.xips) {
+            if (xip.load_offset >= 0x92000000u &&
+                xip.load_offset <  0x94000000u) {
+                flash_window_xip = true;
+                break;
+            }
         }
     }
 
@@ -116,9 +124,23 @@ void Smdk2410DevEmuPageTableBuilder::OnReady() {
         dram_bands_ = { { 0x80000000u, 0x30000000u, MB(64),  OatKind::Dram },
                         { 0x94000000u, 0x34000000u, MB(192), OatKind::Dram } };
     }
+    /* VA 0x92000000 -> PA 0x00000000, 32 MB NOR flash: g_oalAddressTable /
+       oemaddrtab_cfg.inc "original location of 32MB of NOR flash". */
+    bool have_flash_band = false;
+    for (const auto& e : dram_bands_) {
+        if (0x92000000u >= e.va_base && 0x92000000u < e.va_base + e.size) {
+            have_flash_band = true;
+            break;
+        }
+    }
+    if (flash_window_xip && !have_flash_band) {
+        dram_bands_.push_back({ 0x92000000u, 0x00000000u, MB(32),
+                                OatKind::Flash });
+    }
+
     LOG(Boot, "Smdk2410DevEmuPageTableBuilder: ulRAMStart=0x%08X -> %s "
-              "kernel placement\n",
-        ram_start, name);
+              "kernel placement (flash-window XIP: %s)\n",
+        ram_start, name, flash_window_xip ? "yes" : "no");
 }
 
 uint32_t Smdk2410DevEmuPageTableBuilder::VaToPa(uint32_t va) const {
