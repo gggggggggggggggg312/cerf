@@ -312,7 +312,7 @@ void ArmJit::SetResetPending(bool is_resume) {
         SetInterruptPendingLocked();
     }
     SetEvent(idle_event_);
-    if (is_resume) { emu_.Get<GuestPowerNotifier>().NotifyResume(); return; }
+    if (is_resume) return;
     emu_.Get<GuestDeepSleep>().ClearWakeCause();
     emu_.Get<GuestPowerNotifier>().NotifyReboot();
 }
