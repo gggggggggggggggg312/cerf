@@ -14,30 +14,31 @@ bool IpaqH3800Asic2::ShouldRegister() {
 void IpaqH3800Asic2::OnReady() {
     emu_.Get<PeripheralDispatcher>().Register(this);
 
-    /* Default inputs: no USB cable, no earphone, no SD card inserted.
-       The *_N signals idle high. */
-    gpio_status_ = (1u << 1) | (1u << 2);
+    /* Default inputs: no SD card, no USB cable, no earphone.
+       Active-low signals therefore idle high. */
+    gpio_status_ = (1u << 0) | (1u << 1) | (1u << 2);
 
     LOG(Periph, "[H3800 ASIC2] ready (base=%08X)\n", kAsic2Base);
 }
 
-void IpaqH3800Asic2::RaiseIrq(uint8_t source) {
-    const uint32_t bit = 1u << source;
-
+void IpaqH3800Asic2::RaiseIrq(uint32_t bit) {
     raw_ |= bit;
 
-    const uint32_t level = raw_; // active-high for now
+    const uint32_t level = raw_; /* active-high for now */
 
-    if ((detect_ & bit) == 0 && (level & bit)) {
-        status_ |= bit; // latch edge
-    }
-
+    /* Rising-edge latch. */
+    status_ |= level & ~detect_;
     detect_ = level;
+
+    if (bit == kIrqSdDetectBit)
+        LOG(Periph, "[H3800 ASIC2] SD detect IRQ\n");
+    else if (bit == kIrqUsbDetectBit)
+        LOG(Periph, "[H3800 ASIC2] USB detect IRQ\n");
+    else if (bit == kIrqEarphoneBit)
+        LOG(Periph, "[H3800 ASIC2] Earphone IRQ\n");
 }
 
-void IpaqH3800Asic2::LowerIrq(uint8_t source) {
-    const uint32_t bit = 1u << source;
-
+void IpaqH3800Asic2::LowerIrq(uint32_t bit) {
     raw_ &= ~bit;
     detect_ = raw_;
 
@@ -92,7 +93,7 @@ void IpaqH3800Asic2::WriteWord(uint32_t addr, uint32_t value) {
         break;
 
     case kIntAckOffset:
-        status_ &= ~value;
+        status_ &= ~value; /* W1C */
         LOG(Periph, "[H3800 ASIC2] INT_ACK = %08X -> pending %08X\n",
             value, status_);
         break;
@@ -118,6 +119,14 @@ void IpaqH3800Asic2::RestoreState(StateReader& r) {
     r.Read(status_);
     r.Read(enable_);
     r.Read(gpio_status_);
+}
+
+void IpaqH3800Asic2::PostRestore() {
+    /* Re-drive interrupt state after loading a save state. */
+    if (OutputAsserted()) {
+        LOG(Periph,
+            "[H3800 ASIC2] interrupt output asserted after restore\n");
+    }
 }
 
 REGISTER_SERVICE(IpaqH3800Asic2);
