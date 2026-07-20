@@ -24,8 +24,6 @@ uint32_t IpaqH3800Asic2::ReadWord(uint32_t addr) {
 
     LOG(Periph, "[H3800 ASIC2] R32 %08X\n", off);
 
-    /* For now return 0 for all registers.
-       The ROM will probe IRQ/GPIO/SD/USB status registers here. */
     return dummy_.load(std::memory_order_acquire);
 }
 
@@ -34,7 +32,8 @@ void IpaqH3800Asic2::WriteByte(uint32_t addr, uint8_t value) {
     const uint32_t shift   = (addr & 3u) * 8;
 
     uint32_t cur = ReadWord(aligned);
-    cur = (cur & ~(0xFFu << shift)) | (static_cast<uint32_t>(value) << shift);
+    cur = (cur & ~(0xFFu << shift)) |
+          (static_cast<uint32_t>(value) << shift);
 
     WriteWord(aligned, cur);
 }
