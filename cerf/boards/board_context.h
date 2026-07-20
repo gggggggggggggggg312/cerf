@@ -54,6 +54,7 @@ enum class Board {
     PhilipsVelo1,
     SharpMobilonHc4100,
     CasioCassiopeiaEm500,
+    CompaqIpaqH3800,
 };
 
 /* A board's fixed host-window open size, in guest-surface pixels. */
