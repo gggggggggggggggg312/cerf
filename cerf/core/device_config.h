@@ -113,14 +113,13 @@ struct DeviceConfig : public Service {
         StateBootMode::Resume;
 #endif
 
-    /* --share-folder=<host path>: pre-enables the guest-additions folder share
-       on a host directory at boot (the widget still toggles it live). Empty when
-       not given on the command line. */
     std::string share_folder;
 
     /* --full-screen: enter borderless fullscreen (the Right Ctrl+F toggle) right
        after the host window is shown. CLI-only launch preference, default off. */
     bool start_fullscreen = false;
+
+    bool show_about_instead_of_run = false;
 
     /* Guest-additions victim display-driver module names from the GLOBAL
        cerf.json ("video_driver_names_for_guest_additions"): the ROM modules to

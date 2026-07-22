@@ -94,6 +94,7 @@ class BundleManager:
                               for rb in self.remote_bundles}
         self.download_places = load_analytics(repositories)
         self._reconcile_cerf_json()
+        self._backfill_installed_sha256()
 
     def _local_device_dirs(self) -> List[Path]:
         if not self.devices_dir.is_dir():
@@ -135,6 +136,21 @@ class BundleManager:
             except OSError:
                 pass
 
+    def _backfill_installed_sha256(self) -> None:
+        changed = False
+        with self._manifest_lock:
+            for device_dir in self._local_device_dirs():
+                record = self.installed.get(device_dir.name)
+                if record is None or record.sha256 is not None:
+                    continue
+                rb = self._remote_for_dir(device_dir)
+                if rb is None or rb.archive_sha256 is None:
+                    continue
+                record.sha256 = rb.archive_sha256
+                changed = True
+            if changed:
+                save_local_manifest(self.local_manifest_path, self.installed)
+
     def _package_statuses(self, rb: RemoteBundle, dir_name: str,
                           device_dir: Optional[Path]) -> List[PackageStatus]:
         record = self.installed.get(dir_name)
@@ -159,7 +175,8 @@ class BundleManager:
                         remote_h: Optional[int]) -> None:
         for f in ("device_name", "board_name", "board_id", "soc_family",
                   "os_name", "os_ver_major", "os_ver_minor", "os_ver_build",
-                  "os_language", "device_year", "os_year", "os_notes"):
+                  "os_language", "device_year", "os_year", "os_notes",
+                  "forbid_guest_additions"):
             if not getattr(existing.meta, f):
                 setattr(existing.meta, f, getattr(remote_meta, f))
         if existing.meta.source is None:
@@ -183,7 +200,7 @@ class BundleManager:
                 name=entry.name,
                 remote=None,
                 local_dir_exists=True,
-                installed_at=record.updated_at if record else None,
+                installed_sha256=record.sha256 if record else None,
                 meta=meta,
                 default_screen_width=w,
                 default_screen_height=h,
@@ -205,7 +222,7 @@ class BundleManager:
                 name=rb.name,
                 remote=rb,
                 local_dir_exists=False,
-                installed_at=None,
+                installed_sha256=None,
                 meta=remote_meta,
                 default_screen_width=remote_w,
                 default_screen_height=remote_h,
@@ -284,6 +301,7 @@ class BundleManager:
         with self._manifest_lock:
             self.installed[dir_name] = LocalBundleRecord(
                 updated_at=bundle.updated_at,
+                sha256=bundle.archive_sha256,
                 packages=[record for record, _ in preserved],
             )
             save_local_manifest(self.local_manifest_path, self.installed)
@@ -327,6 +345,7 @@ class BundleManager:
         with self._manifest_lock:
             record = self.installed.get(dir_name) or LocalBundleRecord()
             record.updated_at = bundle.updated_at
+            record.sha256 = bundle.archive_sha256
             self.installed[dir_name] = record
             save_local_manifest(self.local_manifest_path, self.installed)
         return dir_name

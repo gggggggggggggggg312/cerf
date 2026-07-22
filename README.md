@@ -267,12 +267,16 @@ The website is built from `docs/website/` - `python tools/build_site.py --serve`
           ✅ Fixed framebuffer not relatching on suspend/resume<br/>
           ✅ Fixed 100% CPU usage and UI deadlocks on Windows XP on non-framebuffer tabs</p>
         <p><b>🚀 Launcher</b><br/>
-          🆕 UI refresh</p>
+          🆕 UI refresh<br/>
+          ✅ Remote metadata-only updates no longer mark installed bundles as pending an update</p>
         <p><b>💾 CE Apps</b><br/>
           ✅ CerfDemo: UI and performance improvements</p>
         <p><b>✨ Guest Additions</b><br/>
-          🆕 High refresh rate support: the guest video mode and host window scanout follow the host monitor&#x27;s refresh rate<br/>
+          🆕 High refresh rate support - use Windows CE with 240 hz display! (Or whatever Hz you have).<br/>
+          🆕 Yes, this should be taken LITERALLY. WinCE WILL render 240 fps on your 240 hz monitor.<br/>
+          🆕 The guest video mode and host window scanout follow the host monitor&#x27;s refresh rate<br/>
           🆕 --screen-refresh-rate flag to set the refresh rate manually<br/>
+          🆕 Touch-calibration helper - offers to switch to the stock input device when the guest opens a calibration screen, and switches back afterwards<br/>
           ✅ Input devices now run at the proper priority, staying responsive under heavy guest CPU load</p>
       </td>
     </tr>
